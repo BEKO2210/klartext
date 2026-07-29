@@ -15,8 +15,33 @@ from .config import CONFIG
 
 log = logging.getLogger("klartext.mail")
 
+# Adressbereiche, die per Norm nie Post annehmen koennen (RFC 2606 und RFC 6761).
+# An diese Adressen wird gar nicht erst zugestellt: der Postausgangsserver wuerde
+# es versuchen, an der Namensaufloesung scheitern und einen Unzustellbarkeits-
+# bericht an den Absender schicken. Bei Tests entsteht so pro Registrierung eine
+# Rueckläufer-Mail im Postfach des Betreibers.
+_TOTE_ENDUNGEN = (".invalid", ".test", ".localhost", ".example")
+_TOTE_DOMAINS = frozenset({"example.com", "example.net", "example.org", "localhost"})
+
+
+def unzustellbar(adresse: str) -> bool:
+    """Wahr, wenn die Adresse per Norm keine Post annehmen kann."""
+    _, trenner, domain = adresse.strip().lower().rpartition("@")
+    if not trenner or not domain:
+        return False
+    if domain.endswith(_TOTE_ENDUNGEN):
+        return True
+    # Untergeordnete Namen zaehlen mit: www.example.com nimmt genauso wenig Post
+    # an wie example.com selbst.
+    return any(domain == tot or domain.endswith("." + tot) for tot in _TOTE_DOMAINS)
+
 
 async def _send(to: str, subject: str, body: str) -> bool:
+    if unzustellbar(to):
+        # Absichtlich still: der Aufrufer soll sich genauso verhalten wie sonst,
+        # damit aus der Antwort nicht ablesbar wird, welche Konten existieren.
+        log.info("Versand unterdrueckt, Adresse kann keine Post annehmen")
+        return False
     if not CONFIG.mail_configured:
         return False
     message = EmailMessage()

@@ -17,6 +17,7 @@
   var jobList     = document.getElementById("job-list");
   var usageLine   = document.getElementById("usage-line");
   var zipButton   = document.getElementById("zip-button");
+  var jobSection  = document.getElementById("auftraege");
   var csrf        = form.querySelector("input[name=csrf]").value;
 
   var selected = [];
@@ -28,7 +29,7 @@
   function formatSize(bytes) {
     if (bytes < 1024) { return bytes + " B"; }
     if (bytes < 1024 * 1024) { return (bytes / 1024).toFixed(0) + " KB"; }
-    return (bytes / 1024 / 1024).toFixed(1) + " MB";
+    return (bytes / 1024 / 1024).toFixed(1).replace(".", ",") + " MB";
   }
 
   function formatTime(iso) {
@@ -44,6 +45,27 @@
     if (className) { node.className = className; }
     if (text !== undefined && text !== null) { node.textContent = text; }
     return node;
+  }
+
+  // Lange Dateinamen sollen nicht mitten im Wort umbrechen. Der Name wird in
+  // Stamm und Endung zerlegt: der Stamm darf per CSS gekuerzt werden, die
+  // Endung bleibt immer stehen — sonst sieht man dem Eintrag nicht mehr an,
+  // ob es eine PDF oder ein Bild war.
+  function dateiname(name) {
+    var punkt = name.lastIndexOf(".");
+    if (punkt < 1 || name.length - punkt > 6) {
+      return { stamm: name, endung: "" };
+    }
+    return { stamm: name.slice(0, punkt), endung: name.slice(punkt) };
+  }
+
+  function nameKnoten(name, klasse) {
+    var teile = dateiname(name);
+    var wrap = el("span", klasse);
+    wrap.title = name;
+    wrap.appendChild(el("span", "name-stamm", teile.stamm));
+    if (teile.endung) { wrap.appendChild(el("span", "name-endung", teile.endung)); }
+    return wrap;
   }
 
   function showMessage(text, kind) {
@@ -65,7 +87,7 @@
     }
     selected.forEach(function (file) {
       var row = el("li");
-      row.appendChild(el("span", null, file.name));
+      row.appendChild(nameKnoten(file.name, "datei-name"));
       row.appendChild(el("span", "muted nowrap", formatSize(file.size)));
       fileList.appendChild(row);
     });
@@ -158,9 +180,18 @@
       if (request.status >= 200 && request.status < 300) {
         input.value = "";
         setFiles([]);
-        showMessage("Upload angenommen. Die Verarbeitung läuft.", "success");
+        var anzahl = payload.created || 0;
+        showMessage(anzahl === 1
+          ? "1 Datei hochgeladen. Die Umwandlung läuft — der Auftrag steht unten in der Liste."
+          : anzahl + " Dateien hochgeladen. Die Umwandlung läuft — die Aufträge stehen unten in der Liste.",
+          "success");
         pollDelay = 1000;
         refreshJobs();
+        // Zur Liste springen, sonst entsteht das Ergebnis unbemerkt ausserhalb
+        // des sichtbaren Bereichs.
+        if (jobSection && jobSection.scrollIntoView) {
+          jobSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       } else if (request.status === 401) {
         window.location.href = "/anmelden";
       } else {
@@ -358,8 +389,9 @@
     row.appendChild(rail);
 
     var head = el("div", "job-head");
-    head.appendChild(el("span", "job-name", job.name));
+    head.appendChild(nameKnoten(job.name, "job-name"));
     head.appendChild(el("span", "job-state", STATUS_TEXT[job.status] || job.status));
+    if (istNeu(job)) { head.appendChild(el("span", "job-neu", "neu")); }
     row.appendChild(head);
 
     var meta = [formatSize(job.size)];
@@ -429,6 +461,21 @@
     return row;
   }
 
+  // Frisch hochgeladene Auftraege werden kurz hervorgehoben. Ohne das passiert
+  // nach dem Absenden sichtbar nichts: die Auswahl verschwindet und der neue
+  // Eintrag entsteht weit unterhalb des Knopfes, auf dem Handy ausserhalb des
+  // Bildes. Der Zeitpunkt wird je Auftrag gemerkt, damit die Markierung beim
+  // Neuzeichnen nicht von vorn beginnt.
+  var ersteSicht = {};
+  var listeGefuellt = false;
+  var NEU_DAUER = 8000;
+
+  function istNeu(job) {
+    if (!listeGefuellt) { return false; }
+    if (!ersteSicht[job.id]) { ersteSicht[job.id] = Date.now(); }
+    return Date.now() - ersteSicht[job.id] < NEU_DAUER;
+  }
+
   function renderJobs(jobs) {
     jobList.textContent = "";
     if (jobs.length === 0) {
@@ -448,9 +495,17 @@
       empty.appendChild(schritte);
       jobList.appendChild(empty);
       zipButton.hidden = true;
+      listeGefuellt = true;
       return;
     }
-    jobs.forEach(function (job) { jobList.appendChild(jobRow(job)); });
+    jobs.forEach(function (job) {
+      var neu = istNeu(job);
+      var zeile = jobRow(job);
+      if (neu) { zeile.classList.add("is-neu"); }
+      jobList.appendChild(zeile);
+      if (!ersteSicht[job.id]) { ersteSicht[job.id] = Date.now(); }
+    });
+    listeGefuellt = true;
 
     var doneIds = jobs.filter(function (job) { return job.status === "done"; })
                       .map(function (job) { return job.id; });

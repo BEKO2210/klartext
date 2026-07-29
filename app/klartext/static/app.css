@@ -184,6 +184,10 @@ code {
 .empty         { padding: 20px 0; }
 .copy-status   { min-height: 1.4em; }
 .md-view.md-view-full { max-height: none; }
+/* Reine Lesetexte umbrechen lassen: seitliches Schieben uebersieht man auf dem
+   Handy, und dann wirkt der Text abgeschnitten. Beim Ergebnis-Markdown ist das
+   anders — dort haelt das Nicht-Umbrechen die Tabellen zusammen. */
+.md-view.md-view-wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
 .usage-line    { margin-top: 10px; }
 
 .section-head {
@@ -292,6 +296,7 @@ input:focus, select:focus { border-color: var(--primary); }
   display: flex; justify-content: space-between; gap: 12px;
   padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px;
 }
+.datei-name { display: flex; min-width: 0; }
 .filelist li:last-child { border-bottom: 0; }
 
 /* ---------------------------------------------------------------- Auftraege */
@@ -337,12 +342,18 @@ input:focus, select:focus { border-color: var(--primary); }
   display: flex; align-items: baseline; justify-content: space-between;
   gap: 10px; min-height: 22px;
 }
+/* Dateiname einzeilig: der Stamm wird gekuerzt, die Endung bleibt stehen.
+   min-width:0 ist noetig, sonst schrumpft ein Flex-Element nie unter seinen
+   Inhalt und der lange Name draengt den Zustand aus der Zeile. */
 .job-name {
   font-weight: 600; font-size: 15.5px; line-height: 1.35;
-  overflow-wrap: anywhere;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: flex; min-width: 0;
+  /* Muss den freien Platz aufbrauchen: sonst verteilt space-between den Rest
+     zwischen Name, Zustand und Markierung und reisst den Namen auseinander. */
+  flex: 1 1 auto;
 }
+.name-stamm  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name-endung { flex: none; }
 /* Zustand doppelt codiert: Symbol links, Wort rechts — Farbe nur als Zugabe. */
 .job-state {
   flex: none; font-size: 13px; font-weight: 550; white-space: nowrap;
@@ -360,6 +371,23 @@ input:focus, select:focus { border-color: var(--primary); }
 .job-error {
   grid-column: 2; margin: 4px 0 0;
   color: var(--danger); font-size: 13px; line-height: 1.5;
+}
+
+/* Frisch hochgeladen: ruhiger Farbstich statt Blinken, damit die Markierung
+   beim Neuzeichnen waehrend der Verarbeitung nicht flackert. */
+.job.is-neu {
+  background: var(--surface-2);
+  border-radius: 8px;
+  /* Padding und negativer Rand heben sich auf: die Flaeche bekommt Luft,
+     ohne dass der Inhalt springt, wenn die Markierung wieder verschwindet. */
+  padding-left: 10px; padding-right: 10px;
+  margin-left: -10px; margin-right: -10px;
+}
+.job-neu {
+  flex: none; align-self: center;
+  font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  color: #fff; background: var(--primary);
+  padding: 2px 7px; border-radius: 999px;
 }
 
 .job-note {

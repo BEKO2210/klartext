@@ -531,6 +531,20 @@ def main() -> int:
 
     psql(f"DELETE FROM users WHERE email_norm = '{mail_d.lower()}'")
 
+    # 40 Kein Versand an Adressen, die keine Post annehmen koennen ------------
+    # Sonst erzeugt jede Testregistrierung einen Unzustellbarkeitsbericht im
+    # Postfach des Betreibers — genau das ist frueher passiert.
+    probe = subprocess.run(
+        ["docker", "exec", "klartext-web", "python", "-c",
+         "from klartext.mail import unzustellbar as u;"
+         "print(all(u(a) for a in ['x@example.invalid','y@example.com','z@sub.example.org',"
+         "'q@a.test','r@localhost']) and not any(u(a) for a in ['a@gmail.com',"
+         "'b@it-handwerk-stuttgart.de','c@myexample.com']))"],
+        capture_output=True, text=True, timeout=30,
+    ).stdout.strip()
+    check("40 Kein Mailversand an nicht zustellbare Adressen",
+          probe == "True", probe or "keine Antwort")
+
     # 36 Bestehende Dienste -------------------------------------------------
     others = {
         "fokus": "https://fokus.it-handwerk-stuttgart.de/",
