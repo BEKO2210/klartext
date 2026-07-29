@@ -95,6 +95,15 @@ schreibt Docling die Rohdaten als base64 mitten in die Markdown-Datei — bei ei
 Textexport vollständig verloren. Sie werden ausgelesen und nach Seiten geordnet
 angehängt. Gemessen an derselben PDF: 146 Verweise statt 8.
 
+**Schreibweisen** werden rein mechanisch geradegezogen: Die Texterkennung liest das
+deutsche Dezimalkomma oft als Punkt (`51.79` statt `51,79`) und lässt Leerzeichen vor
+dem Währungszeichen weg. Datumsangaben, Uhrzeiten und Internetadressen werden vorher
+geschützt — ohne diesen Schutz würde aus `10.08.2021` ein `10,08.2021`. Die
+Komma-Regel greift nur, wenn das Dokument erkennbar deutsch formatiert ist.
+Bei einer Testrechnung stiegen die korrekt erkannten Beträge dadurch von 10 auf 18
+von 18. **Es findet keine Rechtschreibkorrektur statt:** kein Wörterbuch, kein
+Raten, keine Sprachmodelle. Tippfehler der Vorlage bleiben erhalten.
+
 **Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
 in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie
 noch auf einer eigenen Zeile. Im Markdown werden sie einmal aufgeführt statt auf

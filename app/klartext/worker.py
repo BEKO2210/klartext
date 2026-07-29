@@ -112,7 +112,12 @@ async def _process(client: DoclingClient, job) -> None:
         links = postprocess.links_lesen(data)
         markdown = postprocess.markdown_links_anhaengen(markdown, links)
 
-    # 3) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
+    # 3) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
+    #    fehlende Leerzeichen). Keine Rechtschreibkorrektur — Tippfehler der
+    #    Vorlage bleiben stehen. Nur im Markdown, die JSON bleibt unangetastet.
+    markdown, geglaettet = postprocess.schreibweisen_glaetten(markdown)
+
+    # 4) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
     #    Nur im Markdown; die JSON bleibt vollstaendig.
     elemente = []
     if job["mime_type"] == "application/pdf":
@@ -172,8 +177,8 @@ async def _process(client: DoclingClient, job) -> None:
             job["user_id"],
             delta,
         )
-    log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise",
-             result["pages"], len(bilder), len(links))
+    log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise, %s Schreibweisen",
+             result["pages"], len(bilder), len(links), geglaettet)
 
 
 async def _worker_loop(index: int, client: DoclingClient) -> None:

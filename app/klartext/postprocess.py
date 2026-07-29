@@ -269,3 +269,56 @@ def seitenelemente_zusammenfassen(markdown: str, elemente: list[str]) -> str:
         kopf.append(f"- {text}")
     kopf.extend(["", "---", ""])
     return "\n".join(kopf) + gekuerzt + "\n"
+
+
+# --------------------------------------------------- Schreibweisen geradeziehen
+
+# Datum zuerst schuetzen: 10.08.2021 darf nicht zu 10,08.2021 werden.
+_DATUM = re.compile(r"\b\d{1,2}\.\d{1,2}\.\d{2,4}\b")
+# Uhrzeit und Netzadressen schuetzen, damit die Doppelpunkt-Regel sie nicht trifft.
+_UHRZEIT = re.compile(r"\b\d{1,2}:\d{2}(:\d{2})?\b")
+_ADRESSE = re.compile(r"\b[a-z][a-z0-9+.-]*://\S+", re.I)
+
+_DEZIMAL_PUNKT = re.compile(r"(?<=\d)\.(?=\d{2}\b)")
+_KOMMA_ZAHL = re.compile(r"\d,\d{2}\b")
+_PUNKT_ZAHL = re.compile(r"\d\.\d{2}\b")
+
+_DOPPELPUNKT_ZAHL = re.compile(r"(?<=[A-Za-zÄÖÜäöüß]):(?=\d)")
+_WAEHRUNG_KLEBT = re.compile(r"(?<=[A-Za-zÄÖÜäöüß0-9])(?=[€$£])")
+
+
+def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
+    """Zieht rein mechanische Schreibfehler der Texterkennung gerade.
+
+    Ausdruecklich **keine** Rechtschreibkorrektur: es wird kein Wort geraten und
+    kein Woerterbuch befragt. Verbessert werden nur Dinge, die sich aus dem
+    Dokument selbst zweifelsfrei ergeben — Trennzeichen in Zahlen und fehlende
+    Leerzeichen. Tippfehler der Vorlage bleiben erhalten.
+    """
+    schutz: list[str] = []
+
+    def merken(treffer):
+        schutz.append(treffer.group(0))
+        return f"\x00{len(schutz) - 1}\x00"
+
+    text = _ADRESSE.sub(merken, markdown)
+    text = _DATUM.sub(merken, text)
+    text = _UHRZEIT.sub(merken, text)
+
+    aenderungen = 0
+
+    # Dezimaltrennzeichen nur angleichen, wenn das Dokument erkennbar deutsch
+    # formatiert ist — sonst waere es geraten statt hergeleitet.
+    if len(_KOMMA_ZAHL.findall(text)) > len(_PUNKT_ZAHL.findall(text)):
+        text, n = _DEZIMAL_PUNKT.subn(",", text)
+        aenderungen += n
+
+    text, n = _DOPPELPUNKT_ZAHL.subn(": ", text)
+    aenderungen += n
+    text, n = _WAEHRUNG_KLEBT.subn(" ", text)
+    aenderungen += n
+
+    def zurueck(treffer):
+        return schutz[int(treffer.group(1))]
+
+    return re.sub(r"\x00(\d+)\x00", zurueck, text), aenderungen
