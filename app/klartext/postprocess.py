@@ -322,3 +322,258 @@ def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
         return schutz[int(treffer.group(1))]
 
     return re.sub(r"\x00(\d+)\x00", zurueck, text), aenderungen
+
+
+# --- Auflösung prüfen ----------------------------------------------------
+#
+# Die Texterkennung braucht eine Mindestgroesse je Buchstabe. Ist die Vorlage zu
+# klein fotografiert oder zu grob gescannt, verwechselt sie einzelne Zeichen —
+# das laesst sich nachtraeglich nicht reparieren, nur melden.
+#
+# Bei Bildern wird die tatsaechliche Schrifthoehe aus dem Erkennungsergebnis
+# gemessen statt aus der Bildgroesse geraten: ein kleiner Ausschnitt mit grosser
+# Schrift ist gut lesbar, eine ganze Seite mit derselben Pixelzahl nicht.
+#
+# Bei PDF geht das nicht — dort sind die Textmasse in Punkt und nicht in Pixel
+# angegeben, eine normale 10-Punkt-Schrift waere von einem groben Scan nicht zu
+# unterscheiden. Deshalb dort der Umweg ueber die eingebetteten Bilder.
+#
+# Bilddateien werden nur an den Kopfdaten vermessen, die Bilddaten selbst nie
+# entpackt: Bilddecoder auf fremde Uploads anzuwenden waere eine unnoetig grosse
+# Angriffsflaeche.
+
+# Unterhalb dieser Zeilenhoehe in Bildpunkten wird die Zeichenerkennung
+# unzuverlaessig. Gemessen: eine unbrauchbar gelesene Rechnung lag bei 11,
+# ein sauber gelesenes Testbild bei 23.
+_MINDEST_ZEILENHOEHE = 16
+# Unter so vielen Punkten je Zoll wird ein Seitenscan unzuverlaessig.
+_MINDEST_PUNKTE_JE_ZOLL = 150
+
+
+def _groesse_png(kopf: bytes) -> tuple[int, int] | None:
+    if not kopf.startswith(b"\x89PNG\r\n\x1a\n") or kopf[12:16] != b"IHDR":
+        return None
+    return int.from_bytes(kopf[16:20], "big"), int.from_bytes(kopf[20:24], "big")
+
+
+def _groesse_jpeg(daten: bytes) -> tuple[int, int] | None:
+    if not daten.startswith(b"\xff\xd8"):
+        return None
+    i = 2
+    ende = len(daten)
+    while i + 9 < ende:
+        if daten[i] != 0xFF:
+            i += 1
+            continue
+        marker = daten[i + 1]
+        # Fuellbytes und Segmente ohne Laengenangabe ueberspringen.
+        if marker in (0xFF, 0x01) or 0xD0 <= marker <= 0xD9:
+            i += 2
+            continue
+        laenge = int.from_bytes(daten[i + 2 : i + 4], "big")
+        if laenge < 2:
+            return None
+        # SOF0-SOF15, ohne DHT (C4), DAC (CC) und die Restart-Marker.
+        if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+            hoehe = int.from_bytes(daten[i + 5 : i + 7], "big")
+            breite = int.from_bytes(daten[i + 7 : i + 9], "big")
+            return breite, hoehe
+        i += 2 + laenge
+    return None
+
+
+def _groesse_bmp(kopf: bytes) -> tuple[int, int] | None:
+    if not kopf.startswith(b"BM") or len(kopf) < 26:
+        return None
+    breite = int.from_bytes(kopf[18:22], "little", signed=True)
+    hoehe = int.from_bytes(kopf[22:26], "little", signed=True)
+    return abs(breite), abs(hoehe)
+
+
+def _groesse_webp(kopf: bytes) -> tuple[int, int] | None:
+    if not (kopf.startswith(b"RIFF") and kopf[8:12] == b"WEBP"):
+        return None
+    art = kopf[12:16]
+    if art == b"VP8X" and len(kopf) >= 30:
+        breite = int.from_bytes(kopf[24:27], "little") + 1
+        hoehe = int.from_bytes(kopf[27:30], "little") + 1
+        return breite, hoehe
+    if art == b"VP8 " and len(kopf) >= 30:
+        return (
+            int.from_bytes(kopf[26:28], "little") & 0x3FFF,
+            int.from_bytes(kopf[28:30], "little") & 0x3FFF,
+        )
+    if art == b"VP8L" and len(kopf) >= 25:
+        bits = int.from_bytes(kopf[21:25], "little")
+        return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+    return None
+
+
+def _groesse_tiff(daten: bytes) -> tuple[int, int] | None:
+    if daten[:2] == b"II":
+        ordnung = "little"
+    elif daten[:2] == b"MM":
+        ordnung = "big"
+    else:
+        return None
+
+    def zahl(pos: int, laenge: int) -> int:
+        return int.from_bytes(daten[pos : pos + laenge], ordnung)
+
+    start = zahl(4, 4)
+    if start + 2 > len(daten):
+        return None
+    masse: dict[int, int] = {}
+    anzahl = zahl(start, 2)
+    for n in range(anzahl):
+        feld = start + 2 + n * 12
+        if feld + 12 > len(daten):
+            break
+        kennung = zahl(feld, 2)
+        if kennung in (256, 257):
+            # Typ 3 ist ein 2-Byte-Wert, Typ 4 ein 4-Byte-Wert; beide stehen
+            # linksbuendig im Feld.
+            typ = zahl(feld + 2, 2)
+            masse[kennung] = zahl(feld + 8, 2 if typ == 3 else 4)
+    if 256 in masse and 257 in masse:
+        return masse[256], masse[257]
+    return None
+
+
+def bildgroesse(daten: bytes) -> tuple[int, int] | None:
+    """Liest Breite und Hoehe aus den Kopfdaten, ohne das Bild zu entpacken."""
+    kopf = daten[:4096]
+    for leser in (_groesse_png, _groesse_bmp, _groesse_webp):
+        masse = leser(kopf)
+        if masse:
+            return masse
+    for leser in (_groesse_jpeg, _groesse_tiff):
+        masse = leser(daten)
+        if masse:
+            return masse
+    return None
+
+
+def _zeilenhoehe(struktur: dict) -> float | None:
+    """Mittlere Hoehe der erkannten Textzeilen, in Einheiten der Seite."""
+    hoehen: list[float] = []
+    for eintrag in struktur.get("texts", []) or []:
+        for stelle in eintrag.get("prov", []) or []:
+            kasten = stelle.get("bbox") or {}
+            oben, unten = kasten.get("t"), kasten.get("b")
+            if isinstance(oben, (int, float)) and isinstance(unten, (int, float)):
+                hoehen.append(abs(oben - unten))
+    if len(hoehen) < 3:
+        # Zu wenige Zeilen fuer eine belastbare Aussage.
+        return None
+    hoehen.sort()
+    return hoehen[len(hoehen) // 2]
+
+
+def aufloesung_pruefen(daten: bytes, mime: str, struktur: dict | None = None) -> str | None:
+    """Meldet zu grobe Vorlagen. Gibt einen Hinweistext zurueck oder nichts."""
+    if mime == "application/pdf":
+        return _aufloesung_pdf(daten)
+    if not mime.startswith("image/"):
+        return None
+    if not isinstance(struktur, dict):
+        return None
+
+    hoehe = _zeilenhoehe(struktur)
+    if hoehe is None or hoehe >= _MINDEST_ZEILENHOEHE:
+        return None
+
+    masse = bildgroesse(daten)
+    groesse = f" ({masse[0]} × {masse[1]} Bildpunkte)" if masse else ""
+    return (
+        f"Auf dieser Vorlage ist die Schrift nur etwa {round(hoehe)} Bildpunkte "
+        f"hoch{groesse}. Für eine sichere Texterkennung sollten es mindestens "
+        f"{_MINDEST_ZEILENHOEHE} sein. Einzelne Zeichen können deshalb falsch "
+        "gelesen werden. Am besten die Vorlage noch einmal näher heran und mit "
+        "voller Kameraauflösung aufnehmen."
+    )
+
+
+def _bilder_einer_seite(seite) -> list[tuple[int, int]]:
+    """Liest Breite und Hoehe der eingebetteten Bilder aus dem PDF-Verzeichnis.
+
+    Bewusst ueber die Katalogeintraege und nicht ueber ``page.images``: letzteres
+    entpackt die Bilddaten (und braucht dafuer Pillow). Die Masse stehen als
+    Metadaten im Stream-Verzeichnis und sind ohne Dekodieren lesbar.
+    """
+    masse: list[tuple[int, int]] = []
+    try:
+        mittel = seite["/Resources"]["/XObject"].get_object()
+    except Exception:
+        return masse
+    for schluessel in list(mittel.keys()):
+        try:
+            objekt = mittel[schluessel].get_object()
+            if objekt.get("/Subtype") != "/Image":
+                continue
+            breite = int(objekt.get("/Width", 0))
+            hoehe = int(objekt.get("/Height", 0))
+        except Exception:
+            continue
+        if breite > 0 and hoehe > 0:
+            masse.append((breite, hoehe))
+    return masse
+
+
+def _aufloesung_pdf(daten: bytes) -> str | None:
+    """Prueft eingescannte PDF-Seiten: kein Textlayer, nur ein grobes Bild.
+
+    Der Hinweis erscheint nur, wenn das Dokument ueberwiegend aus solchen Seiten
+    besteht. Ein sauberes Textdokument mit einem Bild als Titelseite ist kein
+    Scan — dort waere die Meldung schlicht falsch.
+    """
+    try:
+        leser = PdfReader(io.BytesIO(daten))
+        seiten = leser.pages[:5]
+    except Exception:  # pragma: no cover - kaputte Dateien meldet die Engine
+        return None
+    if not seiten:
+        return None
+
+    schlechteste: tuple[int, int, float] | None = None
+    grobe_seiten = 0
+    for seite in seiten:
+        try:
+            # Seiten mit Textlayer brauchen keine Texterkennung.
+            if len((seite.extract_text() or "").strip()) > 100:
+                continue
+            breite_punkt = float(seite.mediabox.width)
+            hoehe_punkt = float(seite.mediabox.height)
+        except Exception:
+            continue
+        if breite_punkt <= 0 or hoehe_punkt <= 0:
+            continue
+        seiten_verhaeltnis = hoehe_punkt / breite_punkt
+
+        for breite, hoehe in _bilder_einer_seite(seite):
+            # Schmale Streifen sind Linien oder Logos, keine Seitenscans.
+            if breite < 200 or hoehe < 200:
+                continue
+            # Ein Seitenscan hat ungefaehr das Seitenverhaeltnis der Seite.
+            # Ohne diese Pruefung wuerde jede grosse Grafik als Scan gelten:
+            # aus ihrer Pixelzahl allein laesst sich nicht ablesen, wie gross
+            # sie auf der Seite tatsaechlich abgebildet wird.
+            if not 0.75 <= (hoehe / breite) / seiten_verhaeltnis <= 1.33:
+                continue
+            punkte_je_zoll = breite / (breite_punkt / 72.0)
+            if round(punkte_je_zoll) >= _MINDEST_PUNKTE_JE_ZOLL:
+                continue
+            grobe_seiten += 1
+            if schlechteste is None or punkte_je_zoll < schlechteste[2]:
+                schlechteste = (breite, hoehe, punkte_je_zoll)
+            break
+
+    if schlechteste is None or grobe_seiten * 2 < len(seiten):
+        return None
+    breite, hoehe, punkte_je_zoll = schlechteste
+    return (
+        f"Dieses PDF enthält gescannte Seiten mit {breite} × {hoehe} Bildpunkten "
+        f"— etwa {round(punkte_je_zoll)} Punkte je Zoll, empfohlen sind "
+        f"{_MINDEST_PUNKTE_JE_ZOLL}. Einzelne Zeichen können deshalb falsch "
+        "gelesen werden. Am besten mit mindestens 300 Punkten je Zoll neu einscannen."
+    )

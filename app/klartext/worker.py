@@ -112,12 +112,17 @@ async def _process(client: DoclingClient, job) -> None:
         links = postprocess.links_lesen(data)
         markdown = postprocess.markdown_links_anhaengen(markdown, links)
 
-    # 3) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
+    # 3) Vorlage zu grob? Dann kann die Texterkennung Zeichen verwechseln.
+    hinweis = postprocess.aufloesung_pruefen(
+        data, job["mime_type"], struktur if isinstance(struktur, dict) else None
+    )
+
+    # 4) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
     #    fehlende Leerzeichen). Keine Rechtschreibkorrektur — Tippfehler der
     #    Vorlage bleiben stehen. Nur im Markdown, die JSON bleibt unangetastet.
     markdown, geglaettet = postprocess.schreibweisen_glaetten(markdown)
 
-    # 4) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
+    # 5) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
     #    Nur im Markdown; die JSON bleibt vollstaendig.
     elemente = []
     if job["mime_type"] == "application/pdf":
@@ -160,13 +165,14 @@ async def _process(client: DoclingClient, job) -> None:
 
     await db.execute(
         "UPDATE jobs SET status = 'done', page_count = $2, finished_at = now(), "
-        "image_count = $3, link_count = $4, "
+        "image_count = $3, link_count = $4, quality_note = $5, "
         "duration_ms = (EXTRACT(EPOCH FROM (now() - started_at)) * 1000)::int "
         "WHERE id = $1",
         job_id,
         result["pages"],
         len(bilder),
         len(links),
+        hinweis,
     )
     # Der Verbrauch wurde beim Einstellen mit der geschätzten Seitenzahl gebucht.
     # Hier wird nur noch die Differenz zur tatsächlichen Seitenzahl nachgetragen.

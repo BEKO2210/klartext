@@ -620,7 +620,7 @@ async def dashboard(request: Request):
 async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
     rows = await db.fetch(
         "SELECT public_id, original_name, mime_type, size_bytes, status, error_code, "
-        "       page_count, image_count, link_count, "
+        "       page_count, image_count, link_count, quality_note, "
         "       created_at, started_at, finished_at, duration_ms, expires_at, "
         "       (SELECT COUNT(*) FROM jobs q WHERE q.status = 'queued' "
         "         AND q.created_at < jobs.created_at) AS ahead "
@@ -639,6 +639,7 @@ async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
             "pages": r["page_count"],
             "images": r["image_count"],
             "links": r["link_count"],
+            "note": r["quality_note"],
             "created_at": r["created_at"].isoformat(),
             "started_at": r["started_at"].isoformat() if r["started_at"] else None,
             # Wie viele Auftraege stehen noch davor — fuer eine ehrliche Wartenanzeige.
@@ -773,7 +774,7 @@ async def _owned_job(user_id: int, public_id: str):
         raise HttpProblem(404, "Dieser Auftrag existiert nicht.") from None
     row = await db.fetchrow(
         "SELECT id, public_id, original_name, status, error_code, page_count, size_bytes, "
-        "       image_count, link_count, created_at, duration_ms, expires_at "
+        "       image_count, link_count, quality_note, created_at, duration_ms, expires_at "
         "FROM jobs WHERE public_id = $1 AND user_id = $2 AND status <> 'deleted'",
         job_uuid,
         user_id,
@@ -822,6 +823,7 @@ async def job_detail(request: Request, public_id: str):
                 "pages": job["page_count"],
                 "images": job["image_count"],
                 "links": job["link_count"],
+                "note": job["quality_note"],
                 "size": job["size_bytes"],
                 "duration_ms": job["duration_ms"],
                 "expires_at": job["expires_at"],
@@ -933,6 +935,13 @@ async def download_zip(request: Request, ids: str = ""):
                     count += 1
                 except (OSError, ValueError):
                     continue
+
+            if job["quality_note"]:
+                # Der Hinweis gehoert nicht ins Markdown — das bleibt unveraendert.
+                # Als eigene Datei geht er beim Herunterladen aber nicht verloren.
+                basis = storage.safe_download_name(job["original_name"], "")
+                archive.writestr(f"{basis}-hinweis.txt", job["quality_note"] + "\n")
+                count += 1
 
             for row in rows:
                 suffix = ".md" if row["role"] == "markdown" else ".json"

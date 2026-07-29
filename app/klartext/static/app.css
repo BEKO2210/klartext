@@ -362,6 +362,11 @@ input:focus, select:focus { border-color: var(--primary); }
   color: var(--danger); font-size: 13px; line-height: 1.5;
 }
 
+.job-note {
+  grid-column: 2; margin: 4px 0 0;
+  color: var(--warn); font-size: 13px; line-height: 1.5;
+}
+
 .job .progress-block { grid-column: 2; margin-top: 8px; max-width: 100%; }
 
 /* Nutzende Aktionen links gruppiert, die zerstoerende rechts abgesetzt. */

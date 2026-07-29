@@ -104,6 +104,29 @@ Bei einer Testrechnung stiegen die korrekt erkannten Beträge dadurch von 10 auf
 von 18. **Es findet keine Rechtschreibkorrektur statt:** kein Wörterbuch, kein
 Raten, keine Sprachmodelle. Tippfehler der Vorlage bleiben erhalten.
 
+**Hinweis auf grobe Vorlagen.** Die Texterkennung braucht eine Mindestgröße je
+Buchstabe. Bei zu kleinen Vorlagen verwechselt sie Zeichen, und das lässt sich
+nachträglich nicht reparieren — nur melden. Klartext misst das und schreibt
+einen Hinweis ans Ergebnis, statt stillschweigend fehlerhaften Text zu liefern.
+Der Hinweis steht in der Auftragsliste, auf der Ergebnisseite und als eigene
+Datei im ZIP; das Markdown selbst bleibt unberührt.
+
+Bei Bildern wird die **tatsächliche Schrifthöhe** aus dem Erkennungsergebnis
+gemessen, nicht aus der Bildgröße geraten. Ein kleiner Ausschnitt mit großer
+Schrift ist gut lesbar, eine ganze Seite mit derselben Pixelzahl nicht — die
+Bildgröße allein sagt darüber nichts. Unter 16 Bildpunkten Zeilenhöhe kommt der
+Hinweis. Gemessen: die unbrauchbar gelesene Testrechnung lag bei 11, ein sauber
+gelesenes Testbild bei 23.
+
+Bei PDF geht das nicht, weil die Textmaße dort in Punkt angegeben sind — eine
+normale 10-Punkt-Schrift wäre von einem groben Scan nicht zu unterscheiden.
+Dort wird stattdessen die Auflösung der eingebetteten Seitenbilder geprüft, und
+nur dann gemeldet, wenn das Dokument überwiegend aus solchen Bildseiten ohne
+Textebene besteht. Ein Textdokument mit einer Grafik als Titelseite ist kein
+Scan. Die Bildmaße stammen aus den Kopfdaten, die Bilddaten selbst werden nie
+entpackt: Bilddecoder auf fremde Uploads anzuwenden wäre eine unnötig große
+Angriffsfläche.
+
 **Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
 in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie
 noch auf einer eigenen Zeile. Im Markdown werden sie einmal aufgeführt statt auf

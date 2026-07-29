@@ -32,6 +32,12 @@
     </p>
   </header>
 
+  {% if job.note %}
+    <div class="notice notice-warn">
+      <strong>Hinweis zur Vorlage.</strong> {{ job.note }}
+    </div>
+  {% endif %}
+
   {% if job.status == 'error' %}
     <div class="notice notice-error" role="alert">{{ job.error }}</div>
   {% elif job.status != 'done' %}

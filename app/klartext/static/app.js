@@ -370,6 +370,10 @@
     }
     row.appendChild(el("p", "job-meta", meta.join(" · ")));
 
+    if (job.note) {
+      row.appendChild(el("p", "job-note",
+        "Vorlage grob aufgel\u00f6st — einzelne Zeichen k\u00f6nnen falsch gelesen werden."));
+    }
     if (job.status === "error" && job.error) {
       row.appendChild(el("p", "job-error", job.error));
     }

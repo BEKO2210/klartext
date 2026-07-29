@@ -480,6 +480,57 @@ def main() -> int:
         if not check(f"35 Kein Durchgriff auf {path}", status in (404, 405), f"HTTP {status}"):
             break
 
+    # 37 Hinweis auf zu grobe Vorlagen ---------------------------------------
+    # test-grob.jpg ist ein Foto mit 574 x 822 Bildpunkten; die Schrift darin
+    # ist rund 11 Bildpunkte hoch und wird stellenweise falsch gelesen.
+    # Eigenes Konto: das Konto aus den vorherigen Pruefungen hat die
+    # Tagesgrenze fuer Konvertierungen weitgehend aufgebraucht.
+    d = Client()
+    mail_d = f"klartext-test-d-{suffix}@example.invalid"
+    register(d, mail_d)
+    login(d, mail_d)
+    d_csrf = d.csrf("/app")
+
+    def alle_jobs_d():
+        _, _, roh = d.get("/api/jobs", headers={"Accept": "application/json"})
+        try:
+            return json.loads(roh)["jobs"]
+        except (ValueError, KeyError):
+            print(f"      /api/jobs lieferte: {roh[:120]!r}")
+            return []
+
+    status, _, _ = upload(d, ["test-grob.jpg", "test-text.png"], d_csrf)
+    grob = None
+    jobs_jetzt = []
+    if status == 200:
+        wait_for_jobs(d, 2)
+        jobs_jetzt = alle_jobs_d()
+        for eintrag in jobs_jetzt:
+            if eintrag["name"] == "test-grob.jpg":
+                grob = eintrag
+                break
+    check("37 Grobe Vorlage wird gemeldet",
+          grob is not None and bool(grob.get("note")),
+          f"HTTP {status}, " + ((grob or {}).get("note") or "kein Hinweis"))
+
+    # Das sauber lesbare Testbild darf keinen Hinweis bekommen — sonst waere
+    # die Meldung Rauschen und wuerde ignoriert.
+    sauber = [j for j in jobs_jetzt if j["name"] == "test-text.png"]
+    check("38 Sauberes Bild bleibt ohne Hinweis",
+          bool(sauber) and not any(j.get("note") for j in sauber),
+          f"{len(sauber)} Auftraege geprueft")
+
+    if grob:
+        status, _, body = d.get(f"/app/download/zip?ids={grob['id']}")
+        namen = []
+        if status == 200:
+            with zipfile.ZipFile(io.BytesIO(body)) as archive:
+                namen = archive.namelist()
+        check("39 Hinweis liegt dem ZIP bei",
+              any(n.endswith("-hinweis.txt") for n in namen), ", ".join(namen[:4]))
+
+    psql(f"DELETE FROM users WHERE email_norm = '{mail_d.lower()}'")
+
     # 36 Bestehende Dienste -------------------------------------------------
     others = {
         "fokus": "https://fokus.it-handwerk-stuttgart.de/",
