@@ -66,7 +66,7 @@
             </td>
             <td class="num" data-titel="Aufträge">{{ row.job_count }}</td>
             <td class="nowrap smaller" data-titel="Zuletzt aktiv">
-              {% if row.last_login_at %}{{ row.last_login_at.strftime('%d.%m.%y %H:%M') }}{% else %}nie{% endif %}
+              {% if row.last_login_at %}{{ row.last_login_at|zeit('%d.%m.%y %H:%M') }}{% else %}nie{% endif %}
             </td>
             <td data-titel="Aktion">
               {% if row.id != user_id %}
@@ -99,7 +99,7 @@
         <tbody>
           {% for row in failed %}
           <tr>
-            <td class="nowrap smaller" data-titel="Zeitpunkt">{{ row.created_at.strftime('%d.%m.%y %H:%M') }}</td>
+            <td class="nowrap smaller" data-titel="Zeitpunkt">{{ row.created_at|zeit('%d.%m.%y %H:%M') }}</td>
             <td class="smaller" data-titel="Grund">{{ row.error_code }}</td>
             <td class="num smaller" data-titel="Konto">#{{ row.user_id }}</td>
           </tr>

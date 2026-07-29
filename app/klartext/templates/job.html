@@ -28,7 +28,7 @@
       </span>
       {% if job.pages %} · {{ job.pages }} Seite{{ 'n' if job.pages != 1 }}{% endif %}
       {% if job.duration_ms %} · {{ ('%.1f'|format(job.duration_ms / 1000))|replace('.', ',') }} s{% endif %}
-      · wird gelöscht am {{ job.expires_at.strftime('%d.%m.%Y um %H:%M') }} Uhr
+      · wird gelöscht am {{ job.expires_at|zeit }} Uhr
     </p>
   </header>
 

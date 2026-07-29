@@ -7,11 +7,13 @@ er landet nie in einem Pfad.
 
 from __future__ import annotations
 
+import datetime
 import os
 import pathlib
 import re
 import secrets
 import unicodedata
+from zoneinfo import ZoneInfo
 
 from .config import CONFIG
 
@@ -72,18 +74,35 @@ def delete(kind: str, key: str) -> None:
         return
 
 
+_ZEITZONE = ZoneInfo("Europe/Berlin")
+
 _UNSAFE = re.compile(r'[\x00-\x1f\x7f/\\:*?"<>|]')
 
 
-def safe_download_name(original: str, suffix: str) -> str:
-    """Erzeugt einen unbedenklichen Dateinamen für den Content-Disposition-Header."""
+def safe_download_name(original: str, suffix: str, zeitpunkt=None) -> str:
+    """Erzeugt einen unbedenklichen Dateinamen für den Content-Disposition-Header.
+
+    Mit ``zeitpunkt`` wird der Umwandlungszeitpunkt angehaengt. Ohne ihn heissen
+    zwei Umwandlungen derselben Vorlage gleich, und der Browser haengt beim
+    Herunterladen ein ``-2``, ``-3`` an — man sieht den Dateien dann nicht mehr
+    an, welche welche ist.
+    """
     name = unicodedata.normalize("NFC", original or "dokument")
     name = name.replace("\r", " ").replace("\n", " ")
     name = _UNSAFE.sub("_", name)
     name = name.strip(" .") or "dokument"
     stem = pathlib.PurePosixPath(name).stem or "dokument"
     stem = stem[:120]
+    if zeitpunkt is not None:
+        stem = f"{stem}_{zeitstempel(zeitpunkt)}"
     return f"{stem}{suffix}"
+
+
+def zeitstempel(wert) -> str:
+    """Datum und Uhrzeit in deutscher Ortszeit, sortierbar und dateinamentauglich."""
+    if wert.tzinfo is None:
+        wert = wert.replace(tzinfo=datetime.UTC)
+    return wert.astimezone(_ZEITZONE).strftime("%Y-%m-%d_%H%M")
 
 
 def display_name(original: str) -> str:

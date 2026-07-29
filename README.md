@@ -104,6 +104,23 @@ Bei einer Testrechnung stiegen die korrekt erkannten Beträge dadurch von 10 auf
 von 18. **Es findet keine Rechtschreibkorrektur statt:** kein Wörterbuch, kein
 Raten, keine Sprachmodelle. Tippfehler der Vorlage bleiben erhalten.
 
+**Dateinamen beim Herunterladen** tragen den Zeitpunkt der Umwandlung:
+`Rechnung_2026-07-29_1453.md`. Ohne ihn heißen zwei Umwandlungen derselben
+Vorlage gleich und der Browser hängt ein `-2` an — man sieht den Dateien dann
+nicht mehr an, welche welche ist. Treffen zwei Vorlagen trotzdem zusammen,
+unterscheidet sie das Ausgangsformat (`Rechnung-jpg_…`) statt einer laufenden
+Nummer. Ein Archiv mit mehreren Aufträgen heißt nach dem Zeitpunkt des
+Herunterladens.
+
+Im ZIP bekommt jeder Auftrag einen eigenen Ordner, sobald Bilder dabei sind oder
+mehrere Aufträge im Archiv liegen. Das Markdown verweist auf
+`bilder/bild-001.png`; ohne diesen Ordner zeigte nach dem Entpacken kein
+einziges Bild.
+
+Alle angezeigten Zeiten stehen in deutscher Ortszeit. Der Server läuft auf UTC —
+ohne Umrechnung zeigten serverseitig gerenderte Zeiten zwei Stunden weniger an
+als die im Browser berechneten, im selben Bild.
+
 **Hinweis auf grobe Vorlagen.** Die Texterkennung braucht eine Mindestgröße je
 Buchstabe. Bei zu kleinen Vorlagen verwechselt sie Zeichen, und das lässt sich
 nachträglich nicht reparieren — nur melden. Klartext misst das und schreibt

@@ -319,9 +319,12 @@ def main() -> int:
           status == 200 and payload.get("schema_name") == "DoclingDocument"
           and len(payload.get("pages", {})) == 3,
           f"HTTP {status}, Seiten={len(payload.get('pages', {}))}")
+    # Der Zeitpunkt der Umwandlung steckt im Namen, damit zwei Umwandlungen
+    # derselben Vorlage im Download-Ordner nicht als "-2" landen.
+    verfuegung = headers.get("Content-Disposition", "")
     check("20b Dateiname im Download korrekt",
-          'filename="test-multipage.json"' in headers.get("Content-Disposition", ""),
-          headers.get("Content-Disposition", ""))
+          re.search(r'filename="test-multipage_\d{4}-\d{2}-\d{2}_\d{4}\.json"', verfuegung)
+          is not None, verfuegung)
 
     # 21 ZIP ----------------------------------------------------------------
     ids = ",".join(j["id"] for j in done.values())
@@ -330,9 +333,12 @@ def main() -> int:
     if status == 200:
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             names = archive.namelist()
+    # Bei mehreren Auftraegen bekommt jeder einen eigenen Ordner: nur so stimmen
+    # die Bildverweise im Markdown nach dem Entpacken.
     check("21 ZIP-Download mit .md und .json je Auftrag",
           status == 200 and len(names) == 12
-          and not any(n.startswith(("/", "..")) or "/" in n for n in names),
+          and all(n.count("/") == 1 for n in names)
+          and not any(n.startswith(("/", "..")) or ".." in n for n in names),
           f"{len(names)} Eintraege")
 
     # 22 Ungewoehnliche Dateinamen -----------------------------------------
@@ -527,7 +533,7 @@ def main() -> int:
             with zipfile.ZipFile(io.BytesIO(body)) as archive:
                 namen = archive.namelist()
         check("39 Hinweis liegt dem ZIP bei",
-              any(n.endswith("-hinweis.txt") for n in namen), ", ".join(namen[:4]))
+              any(n.endswith("hinweis.txt") for n in namen), ", ".join(namen[:4]))
 
     psql(f"DELETE FROM users WHERE email_norm = '{mail_d.lower()}'")
 

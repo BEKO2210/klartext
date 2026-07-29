@@ -7,8 +7,10 @@ Es gibt keine Stelle, an der eine ID allein zum Zugriff genügt.
 from __future__ import annotations
 
 import asyncio
+import datetime
 import io
 import logging
+import pathlib
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
@@ -860,7 +862,7 @@ async def download(request: Request, public_id: str, fmt: str):
     except (OSError, ValueError):
         raise HttpProblem(404, "Das Ergebnis ist nicht mehr verfügbar.") from None
 
-    name = storage.safe_download_name(job["original_name"], suffix)
+    name = storage.safe_download_name(job["original_name"], suffix, job["created_at"])
     return Response(
         content=data,
         media_type=content_type,
@@ -903,8 +905,9 @@ async def download_zip(request: Request, ids: str = ""):
         raise HttpProblem(400, "Es wurden keine Ergebnisse ausgewählt.")
 
     buffer = io.BytesIO()
-    used: set[str] = set()
+    verwendet: set[str] = set()
     count = 0
+    einzeln: str | None = None
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         for public_id in wanted:
             try:
@@ -919,17 +922,39 @@ async def download_zip(request: Request, ids: str = ""):
                 job["id"],
                 session["user_id"],
             )
-            for bild_row in await db.fetch(
+            bilder = await db.fetch(
                 "SELECT seq, storage_key, mime_type FROM job_images "
                 "WHERE job_id = $1 AND user_id = $2 ORDER BY seq",
                 job["id"], session["user_id"],
-            ):
+            )
+
+            # Zeitstempel im Namen: sonst heissen zwei Umwandlungen derselben
+            # Vorlage gleich und der Browser haengt beim Herunterladen ein
+            # "-2" an. Kollidieren zwei Vorlagen trotzdem, unterscheidet sie das
+            # Ausgangsformat — das sagt mehr als eine laufende Nummer.
+            basis = storage.safe_download_name(job["original_name"], "", job["created_at"])
+            if basis in verwendet:
+                endung = pathlib.PurePosixPath(job["original_name"]).suffix.lstrip(".")
+                stamm = storage.safe_download_name(job["original_name"], "")
+                basis = storage.safe_download_name(
+                    f"{stamm}-{endung}" if endung else stamm, "", job["created_at"])
+            zaehler = 2
+            while basis in verwendet:
+                basis = f"{basis}-{zaehler}"
+                zaehler += 1
+            verwendet.add(basis)
+            einzeln = basis if len(verwendet) == 1 else None
+
+            # Eigener Ordner, sobald Bilder dabei sind oder mehrere Auftraege im
+            # Archiv liegen. Das Markdown verweist auf "bilder/bild-001.png";
+            # ohne Ordner zeigt nach dem Entpacken kein einziges Bild.
+            ordner = f"{basis}/" if (bilder or len(wanted) > 1) else ""
+
+            for bild_row in bilder:
                 endung = {"image/png": ".png", "image/jpeg": ".jpg",
                           "image/webp": ".webp", "image/tiff": ".tif"}.get(
                               bild_row["mime_type"], ".bin")
-                # Ordnername genau wie im Markdown referenziert.
-                basis = storage.safe_download_name(job["original_name"], "")
-                name = f"{basis}-bilder/bild-{bild_row['seq']:03d}{endung}"
+                name = f"{ordner}bilder/bild-{bild_row['seq']:03d}{endung}"
                 try:
                     archive.writestr(name, storage.read("result", bild_row["storage_key"]))
                     count += 1
@@ -939,22 +964,16 @@ async def download_zip(request: Request, ids: str = ""):
             if job["quality_note"]:
                 # Der Hinweis gehoert nicht ins Markdown — das bleibt unveraendert.
                 # Als eigene Datei geht er beim Herunterladen aber nicht verloren.
-                basis = storage.safe_download_name(job["original_name"], "")
-                archive.writestr(f"{basis}-hinweis.txt", job["quality_note"] + "\n")
+                hinweis_name = "hinweis.txt" if ordner else f"{basis}-hinweis.txt"
+                archive.writestr(f"{ordner}{hinweis_name}", job["quality_note"] + "\n")
                 count += 1
 
             for row in rows:
                 suffix = ".md" if row["role"] == "markdown" else ".json"
-                # Namen im Archiv werden von uns erzeugt, nie vom Benutzer übernommen.
-                name = storage.safe_download_name(job["original_name"], suffix)
-                base, dot, ext = name.rpartition(".")
-                counter = 1
-                while name in used:
-                    name = f"{base}-{counter}{dot}{ext}"
-                    counter += 1
-                used.add(name)
+                # Namen im Archiv werden von uns erzeugt, nie vom Benutzer uebernommen.
                 try:
-                    archive.writestr(name, storage.read("result", row["storage_key"]))
+                    archive.writestr(f"{ordner}{basis}{suffix}",
+                                     storage.read("result", row["storage_key"]))
                     count += 1
                 except (OSError, ValueError):
                     continue
@@ -962,11 +981,17 @@ async def download_zip(request: Request, ids: str = ""):
     if count == 0:
         raise HttpProblem(404, "Es gibt keine fertigen Ergebnisse zum Herunterladen.")
 
+    # Bei einem Auftrag traegt das Archiv dessen Namen, bei mehreren den
+    # Zeitpunkt des Herunterladens. So heisst keine zwei Dateien im
+    # Download-Ordner gleich.
+    zip_name = (f"{einzeln}.zip" if einzeln
+                else f"Klartext_{storage.zeitstempel(datetime.datetime.now(datetime.UTC))}.zip")
+
     return Response(
         content=buffer.getvalue(),
         media_type="application/zip",
         headers={
-            "Content-Disposition": 'attachment; filename="klartext-ergebnisse.zip"',
+            "Content-Disposition": f'attachment; filename="{zip_name}"',
             "X-Content-Type-Options": "nosniff",
         },
     )

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import pathlib
 import secrets
+from zoneinfo import ZoneInfo
 
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
@@ -17,8 +19,30 @@ templates.env.autoescape = True
 
 CSRF_COOKIE = "klartext_csrf"
 
+# Der Server laeuft auf UTC, die Benutzer sitzen in Deutschland. Ohne Umrechnung
+# zeigen serverseitig gerenderte Zeiten zwei Stunden weniger an als die im
+# Browser berechneten — im selben Bild, was zurecht wie ein Fehler aussieht.
+ZEITZONE = ZoneInfo("Europe/Berlin")
+
+
+def ortszeit(wert: datetime.datetime) -> datetime.datetime:
+    """Rechnet einen Zeitpunkt in die deutsche Ortszeit um."""
+    if wert.tzinfo is None:
+        wert = wert.replace(tzinfo=datetime.UTC)
+    return wert.astimezone(ZEITZONE)
+
+
+def zeit(wert, muster: str = "%d.%m.%Y um %H:%M") -> str:
+    """Jinja-Filter: Zeitpunkt in deutscher Ortszeit."""
+    if not isinstance(wert, datetime.datetime):
+        return ""
+    return ortszeit(wert).strftime(muster)
+
 _STATIC_DIR = pathlib.Path("klartext/static")
 _asset_cache: dict[str, str] = {}
+
+
+templates.env.filters["zeit"] = zeit
 
 
 def asset(name: str) -> str:
