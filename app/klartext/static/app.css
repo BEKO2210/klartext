@@ -390,6 +390,17 @@ input:focus, select:focus { border-color: var(--primary); }
   padding: 2px 7px; border-radius: 999px;
 }
 
+/* Pruefliste im Hinweiskasten: kompakter als eine normale Tabelle, damit sie
+   auf dem Handy nicht den halben Bildschirm einnimmt. */
+.pruefliste { margin-top: 12px; }
+.pruefliste table { font-size: 13px; }
+.pruefliste th, .pruefliste td { padding: 6px 8px; }
+.pruefliste code {
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--bg); padding: 1px 5px; border-radius: 4px;
+  white-space: nowrap;
+}
+
 .job-note {
   grid-column: 2; margin: 4px 0 0;
   color: var(--warn); font-size: 13px; line-height: 1.5;

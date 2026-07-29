@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import io
+import json
 import logging
 import pathlib
 import uuid
@@ -840,7 +841,8 @@ async def _owned_job(user_id: int, public_id: str):
         raise HttpProblem(404, "Dieser Auftrag existiert nicht.") from None
     row = await db.fetchrow(
         "SELECT id, public_id, original_name, status, error_code, page_count, size_bytes, "
-        "       image_count, link_count, quality_note, created_at, duration_ms, expires_at "
+        "       image_count, link_count, quality_note, quality_findings, "
+        "       created_at, duration_ms, expires_at "
         "FROM jobs WHERE public_id = $1 AND user_id = $2 AND status <> 'deleted'",
         job_uuid,
         user_id,
@@ -890,6 +892,7 @@ async def job_detail(request: Request, public_id: str):
                 "images": job["image_count"],
                 "links": job["link_count"],
                 "note": job["quality_note"],
+                "funde": json.loads(job["quality_findings"]) if job["quality_findings"] else [],
                 "size": job["size_bytes"],
                 "duration_ms": job["duration_ms"],
                 "expires_at": job["expires_at"],
@@ -1028,8 +1031,18 @@ async def download_zip(request: Request, ids: str = ""):
             if job["quality_note"]:
                 # Der Hinweis gehoert nicht ins Markdown — das bleibt unveraendert.
                 # Als eigene Datei geht er beim Herunterladen aber nicht verloren.
+                zeilen = [job["quality_note"]]
+                auffaellig = json.loads(job["quality_findings"] or "[]")
+                if auffaellig:
+                    zeilen += ["", "Auffällige Zellen (unverändert übernommen):", ""]
+                for fund in auffaellig:
+                    ort = f"Seite {fund['seite']}" if fund.get("seite") else "Tabelle"
+                    zeile = fund.get("zeile") or "ohne Bezeichnung"
+                    zeilen.append(
+                        f"- {ort}, Zeile \"{zeile}\", Spalte \"{fund['spalte']}\": "
+                        f"gelesen als \"{fund['wert']}\"")
                 hinweis_name = "hinweis.txt" if ordner else f"{basis}-hinweis.txt"
-                archive.writestr(f"{ordner}{hinweis_name}", job["quality_note"] + "\n")
+                archive.writestr(f"{ordner}{hinweis_name}", "\n".join(zeilen) + "\n")
                 count += 1
 
             for row in rows:

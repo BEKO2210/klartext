@@ -35,6 +35,25 @@
   {% if job.note %}
     <div class="notice notice-warn">
       <strong>Hinweis zur Vorlage.</strong> {{ job.note }}
+      {% if job.funde %}
+      <div class="table-scroll pruefliste">
+        <table>
+          <thead>
+            <tr><th>Seite</th><th>Zeile</th><th>Spalte</th><th>Gelesen als</th></tr>
+          </thead>
+          <tbody>
+            {% for f in job.funde %}
+            <tr>
+              <td class="num">{{ f.seite if f.seite else '—' }}</td>
+              <td class="wrap-anywhere">{{ f.zeile or '—' }}</td>
+              <td>{{ f.spalte }}</td>
+              <td><code>{{ f.wert }}</code></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
     </div>
   {% endif %}
 

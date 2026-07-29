@@ -574,6 +574,49 @@ def main() -> int:
           f"oeffentlich={'ja' if hat_zaehler(oeffentlich) else 'nein'}, "
           f"angemeldet={'ja' if hat_zaehler(angemeldet) else 'nein'}")
 
+    # 43 Einheitenpruefung -----------------------------------------------------
+    # Deterministisch gegen eine nachgebaute Docling-Struktur: die Regel selbst
+    # soll geprueft werden, nicht die Tagesform der Texterkennung.
+    probe_code = (
+        "from klartext.postprocess import einheiten_pruefen as p;"
+        "kopf=lambda c,t:{'text':t,'start_row_offset_idx':0,'start_col_offset_idx':c,"
+        "'column_header':True};"
+        "zelle=lambda r,c,t:{'text':t,'start_row_offset_idx':r,'start_col_offset_idx':c,"
+        "'column_header':False};"
+        "zellen=[kopf(0,'Bezeichnung'),kopf(1,'Einheit'),kopf(2,'Wert')];"
+        "werte=['mg/dl','Meter','%','','i/n','IP/6','1/6','U/I'];"
+        "zellen+=[x for i,v in enumerate(werte,1) for x in "
+        "(zelle(i,0,'Zeile%d'%i), zelle(i,1,v), zelle(i,2,'42'))];"
+        "d={'tables':[{'prov':[{'page_no':1}],'data':{'table_cells':zellen}}]};"
+        "f=p(d);"
+        "print(sorted(x['wert'] for x in f) == ['1/6','IP/6','U/I','i/n'] and "
+        "all(x['seite']==1 and x['spalte']=='Einheit' for x in f))"
+    )
+    probe = subprocess.run(
+        ["docker", "exec", "klartext-web", "python", "-c", probe_code],
+        capture_output=True, text=True, timeout=30,
+    ).stdout.strip()
+    check("43 Auffaellige Einheiten werden gemeldet, gueltige nicht",
+          probe == "True", probe or "keine Antwort")
+
+    # Ohne Einheiten-Ueberschrift darf nichts gemeldet werden.
+    probe_code2 = (
+        "from klartext.postprocess import einheiten_pruefen as p;"
+        "z=[{'text':'Artikel','start_row_offset_idx':0,'start_col_offset_idx':0,"
+        "'column_header':True},"
+        "{'text':'Kürzel','start_row_offset_idx':0,'start_col_offset_idx':1,"
+        "'column_header':True},"
+        "{'text':'i/n','start_row_offset_idx':1,'start_col_offset_idx':1,"
+        "'column_header':False}];"
+        "print(p({'tables':[{'prov':[{'page_no':1}],'data':{'table_cells':z}}]}) == [])"
+    )
+    probe2 = subprocess.run(
+        ["docker", "exec", "klartext-web", "python", "-c", probe_code2],
+        capture_output=True, text=True, timeout=30,
+    ).stdout.strip()
+    check("43b Nur Einheiten-Spalten werden geprueft", probe2 == "True",
+          probe2 or "keine Antwort")
+
     # 36 Bestehende Dienste -------------------------------------------------
     others = {
         "fokus": "https://fokus.it-handwerk-stuttgart.de/",

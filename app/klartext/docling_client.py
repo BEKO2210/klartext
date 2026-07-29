@@ -44,7 +44,8 @@ class DoclingClient:
         except Exception:  # noqa: BLE001
             return False
 
-    async def convert(self, filename: str, data: bytes, mime: str, max_pages: int) -> dict:
+    async def convert(self, filename: str, data: bytes, mime: str, max_pages: int,
+                      engine: str | None = None) -> dict:
         """Konvertiert genau eine Datei. Gibt {'markdown', 'json', 'pages', 'status'} zurück."""
         # httpx akzeptiert bei Multipart nur ein Dict — Mehrfachwerte als Liste.
         # Eine Liste von Tupeln führt in httpx 0.28 zu
@@ -58,7 +59,7 @@ class DoclingClient:
             "table_cell_matching": "true",
             "do_ocr": "true",
             "force_ocr": "false",
-            "ocr_preset": CONFIG.ocr_engine,
+            "ocr_preset": engine or CONFIG.ocr_engine,
             "pdf_backend": "docling_parse",
             "pipeline": "standard",
             # Bilder werden eingebettet geliefert und danach von uns als eigene

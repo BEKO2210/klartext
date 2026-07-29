@@ -131,6 +131,28 @@ Alle angezeigten Zeiten stehen in deutscher Ortszeit. Der Server läuft auf UTC 
 ohne Umrechnung zeigten serverseitig gerenderte Zeiten zwei Stunden weniger an
 als die im Browser berechneten, im selben Bild.
 
+**Prüfhinweis für Einheiten.** Die Texterkennung verwechselt bei manchen
+Schriftarten ganze Einheiten: aus `g/dl` wird `IP/6`, aus `U/l` wird `i/n` oder
+`v/n`. Klartext prüft Zellen in Spalten mit der Überschrift *Einheit* gegen eine
+Liste bekannter Einheiten und **meldet** Auffälliges mit Seite, Zeile, Spalte und
+dem unveränderten Wert — auf der Ergebnisseite und als Datei im ZIP.
+
+**Korrigiert wird nichts.** Eine automatische Korrektur wäre geraten, und eine
+still auf `mg/dl` gesetzte Zelle, wo `g/dl` stand, ist um den Faktor 1000 falsch
+und fällt niemandem mehr auf. Ein sichtbar kaputtes `IP/6` ist ungefährlich, weil
+man es sofort erkennt.
+
+Die Regel ist bewusst eng: gemeldet wird nur, was erkennbar kein Wort ist.
+Ausgeschriebene Einheiten wie *Meter*, *Stück* oder *Std.* bleiben unangetastet —
+ein Wortschatz dafür wäre endlos, und jede Lücke ein Fehlalarm. Ein Hinweis, dem
+man nicht traut, wird überlesen. Leere Zellen werden nicht gemeldet, weil viele
+Zeilen zu Recht keine Einheit haben; eine verlorene Einheit fällt damit nicht auf.
+
+**Auswahl der Erkennungs-Engine** liegt in `app/klartext/ocr_wahl.py`. Heute immer
+RapidOCR; die Datei hält den Messstand fest, warum. Die tatsächlich verwendete
+Engine steht je Auftrag in `jobs.ocr_engine` — damit ein späterer Vergleich auf
+echten Daten fußt statt auf drei Testdokumenten.
+
 **Hinweis auf grobe Vorlagen.** Die Texterkennung braucht eine Mindestgröße je
 Buchstabe. Bei zu kleinen Vorlagen verwechselt sie Zeichen, und das lässt sich
 nachträglich nicht reparieren — nur melden. Klartext misst das und schreibt

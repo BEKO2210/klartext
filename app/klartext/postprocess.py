@@ -18,6 +18,7 @@ import binascii
 import io
 import logging
 import re
+import unicodedata
 from collections import Counter
 
 from pypdf import PdfReader
@@ -577,3 +578,121 @@ def _aufloesung_pdf(daten: bytes) -> str | None:
         f"{_MINDEST_PUNKTE_JE_ZOLL}. Einzelne Zeichen können deshalb falsch "
         "gelesen werden. Am besten mit mindestens 300 Punkten je Zoll neu einscannen."
     )
+
+
+# --- Einheiten prüfen ----------------------------------------------------
+#
+# Die Texterkennung verwechselt bei manchen Schriftarten ganze Einheiten:
+# aus "g/dl" wird "IP/6", aus "U/l" wird "i/n" oder "v/n". Solche Zellen werden
+# **gemeldet, nie geändert**. Eine automatische Korrektur waere geraten, und ein
+# stillschweigend auf "mg/dl" gesetzter Wert, wo "g/dl" stand, ist um den Faktor
+# 1000 falsch und faellt niemandem mehr auf. Ein sichtbar kaputtes "IP/6" ist
+# ungefaehrlich, weil man es sofort erkennt.
+
+_EINHEIT_SPALTEN = frozenset({
+    "einheit", "einheiten", "masseinheit", "maßeinheit", "dimension",
+    "unit", "units", "uom",
+})
+
+# Zellinhalte, die keine Einheit sein sollen und trotzdem in Ordnung sind.
+_KEINE_EINHEIT = frozenset({"", "-", "–", "—", "/", "n.a.", "k.a.", "n/a", "."})
+
+# Bekannte Einheiten, klein geschrieben und ohne Leerzeichen. Bewusst breit
+# angelegt: eine zu kurze Liste meldet staendig Fehlalarme, und ein Hinweis,
+# dem man nicht traut, wird ueberlesen.
+_EINHEITEN = frozenset("""
+g/dl g/l mg/dl mg/l mg/ml µg/l µg/dl µg/ml ng/ml ng/l ng/dl pg/ml pg fl
+mmol/l µmol/l nmol/l pmol/l mol/l mval/l meq/l mosmol/kg
+u/l u/ml mu/l mu/ml ku/l iu/l iu/ml ie/l ie/ml
+% ‰ /l /ml /nl /µl /pl mio/µl mio/l tsd/µl tsd/l mrd/l
+mm/h ml/min s sek min h std mg/g g/24h mg/24h µg/24h
+kpa mmhg ph ratio titer index score
+kg g mg µg ng t m cm mm µm nm km m² m³ l ml µl dl hl
+tag tage woche monat jahr stk stück st paket
+€ eur ct °c °f k v a w kw kwh wh hz khz mhz ghz
+b kb mb gb tb bar pa mpa n nm rpm u/min km/h m/s ppm db
+""".split())
+
+
+def _einheit_normal(text: str) -> str:
+    """Vereinheitlicht Schreibweisen, die dieselbe Einheit meinen."""
+    wert = unicodedata.normalize("NFC", text or "").strip()
+    # Mikro-Zeichen und griechisches My meinen dasselbe.
+    wert = wert.replace("μ", "µ")
+    wert = wert.replace("⁄", "/").replace("∕", "/")
+    wert = re.sub(r"\s*/\s*", "/", wert)
+    wert = re.sub(r"\s+", " ", wert)
+    return wert.rstrip(".").lower()
+
+
+# Ausgeschriebene Einheiten wie "Meter", "Stück" oder "Std." lassen sich nicht
+# sinnvoll aufzaehlen — der Wortschatz waere endlos und jede Luecke ein
+# Fehlalarm. Deshalb gilt: was wie ein Wort aussieht, wird nicht gemeldet.
+# Gemeldet wird nur, was erkennbar kein Wort ist — Zeichensalat mit Schraeg-
+# strichen oder Ziffern, also genau das Muster der Lesefehler ("i/n", "IP/6").
+_WORTAEHNLICH = re.compile(r"^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\- ]{1,}$")
+
+
+def einheiten_pruefen(struktur: dict, grenze: int = 30) -> list[dict]:
+    """Meldet Zellen einer Einheiten-Spalte, die keine bekannte Einheit sind.
+
+    Gibt Fundstellen mit Seite, Zeilenbezeichnung und dem **unveraenderten**
+    Wert zurueck. Der Text im Ergebnis bleibt, wie die Erkennung ihn gelesen hat.
+    """
+    if not isinstance(struktur, dict):
+        return []
+    funde: list[dict] = []
+
+    for tabelle in struktur.get("tables", []) or []:
+        daten = tabelle.get("data") or {}
+        zellen = daten.get("table_cells") or []
+        if not zellen:
+            continue
+
+        seite = None
+        for stelle in tabelle.get("prov", []) or []:
+            if isinstance(stelle.get("page_no"), int):
+                seite = stelle["page_no"]
+                break
+
+        # Welche Spalten tragen eine Einheiten-Ueberschrift?
+        spalten: dict[int, str] = {}
+        for zelle in zellen:
+            if not zelle.get("column_header"):
+                continue
+            if _einheit_normal(zelle.get("text", "")) in _EINHEIT_SPALTEN:
+                spalte = zelle.get("start_col_offset_idx")
+                if isinstance(spalte, int):
+                    spalten[spalte] = (zelle.get("text") or "").strip()
+        if not spalten:
+            continue
+
+        # Zeilenbeschriftung ist die erste Zelle der Zeile.
+        beschriftung: dict[int, str] = {}
+        for zelle in zellen:
+            zeile = zelle.get("start_row_offset_idx")
+            if zelle.get("start_col_offset_idx") == 0 and isinstance(zeile, int):
+                beschriftung[zeile] = (zelle.get("text") or "").strip()
+
+        for zelle in zellen:
+            if zelle.get("column_header"):
+                continue
+            spalte = zelle.get("start_col_offset_idx")
+            if spalte not in spalten:
+                continue
+            roh = (zelle.get("text") or "").strip()
+            normal = _einheit_normal(roh)
+            if normal in _KEINE_EINHEIT or normal in _EINHEITEN:
+                continue
+            if _WORTAEHNLICH.match(roh):
+                continue
+            zeile = zelle.get("start_row_offset_idx")
+            funde.append({
+                "seite": seite,
+                "zeile": beschriftung.get(zeile, "") if isinstance(zeile, int) else "",
+                "spalte": spalten[spalte],
+                "wert": roh,
+            })
+            if len(funde) >= grenze:
+                return funde
+    return funde

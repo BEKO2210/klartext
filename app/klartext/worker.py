@@ -13,7 +13,7 @@ import json
 import logging
 import signal
 
-from . import db, postprocess, quota, settings_store, storage
+from . import db, ocr_wahl, postprocess, quota, settings_store, storage
 from .config import CONFIG
 from .docling_client import ConversionError, DoclingClient
 
@@ -79,11 +79,13 @@ async def _process(client: DoclingClient, job) -> None:
     limits = await settings_store.limits()
 
     try:
+        engine = ocr_wahl.engine_fuer(job["mime_type"], int(job["size_bytes"] or 0))
         result = await client.convert(
             filename=job["original_name"],
             data=data,
             mime=job["mime_type"],
             max_pages=limits["max_pages"],
+            engine=engine,
         )
     except ConversionError as exc:
         if exc.code == "engine_unreachable":
@@ -116,6 +118,21 @@ async def _process(client: DoclingClient, job) -> None:
     hinweis = postprocess.aufloesung_pruefen(
         data, job["mime_type"], struktur if isinstance(struktur, dict) else None
     )
+
+    # Einheiten gegen eine Liste bekannter Einheiten pruefen. Auffaellige Zellen
+    # werden nur gemeldet — der Text bleibt unveraendert. Eine automatische
+    # Korrektur waere geraten, und eine still auf "mg/dl" gesetzte Zelle, wo
+    # "g/dl" stand, ist um den Faktor 1000 falsch und faellt niemandem auf.
+    funde = postprocess.einheiten_pruefen(struktur if isinstance(struktur, dict) else {})
+    if funde:
+        anzahl = len(funde)
+        satz = ("Eine Zelle in einer Einheiten-Spalte ergibt keine bekannte Einheit"
+                if anzahl == 1 else
+                f"{anzahl} Zellen in Einheiten-Spalten ergeben keine bekannte Einheit")
+        meldung = (f"{satz} — vermutlich hat die Texterkennung sie falsch gelesen. "
+                   "Die Werte stehen unverändert im Ergebnis und sind unten einzeln "
+                   "aufgeführt; korrigiert wird nichts, weil das Raten wäre.")
+        hinweis = f"{hinweis} {meldung}" if hinweis else meldung
 
     # 4) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
     #    fehlende Leerzeichen). Keine Rechtschreibkorrektur — Tippfehler der
@@ -166,6 +183,7 @@ async def _process(client: DoclingClient, job) -> None:
     await db.execute(
         "UPDATE jobs SET status = 'done', page_count = $2, finished_at = now(), "
         "image_count = $3, link_count = $4, quality_note = $5, "
+        "quality_findings = $6, ocr_engine = $7, "
         "duration_ms = (EXTRACT(EPOCH FROM (now() - started_at)) * 1000)::int "
         "WHERE id = $1",
         job_id,
@@ -173,6 +191,8 @@ async def _process(client: DoclingClient, job) -> None:
         len(bilder),
         len(links),
         hinweis,
+        json.dumps(funde, ensure_ascii=False) if funde else None,
+        engine,
     )
     # Der Verbrauch wurde beim Einstellen mit der geschätzten Seitenzahl gebucht.
     # Hier wird nur noch die Differenz zur tatsächlichen Seitenzahl nachgetragen.
