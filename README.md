@@ -142,6 +142,14 @@ still auf `mg/dl` gesetzte Zelle, wo `g/dl` stand, ist um den Faktor 1000 falsch
 und fällt niemandem mehr auf. Ein sichtbar kaputtes `IP/6` ist ungefährlich, weil
 man es sofort erkennt.
 
+Zusammengesetzte Einheiten werden **zerlegt statt aufgezählt**: an Bruch- und
+Malzeichen getrennt, Hochzahlen abgeschnitten, SI-Vorsatz abgetrennt. Ein
+NE555-Datenblatt hat im ersten Anlauf neun Fehlalarme erzeugt — `°C/W`, `µA`,
+`ppm/°C`, `%/V` sind alle gültig und standen in keiner Liste. Nach der Zerlegung:
+null. Die Prüfung ist bewusst großzügig; eine fälschlich akzeptierte Einheit
+kostet nur eine ausgebliebene Meldung, ein Fehlalarm dagegen die Glaubwürdigkeit.
+Preis dafür: `v/n` gilt als Volt pro Newton und wird nicht mehr gemeldet.
+
 Die Regel ist bewusst eng: gemeldet wird nur, was erkennbar kein Wort ist.
 Ausgeschriebene Einheiten wie *Meter*, *Stück* oder *Std.* bleiben unangetastet —
 ein Wortschatz dafür wäre endlos, und jede Lücke ein Fehlalarm. Ein Hinweis, dem

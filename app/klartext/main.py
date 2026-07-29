@@ -762,29 +762,53 @@ async def upload(
     total_bytes = 0
     est_pages = 0
 
+    # Eine unbrauchbare Datei darf die anderen nicht mitreissen. Wer fuenf Scans
+    # auswaehlt und bei einem die Seitenzahl reisst, soll die vier guten
+    # trotzdem bekommen — und erfahren, welche Datei warum liegen blieb.
+    abgelehnt: list[dict] = []
+    erste_ablehnung: list = []
+
+    def ablehnen(name: str, status: int, code: str, zusatz: str = "") -> None:
+        text = message_for(code) + (f" {zusatz}" if zusatz else "")
+        abgelehnt.append({"name": storage.display_name(name), "grund": text})
+        if not erste_ablehnung:
+            erste_ablehnung.append((status, text))
+
     async with _upload_slots:
         for item in incoming:
             data = await item.read(max_bytes + 1)
             if len(data) > max_bytes:
-                raise HttpProblem(413, message_for("file_too_large"))
+                ablehnen(item.filename, 413, "file_too_large",
+                         f"Erlaubt sind {limits['max_file_size_mb']} MB.")
+                continue
             try:
                 mime, _label = uploads.check(item.filename, data)
             except uploads.RejectedUpload as exc:
-                raise HttpProblem(400, message_for(exc.code)) from None
+                ablehnen(item.filename, 400, exc.code)
+                continue
 
             pages = 1
             if mime == "application/pdf":
                 counted = uploads.pdf_page_count(data)
                 if counted is None:
-                    raise HttpProblem(400, message_for("encrypted_pdf"))
+                    ablehnen(item.filename, 400, "encrypted_pdf")
+                    continue
                 if counted > limits["max_pages"]:
-                    raise HttpProblem(400, message_for("too_many_pages"))
+                    ablehnen(item.filename, 400, "too_many_pages",
+                             f"Diese hat {counted}, erlaubt sind {limits['max_pages']}.")
+                    continue
                 pages = counted
 
             total_bytes += len(data)
             est_pages += pages
             prepared.append({"name": item.filename, "data": data,
                              "mime": mime, "pages": pages})
+
+    if not prepared:
+        status, text = erste_ablehnung[0] if erste_ablehnung else (400, message_for("no_files"))
+        if len(incoming) > 1 and abgelehnt:
+            text = f"„{abgelehnt[0]['name']}“: {text}"
+        raise HttpProblem(status, text)
 
     try:
         await quota.check_batch(user_id, len(prepared), total_bytes, est_pages)
@@ -824,7 +848,8 @@ async def upload(
         await quota.record(user_id, entry["pages"], len(entry["data"]))
         created += 1
 
-    return JSONResponse({"ok": True, "created": created, "batch": str(batch_id)})
+    return JSONResponse({"ok": True, "created": created, "batch": str(batch_id),
+                         "abgelehnt": abgelehnt})
 
 
 # Uploads werden zum Prüfen vollständig in den Speicher gelesen. Ohne Bremse

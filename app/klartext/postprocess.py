@@ -632,6 +632,42 @@ def _einheit_normal(text: str) -> str:
 # strichen oder Ziffern, also genau das Muster der Lesefehler ("i/n", "IP/6").
 _WORTAEHNLICH = re.compile(r"^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\- ]{1,}$")
 
+# Zusammengesetzte Einheiten lassen sich nicht aufzaehlen: "°C/W", "ppm/°C",
+# "%/V", "µA" sind alle gueltig und standen in keiner Liste — ein Datenblatt hat
+# dafuer prompt neun Fehlalarme erzeugt. Deshalb wird zerlegt statt aufgezaehlt:
+# an Bruch- und Malzeichen trennen, Hochzahlen abschneiden, Vorsatz abtrennen.
+# Die Pruefung ist bewusst grosszuegig — eine faelschlich akzeptierte Einheit
+# kostet nur eine ausgebliebene Meldung, ein Fehlalarm dagegen die Glaubwuerdigkeit.
+_GRUNDEINHEITEN = frozenset("""
+m g s a k mol cd n pa j w c v f ω ohm si wb t h lm lx bq gy sv kat
+l t min h d °c °f % ‰ ppm ppb bar ev hz b byte bit u iu ie da val db rpm px °
+mmhg mval eq osm mos
+""".split())
+
+_VORSAETZE = ("q", "r", "y", "z", "e", "p", "t", "g", "m", "k", "h", "da",
+              "d", "c", "µ", "n", "f", "a")
+
+
+def _teil_ist_einheit(teil: str) -> bool:
+    teil = re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]|\^-?\d+|(?<=[a-zäöüß°])\d+$", "", teil).strip()
+    if not teil:
+        return False
+    if teil in _GRUNDEINHEITEN:
+        return True
+    for vorsatz in _VORSAETZE:
+        if teil.startswith(vorsatz) and teil[len(vorsatz):] in _GRUNDEINHEITEN:
+            return True
+    return False
+
+
+def _ist_einheit(normal: str) -> bool:
+    if normal in _EINHEITEN:
+        return True
+    teile = [t for t in re.split(r"[/*·×]", normal) if t.strip()]
+    if not teile or len(teile) > 3:
+        return False
+    return all(_teil_ist_einheit(t) for t in teile)
+
 
 def einheiten_pruefen(struktur: dict, grenze: int = 30) -> list[dict]:
     """Meldet Zellen einer Einheiten-Spalte, die keine bekannte Einheit sind.
@@ -682,7 +718,7 @@ def einheiten_pruefen(struktur: dict, grenze: int = 30) -> list[dict]:
                 continue
             roh = (zelle.get("text") or "").strip()
             normal = _einheit_normal(roh)
-            if normal in _KEINE_EINHEIT or normal in _EINHEITEN:
+            if normal in _KEINE_EINHEIT or _ist_einheit(normal):
                 continue
             if _WORTAEHNLICH.match(roh):
                 continue

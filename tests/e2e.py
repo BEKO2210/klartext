@@ -535,6 +535,27 @@ def main() -> int:
         check("39 Hinweis liegt dem ZIP bei",
               any(n.endswith("hinweis.txt") for n in namen), ", ".join(namen[:4]))
 
+    # 44 Teilannahme beim Upload -----------------------------------------------
+    # Eine unbrauchbare Datei darf die anderen nicht mitreissen.
+    status, _, body = d.post_multipart("/app/upload", {"csrf": d_csrf}, [
+        ("files", "gut.png", (FIXTURES / "test-text.png").read_bytes(), "image/png"),
+        ("files", "kaputt.png", b"kein Bild, nur Text", "image/png"),
+    ])
+    antwort = json.loads(body) if status == 200 else {}
+    check("44 Gute Datei kommt durch, schlechte wird benannt",
+          status == 200 and antwort.get("created") == 1
+          and len(antwort.get("abgelehnt", [])) == 1
+          and antwort["abgelehnt"][0]["name"] == "kaputt.png",
+          f"HTTP {status}, {body[:90]}")
+
+    # Markdown darf HTML enthalten — sonst faellt jede uebliche README durch.
+    status, _, _ = d.post_multipart("/app/upload", {"csrf": d_csrf}, [
+        ("files", "readme.md",
+         b"<p align=\"center\"><img src=\"logo.png\"></p>\n\n# Titel\n\nText.\n",
+         "text/markdown"),
+    ])
+    check("44b Markdown mit HTML-Block wird angenommen", status == 200, f"HTTP {status}")
+
     psql(f"DELETE FROM users WHERE email_norm = '{mail_d.lower()}'")
 
     # 40 Kein Versand an Adressen, die keine Post annehmen koennen ------------
@@ -584,7 +605,8 @@ def main() -> int:
         "zelle=lambda r,c,t:{'text':t,'start_row_offset_idx':r,'start_col_offset_idx':c,"
         "'column_header':False};"
         "zellen=[kopf(0,'Bezeichnung'),kopf(1,'Einheit'),kopf(2,'Wert')];"
-        "werte=['mg/dl','Meter','%','','i/n','IP/6','1/6','U/I'];"
+        "werte=['mg/dl','Meter','%','','°C/W','ppm/°C','%/V','µA','kWh',"
+        "'i/n','IP/6','1/6','U/I'];"
         "zellen+=[x for i,v in enumerate(werte,1) for x in "
         "(zelle(i,0,'Zeile%d'%i), zelle(i,1,v), zelle(i,2,'42'))];"
         "d={'tables':[{'prov':[{'page_no':1}],'data':{'table_cells':zellen}}]};"

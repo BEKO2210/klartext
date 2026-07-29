@@ -153,7 +153,11 @@ SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], str]] = {
         "PowerPoint-Präsentation",
     ),
     ".html": (("text/html", "text/plain"), "HTML-Datei"),
-    ".md": (("text/markdown", "text/plain"), "Markdown-Datei"),
+    # text/html gehoert dazu: Markdown darf HTML enthalten, und sobald eine
+    # Datei mit einem HTML-Block beginnt — bei README-Dateien der Normalfall —
+    # meldet die Inhaltspruefung text/html. Ohne diesen Eintrag wurde eine
+    # voellig gewoehnliche README abgewiesen.
+    ".md": (("text/markdown", "text/plain", "text/html"), "Markdown-Datei"),
 }
 
 SUPPORTED_EXT_LIST = sorted({e.lstrip(".").upper() for e in SUPPORTED_FORMATS})

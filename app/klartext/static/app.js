@@ -75,6 +75,24 @@
     messageBox.appendChild(box);
   }
 
+  function showAbgelehnt(kopf, liste) {
+    messageBox.textContent = "";
+    var box = el("div", "notice notice-warn");
+    box.appendChild(el("p", null, kopf));
+    box.appendChild(el("p", null, liste.length === 1
+      ? "Eine Datei wurde nicht angenommen:"
+      : liste.length + " Dateien wurden nicht angenommen:"));
+    var ul = el("ul");
+    liste.forEach(function (eintrag) {
+      var li = el("li");
+      li.appendChild(el("strong", "wrap-anywhere", eintrag.name));
+      li.appendChild(document.createTextNode(" — " + eintrag.grund));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    messageBox.appendChild(box);
+  }
+
   // ---------------------------------------------------------------- Auswahl
 
   function renderSelection() {
@@ -181,10 +199,17 @@
         input.value = "";
         setFiles([]);
         var anzahl = payload.created || 0;
-        showMessage(anzahl === 1
+        var liegen = payload.abgelehnt || [];
+        var text = anzahl === 1
           ? "1 Datei hochgeladen. Die Umwandlung läuft — der Auftrag steht unten in der Liste."
-          : anzahl + " Dateien hochgeladen. Die Umwandlung läuft — die Aufträge stehen unten in der Liste.",
-          "success");
+          : anzahl + " Dateien hochgeladen. Die Umwandlung läuft — die Aufträge stehen unten in der Liste.";
+        if (liegen.length) {
+          // Teilweise angenommen: die guten Dateien laufen, die uebrigen werden
+          // einzeln benannt. Sonst weiss niemand, welche liegen geblieben ist.
+          showAbgelehnt(text, liegen);
+        } else {
+          showMessage(text, "success");
+        }
         pollDelay = 1000;
         refreshJobs();
         // Zur Liste springen, sonst entsteht das Ergebnis unbemerkt ausserhalb
