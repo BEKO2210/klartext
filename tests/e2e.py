@@ -639,6 +639,19 @@ def main() -> int:
     check("43b Nur Einheiten-Spalten werden geprueft", probe2 == "True",
           probe2 or "keine Antwort")
 
+    # 45 Bestätigungsmail erneut anfordern -------------------------------------
+    status, _, _ = anon.get("/bestaetigung")
+    check("45 Formular für neue Bestätigungsmail erreichbar", status == 200, f"HTTP {status}")
+
+    # Die Antwort darf nicht verraten, ob es das Konto gibt.
+    csrf_v = anon.csrf("/bestaetigung")
+    _, _, mit = anon.post_form("/bestaetigung", {"csrf": csrf_v, "email": mail_a})
+    csrf_v = anon.csrf("/bestaetigung")
+    _, _, ohne = anon.post_form(
+        "/bestaetigung", {"csrf": csrf_v, "email": f"gibtsnicht-{suffix}@example.invalid"})
+    check("45b Keine Auskunft, ob die Adresse existiert", mit == ohne,
+          f"{len(mit)} vs {len(ohne)} Bytes")
+
     # 36 Bestehende Dienste -------------------------------------------------
     others = {
         "fokus": "https://fokus.it-handwerk-stuttgart.de/",

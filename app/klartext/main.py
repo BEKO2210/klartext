@@ -429,6 +429,68 @@ async def register_submit(
     return response
 
 
+@app.get("/bestaetigung", response_class=HTMLResponse)
+async def bestaetigung_form(request: Request):
+    """Formular, um die Bestätigungsmail erneut zu schicken."""
+    return templates.TemplateResponse(
+        request, "verify_again.html",
+        base_context(request, mail_configured=CONFIG.mail_configured),
+    )
+
+
+@app.post("/bestaetigung")
+async def bestaetigung_erneut(request: Request, email: str = Form(""), csrf: str = Form("")):
+    """Schickt die Bestätigungsmail erneut.
+
+    Die Antwort ist immer dieselbe, unabhaengig davon, ob es das Konto gibt und ob
+    es schon bestaetigt ist — sonst liesse sich hier abfragen, welche Adressen
+    registriert sind.
+    """
+    verify_csrf(request, csrf)
+    norm = security.normalize_email(email)
+    ip = client_ip(request)
+
+    # Bremse gegen Missbrauch als Mailschleuder: je Verbindung und je Adresse.
+    if not await security.rate_limit_hit(f"verify-again-ip:{ip}", 3600, 10):
+        raise HttpProblem(429, "Zu viele Anfragen von dieser Verbindung. Bitte später.")
+    if norm and not await security.rate_limit_hit(f"verify-again:{norm}", 3600, 3):
+        raise HttpProblem(429, "Diese Adresse hat schon mehrere Mails erhalten. "
+                               "Bitte warte eine Stunde.")
+
+    row = await db.fetchrow(
+        "SELECT id, email, email_verified FROM users WHERE email_norm = $1 AND is_active = TRUE",
+        norm,
+    ) if norm else None
+
+    if row is not None and not row["email_verified"] and CONFIG.mail_configured:
+        # Alte, noch offene Links entwerten: es soll immer nur einer gelten.
+        await db.execute(
+            "UPDATE auth_tokens SET used_at = now() "
+            "WHERE user_id = $1 AND kind = 'verify_email' AND used_at IS NULL",
+            row["id"],
+        )
+        token = security.new_token()
+        await db.execute(
+            "INSERT INTO auth_tokens(token_hash, user_id, kind, expires_at) "
+            "VALUES($1, $2, 'verify_email', now() + interval '24 hours')",
+            security.token_hash(token),
+            row["id"],
+        )
+        await mail.send_verification(row["email"], token)
+
+    return templates.TemplateResponse(
+        request,
+        "info.html",
+        base_context(
+            request,
+            heading="Mail ist unterwegs",
+            text="Falls die Adresse zu einem noch unbestätigten Konto gehört, haben wir "
+                 "einen neuen Bestätigungslink geschickt. Er gilt 24 Stunden. Nichts da? "
+                 "Bitte auch im Spam-Ordner nachsehen.",
+        ),
+    )
+
+
 @app.get("/verify", response_class=HTMLResponse)
 async def verify_email(request: Request, token: str = ""):
     row = await db.fetchrow(
@@ -523,7 +585,8 @@ async def login_submit(
             base_context(
                 request,
                 errors=["Bitte bestätige zuerst deine E-Mail-Adresse über den Link, "
-                        "den wir dir geschickt haben."],
+                        "den wir dir geschickt haben. Keine Mail bekommen? Unter "
+                        "„Bestätigungsmail erneut senden“ schicken wir sie neu."],
                 email=email,
             ),
             status_code=403,

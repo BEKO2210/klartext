@@ -131,6 +131,13 @@ Alle angezeigten Zeiten stehen in deutscher Ortszeit. Der Server läuft auf UTC 
 ohne Umrechnung zeigten serverseitig gerenderte Zeiten zwei Stunden weniger an
 als die im Browser berechneten, im selben Bild.
 
+**Bestätigungsmail erneut anfordern** unter `/bestaetigung`. Ohne das ist jeder
+verloren, bei dem die erste Mail im Spam landet — es gab keinen Weg zurück ins
+Konto. Die Antwort ist immer dieselbe, egal ob die Adresse existiert oder schon
+bestätigt ist, sonst ließe sich dort abfragen, wer registriert ist. Höchstens
+drei Mails je Adresse und zehn je Verbindung pro Stunde. Ein neuer Link entwertet
+alle älteren.
+
 **Prüfhinweis für Einheiten.** Die Texterkennung verwechselt bei manchen
 Schriftarten ganze Einheiten: aus `g/dl` wird `IP/6`, aus `U/l` wird `i/n` oder
 `v/n`. Klartext prüft Zellen in Spalten mit der Überschrift *Einheit* gegen eine
