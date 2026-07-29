@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
-from .config import CONFIG, SUPPORTED_EXT_LIST
+from .config import CONFIG, SUPPORTED_EXT_LIST, SUPPORTED_EXT_SHORT
 from .security import constant_time_eq
 
 templates = Jinja2Templates(directory="klartext/templates")
@@ -147,6 +147,12 @@ def base_context(request: Request, **extra) -> dict:
             "verified": session["email_verified"],
         },
         "formats": SUPPORTED_EXT_LIST,
+        "formats_kurz": SUPPORTED_EXT_SHORT,
+        # Gemessen wird nur ausserhalb des angemeldeten Bereichs: dort stehen
+        # Auftragskennungen in der Adresse, die nichts in einer Statistik zu
+        # suchen haben.
+        "messung": CONFIG.messung_aktiv and session is None,
+        "messung_domain": CONFIG.plausible_domain,
         "asset": asset,
     }
     ctx.update(extra)

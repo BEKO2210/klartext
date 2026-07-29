@@ -86,7 +86,30 @@ Alle Preise zzgl. MwSt.</pre>
   </div>
 </section>
 
+{# Laufband der tatsaechlich unterstuetzten Formate. Bewusst keine fremden
+   Firmenlogos: Klartext hat keine Sponsoren, und erfundene waeren gelogen. #}
+<div class="laufband" role="group" aria-label="Unterstützte Dateiformate">
+  <p class="laufband-titel">Liest zuverlässig</p>
+  <div class="laufband-fenster">
+    <div class="laufband-spur">
+      <span class="laufband-satz">
+        {% for f in formats_kurz %}<span class="laufband-marke">{{ f }}</span>{% endfor %}
+      </span>
+      <span class="laufband-satz" aria-hidden="true">
+        {% for f in formats_kurz %}<span class="laufband-marke">{{ f }}</span>{% endfor %}
+      </span>
+    </div>
+  </div>
+</div>
+
 <div class="wrap stack-lg">
+  <section class="kennzahlen" aria-label="Eckdaten">
+    <div><strong>{{ formats_kurz|length }}</strong><span>Formate</span></div>
+    <div><strong>{{ limits.max_pages }}</strong><span>Seiten je Dokument</span></div>
+    <div><strong>{{ limits.retention_hours }} h</strong><span>dann gelöscht</span></div>
+    <div><strong>0 €</strong><span>dauerhaft</span></div>
+  </section>
+
   <div class="grid grid-3">
     <article class="card feature">
       <span class="feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -97,7 +120,8 @@ Alle Preise zzgl. MwSt.</pre>
       <h2>Nichts verlässt den Server</h2>
       <p class="small">
         Alles läuft auf diesem Server. Keine Inhalte an OpenAI, Anthropic, Google
-        oder einen anderen Dienst. Kein Tracking.
+        oder einen anderen Dienst. Keine Werbenetzwerke, keine Verfolgung über
+        Seiten hinweg.
       </p>
     </article>
 
@@ -499,4 +523,7 @@ Alle Preise zzgl. MwSt.</pre>
   ]
 }
 </script>
+{% block scripts %}
+<script defer src="{{ asset('landing.js') }}"></script>
+{% endblock %}
 {% endblock %}

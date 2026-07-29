@@ -551,6 +551,29 @@ def main() -> int:
     check("40 Kein Mailversand an nicht zustellbare Adressen",
           probe == "True", probe or "keine Antwort")
 
+    # 41 Reichweitenmessung ueber die eigene Domain ---------------------------
+    status, headers, body = anon.get("/js/script.js?v=1")
+    check("41 Zaehlskript ueber die eigene Domain",
+          status == 200 and len(body) > 500
+          and "javascript" in headers.get("Content-Type", ""),
+          f"HTTP {status}, {len(body)} Bytes")
+
+    status, _, _ = anon.post_form("/api/event", {})
+    check("41b Zaehlaufruf wird angenommen", status in (202, 400), f"HTTP {status}")
+
+    # Im angemeldeten Bereich darf nicht gemessen werden: dort stehen
+    # Auftragskennungen in der Adresse.
+    def hat_zaehler(rohtext) -> bool:
+        text = rohtext.decode("utf-8", "replace") if isinstance(rohtext, bytes) else rohtext
+        return "data-domain=" in text
+
+    _, _, oeffentlich = anon.get("/")
+    _, _, angemeldet = a.get("/app")
+    check("42 Keine Messung im angemeldeten Bereich",
+          hat_zaehler(oeffentlich) and not hat_zaehler(angemeldet),
+          f"oeffentlich={'ja' if hat_zaehler(oeffentlich) else 'nein'}, "
+          f"angemeldet={'ja' if hat_zaehler(angemeldet) else 'nein'}")
+
     # 36 Bestehende Dienste -------------------------------------------------
     others = {
         "fokus": "https://fokus.it-handwerk-stuttgart.de/",

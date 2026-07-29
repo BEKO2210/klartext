@@ -35,7 +35,7 @@
       <li>OpenAI, Anthropic, Google oder andere Anbieter von Sprachmodellen</li>
       <li>externe OCR- oder Texterkennungsdienste</li>
       <li>externe Bildanalysedienste</li>
-      <li>Analyse-, Statistik- oder Tracking-Anbieter</li>
+      <li>externe Analyse-, Statistik- oder Tracking-Anbieter</li>
       <li>Fehlerprotokoll-Dienste</li>
     </ul>
     <p class="small">
@@ -89,6 +89,37 @@
       (CSRF). Beide sind für den Betrieb erforderlich und deshalb nach § 25 Abs. 2 TDDDG
       nicht einwilligungspflichtig. Es gibt keine Tracking-, Werbe- oder Analyse-Cookies
       und deshalb bewusst auch kein Cookie-Banner.
+    </p>
+  </section>
+
+  <section>
+    <h2>Reichweitenmessung</h2>
+    <p class="small">
+      Um zu sehen, wie oft die öffentlichen Seiten aufgerufen werden, läuft auf demselben
+      Server eine selbst betriebene Instanz von <strong>Plausible Analytics</strong>. Es ist
+      kein externer Dienst beteiligt; die Daten verlassen den Server nicht. Das Zählskript
+      wird über die eigene Domain ausgeliefert, die Seite baut also keine Verbindung zu
+      einem fremden Rechner auf.
+    </p>
+    <p class="small">Erfasst werden je Aufruf:</p>
+    <ul class="small">
+      <li>die aufgerufene Seite und die verweisende Adresse</li>
+      <li>Browser, Betriebssystem und Gerätetyp in grober Einteilung</li>
+      <li>das Land, abgeleitet aus der IP-Adresse</li>
+    </ul>
+    <p class="small">
+      <strong>Die IP-Adresse wird nicht gespeichert.</strong> Aus ihr wird zusammen mit
+      einem täglich wechselnden Zufallswert eine Prüfsumme gebildet, die nur der Zählung
+      wiederkehrender Aufrufe innerhalb eines Tages dient und danach niemandem mehr
+      zuzuordnen ist. Es werden keine Cookies gesetzt und nichts auf dem Gerät gespeichert
+      oder ausgelesen — deshalb ist dafür weder eine Einwilligung nach § 25 TDDDG nötig
+      noch ein Cookie-Banner. Rechtsgrundlage ist das berechtigte Interesse an einer
+      datensparsamen Reichweitenmessung, Art. 6 Abs. 1 lit. f DSGVO.
+    </p>
+    <p class="small">
+      <strong>Im angemeldeten Bereich wird nicht gemessen.</strong> Dort stehen
+      Auftragskennungen in der Adresszeile; diese haben in einer Statistik nichts zu
+      suchen. Gemessen werden ausschließlich die öffentlich zugänglichen Seiten.
     </p>
   </section>
 

@@ -104,6 +104,16 @@ Bei einer Testrechnung stiegen die korrekt erkannten Beträge dadurch von 10 auf
 von 18. **Es findet keine Rechtschreibkorrektur statt:** kein Wörterbuch, kein
 Raten, keine Sprachmodelle. Tippfehler der Vorlage bleiben erhalten.
 
+**Reichweitenmessung.** Auf den öffentlichen Seiten läuft eine selbst betriebene
+Plausible-Instanz auf demselben Server. Zählskript und Zählaufruf gehen über die
+eigene Domain: die Seite baut keine Verbindung zu einem fremden Rechner auf, die
+strenge CSP bleibt unverändert (`script-src 'self'`), und Werbeblocker greifen
+nicht. Keine Cookies, keine gespeicherte IP-Adresse — Plausible bildet daraus
+zusammen mit einem täglich wechselnden Zufallswert eine Prüfsumme. **Im
+angemeldeten Bereich wird nicht gemessen**, weil dort Auftragskennungen in der
+Adresszeile stehen. Leere Werte in `PLAUSIBLE_URL`/`PLAUSIBLE_DOMAIN` schalten
+alles ab.
+
 **Dateinamen beim Herunterladen** tragen den Zeitpunkt der Umwandlung:
 `Rechnung_2026-07-29_1453.md`. Ohne ihn heißen zwei Umwandlungen derselben
 Vorlage gleich und der Browser hängt ein `-2` an — man sieht den Dateien dann

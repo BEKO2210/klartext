@@ -16,6 +16,7 @@ import zipfile
 from contextlib import asynccontextmanager
 from datetime import timedelta
 
+import httpx
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -231,6 +232,69 @@ _PUBLIC_PATHS = [
     "/nutzungsbedingungen",
     "/lizenzen",
 ]
+
+
+# --- Reichweitenmessung ------------------------------------------------------
+#
+# Das Zaehlskript und der Zaehlaufruf laufen ueber die eigene Domain. Sonst
+# muesste die Inhaltsrichtlinie einen fremden Rechnernamen erlauben, in der Seite
+# staende ein Fremd-Request, und die ueblichen Werbeblocker wuerden ihn ohnehin
+# unterbinden. Weitergereicht wird nur an die fest eingestellte Adresse.
+
+_MESSUNG_SKRIPT: bytes | None = None
+
+
+@app.get("/js/script.js")
+async def messung_skript():
+    if not CONFIG.messung_aktiv:
+        raise HttpProblem(404, "Diese Datei gibt es nicht.")
+    global _MESSUNG_SKRIPT
+    if _MESSUNG_SKRIPT is None:
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                antwort = await client.get(f"{CONFIG.plausible_url}/js/script.js")
+            antwort.raise_for_status()
+            _MESSUNG_SKRIPT = antwort.content
+        except Exception:  # noqa: BLE001 - die Seite darf daran nicht scheitern
+            log.warning("Zaehlskript nicht erreichbar")
+            # Auf keinen Fall zwischenspeichern lassen: Cloudflare haelt
+            # JavaScript vier Stunden fest, und eine einmal ausgelieferte leere
+            # Antwort bliebe so lange haengen.
+            return Response(content=b"", media_type="application/javascript",
+                            headers={"Cache-Control": "no-store"})
+    return Response(
+        content=_MESSUNG_SKRIPT,
+        media_type="application/javascript",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+@app.post("/api/event")
+async def messung_ereignis(request: Request):
+    if not CONFIG.messung_aktiv:
+        raise HttpProblem(404, "Diese Adresse gibt es nicht.")
+    rumpf = await request.body()
+    if len(rumpf) > 4096:
+        raise HttpProblem(400, "Die Anfrage ist zu gross.")
+    # Die echte Besucheradresse weiterreichen, sonst zaehlt Plausible alle
+    # Aufrufe als denselben Besucher. Cloudflare stellt sie in diesem Kopffeld
+    # bereit; sie wird von Plausible nur als taeglich wechselnder Hashwert
+    # gespeichert, nie im Klartext.
+    quelle = request.headers.get("cf-connecting-ip") or (
+        request.client.host if request.client else "")
+    kopf = {
+        "Content-Type": "application/json",
+        "User-Agent": request.headers.get("user-agent", ""),
+    }
+    if quelle:
+        kopf["X-Forwarded-For"] = quelle
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(f"{CONFIG.plausible_url}/api/event",
+                              content=rumpf, headers=kopf)
+    except Exception:  # noqa: BLE001 - Messung darf nie stoeren
+        pass
+    return Response(status_code=202)
 
 
 @app.get("/robots.txt")

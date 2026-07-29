@@ -361,3 +361,80 @@ h1 {
   border-top: 1px solid var(--border);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+
+/* ---------------------------------------------------------------- Laufband */
+/*
+ * Zeigt die tatsaechlich unterstuetzten Formate als laufendes Band. Die Spur
+ * enthaelt denselben Satz zweimal und wird um genau die halbe Breite
+ * verschoben — dadurch schliesst der Umlauf ohne sichtbaren Sprung.
+ */
+.laufband { margin: 30px 0 6px; text-align: center; }
+.laufband-titel {
+  margin: 0 0 12px;
+  font-size: 12px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted);
+}
+.laufband-fenster {
+  overflow: hidden;
+  /* Weiche Kanten statt harter Abschnitt: das Band wirkt endlos. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.laufband-spur {
+  display: flex; width: max-content;
+  animation: laufband 38s linear infinite;
+}
+.laufband-satz { display: flex; gap: 10px; padding-right: 10px; }
+.laufband-marke {
+  flex: none;
+  padding: 8px 15px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--bg);
+  font-size: 13px; font-weight: 600; letter-spacing: .03em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+@keyframes laufband {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.laufband-fenster:hover .laufband-spur { animation-play-state: paused; }
+
+/* ---------------------------------------------------------------- Eckdaten */
+
+.kennzahlen {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 14px 10px;
+  padding: 22px 16px;
+  border: 1px solid var(--border); border-radius: var(--radius-l);
+  background: var(--surface);
+  text-align: center;
+}
+.kennzahlen > div { display: flex; flex-direction: column; gap: 2px; }
+.kennzahlen strong {
+  font-size: clamp(22px, 6vw, 29px); font-weight: 680;
+  letter-spacing: -.02em; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.kennzahlen span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+@media (min-width: 620px) {
+  .kennzahlen { grid-template-columns: repeat(4, 1fr); padding: 26px 20px; }
+}
+
+/* ---------------------------------------------------------------- Auftritt */
+/*
+ * Wird erst von landing.js vergeben. Ohne JavaScript oder bei abgestellter
+ * Bewegung bleibt alles sofort sichtbar — nichts haengt an der Animation.
+ */
+.auftritt {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity .5s ease-out, transform .5s ease-out;
+}
+.auftritt-fertig { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .laufband-spur { animation: none; }
+  .auftritt { opacity: 1; transform: none; transition: none; }
+}

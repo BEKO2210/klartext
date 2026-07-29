@@ -93,6 +93,12 @@ services:
       - ./data/results:/data/results
     networks:
       - klartext-internal
+      # Nur fuer die Reichweitenmessung. Plausible laeuft auf demselben Rechner
+      # in einem eigenen Netz und ist ausschliesslich an 127.0.0.1 gebunden,
+      # vom Docker-Netz aus also nicht erreichbar. Statt an diesem laufenden
+      # Dienst etwas zu aendern, tritt Klartext seinem Netz bei. An Plausible
+      # selbst wird nichts angefasst.
+      - plausible
     ports:
       # Nur lokal gebunden; oeffentlich ausschliesslich ueber den Cloudflare-Tunnel
       - "127.0.0.1:${APP_PORT:-8160}:8000"
@@ -137,6 +143,10 @@ services:
           memory: 512M
 
 networks:
+  # Vorhandenes Netz von Plausible, nur mitbenutzt — nicht von hier verwaltet.
+  plausible:
+    external: true
+    name: plausible_default
   klartext-internal:
     name: klartext-internal
     driver: bridge

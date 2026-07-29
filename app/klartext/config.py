@@ -78,6 +78,12 @@ class Config:
     job_stale_minutes: int = _i("JOB_STALE_MINUTES", 30)
 
     # --- E-Mail (optional) ---
+    # Reichweitenmessung. Leer = ausgeschaltet. Gemessen wird ausschliesslich auf
+    # den oeffentlichen Seiten, nie im angemeldeten Bereich: dort stehen
+    # Auftragskennungen in der Adresse.
+    plausible_url: str = _s("PLAUSIBLE_URL", "").rstrip("/")
+    plausible_domain: str = _s("PLAUSIBLE_DOMAIN", "")
+
     smtp_host: str = _s("SMTP_HOST", "")
     smtp_port: int = _i("SMTP_PORT", 587)
     smtp_user: str = _s("SMTP_USER", "")
@@ -105,6 +111,10 @@ class Config:
     @property
     def mail_configured(self) -> bool:
         return bool(self.smtp_host and self.smtp_from)
+
+    @property
+    def messung_aktiv(self) -> bool:
+        return bool(self.plausible_url and self.plausible_domain)
 
 
 def load() -> Config:
@@ -147,3 +157,25 @@ SUPPORTED_FORMATS: dict[str, tuple[tuple[str, ...], str]] = {
 }
 
 SUPPORTED_EXT_LIST = sorted({e.lstrip(".").upper() for e in SUPPORTED_FORMATS})
+
+
+def _formate_ohne_dubletten() -> list[str]:
+    """Je Dateityp nur eine Endung — fuer die Anzeige auf der Startseite.
+
+    Die vollstaendige Liste enthaelt Paare wie JPG und JPEG oder TIF und TIFF,
+    die denselben Typ meinen. Nebeneinander gezeigt wirkt das wie ein Versehen.
+    Zusammengefasst wird ueber den Medientyp, nicht ueber eine Namensliste —
+    dann stimmt es auch, wenn spaeter ein Format dazukommt.
+    """
+    gesehen: dict[str, str] = {}
+    for endung, (typen, _) in sorted(SUPPORTED_FORMATS.items()):
+        schluessel = typen[0]
+        name = endung.lstrip(".").upper()
+        vorhanden = gesehen.get(schluessel)
+        # Die kuerzere Schreibweise gewinnt: JPG vor JPEG, TIF vor TIFF.
+        if vorhanden is None or len(name) < len(vorhanden):
+            gesehen[schluessel] = name
+    return sorted(gesehen.values())
+
+
+SUPPORTED_EXT_SHORT = _formate_ohne_dubletten()
