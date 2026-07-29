@@ -142,6 +142,18 @@ erfolgreicher Konvertierung gebucht worden, hätte man das Tageskontingent durch
 absichtlich fehlschlagende Aufträge beliebig umgehen können. Die tatsächliche
 Seitenzahl wird nach der Konvertierung nur noch als Differenz nachgetragen.
 
+## Dateien ohne Datenbankeintrag
+
+Alle Löschwege gehen über die Datenbank: Ablauf der Frist, Auftrag löschen, Konto
+löschen. Fällt zwischen dem Schreiben einer Datei und dem Anlegen ihres Eintrags
+etwas aus, kennt niemand die Datei mehr — sie läge für immer auf der Platte und das
+Löschversprechen wäre gebrochen.
+
+Der Worker vergleicht deshalb alle fünf Minuten die Dateien auf der Platte mit den
+Einträgen in `files` und `job_images` und entfernt, was zu keinem Eintrag gehört und
+älter als eine Stunde ist. Die Altersgrenze verhindert, dass eine gerade
+entstehende Datei erwischt wird.
+
 ## Netzwerk
 
 Nur `klartext-web` hat ein Port-Mapping — und zwar auf `127.0.0.1:8160`, also nicht

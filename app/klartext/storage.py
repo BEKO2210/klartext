@@ -91,3 +91,27 @@ def display_name(original: str) -> str:
     name = unicodedata.normalize("NFC", original or "")
     name = "".join(ch for ch in name if ch.isprintable())
     return name[:180] or "unbenannt"
+
+
+def alle_schluessel(kind: str) -> list[str]:
+    """Alle vorhandenen Dateien als Storage-Keys, unabhaengig von der Datenbank."""
+    wurzel = _root(kind)
+    gefunden: list[str] = []
+    if not wurzel.exists():
+        return gefunden
+    for unterordner in wurzel.iterdir():
+        if not unterordner.is_dir() or len(unterordner.name) != 2:
+            continue
+        for datei in unterordner.iterdir():
+            if datei.is_file() and len(datei.name) == 32:
+                gefunden.append(f"{unterordner.name}/{datei.name}")
+    return gefunden
+
+
+def alter_sekunden(kind: str, key: str) -> float:
+    """Alter der Datei in Sekunden, oder -1 wenn sie nicht existiert."""
+    import time
+    try:
+        return time.time() - path_for(kind, key).stat().st_mtime
+    except (OSError, ValueError):
+        return -1.0

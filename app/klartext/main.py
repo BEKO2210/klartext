@@ -802,11 +802,18 @@ async def job_detail(request: Request, public_id: str):
             except (OSError, ValueError):
                 markdown = None
 
+    bilder = await db.fetch(
+        "SELECT seq, page_no, mime_type, size_bytes FROM job_images "
+        "WHERE job_id = $1 AND user_id = $2 ORDER BY seq",
+        job["id"], session["user_id"],
+    )
+
     return templates.TemplateResponse(
         request,
         "job.html",
         base_context(
             request,
+            bilder=bilder,
             job={
                 "id": str(job["public_id"]),
                 "name": storage.display_name(job["original_name"]),

@@ -42,10 +42,11 @@
   {% else %}
 
   <div class="job-cta">
-    <a class="btn btn-primary btn-block" href="/app/auftrag/{{ job.id }}/download/md">
-      Markdown herunterladen
+    <a class="btn btn-primary btn-block" href="/app/download/zip?ids={{ job.id }}">
+      Alles herunterladen{% if job.images %} — ZIP mit {{ job.images }} Bildern{% else %} (ZIP){% endif %}
     </a>
     <div class="job-cta-row">
+      <a class="btn btn-secondary" href="/app/auftrag/{{ job.id }}/download/md">Markdown</a>
       <a class="btn btn-secondary" href="/app/auftrag/{{ job.id }}/download/json">JSON</a>
       <button class="btn btn-secondary" id="copy-button" type="button">Kopieren</button>
     </div>
@@ -55,6 +56,27 @@
     Meistens reicht die Markdown-Datei.
   </p>
   <p class="smaller muted copy-status" id="copy-status" aria-live="polite"></p>
+
+  {% if bilder %}
+  <section>
+    <h2>Bilder aus dem Dokument</h2>
+    <p class="small muted">
+      {{ bilder|length }} Abbildung{{ 'en' if bilder|length != 1 }} herausgelöst.
+      Im Markdown stehen Verweise darauf, im ZIP liegen sie als Dateien.
+    </p>
+    <ul class="bildgitter">
+      {% for b in bilder %}
+      <li>
+        <a href="/app/auftrag/{{ job.id }}/bild/{{ b.seq }}" target="_blank" rel="noopener">
+          <img src="/app/auftrag/{{ job.id }}/bild/{{ b.seq }}" loading="lazy"
+               alt="Bild {{ b.seq }} aus dem Dokument{% if b.page_no %}, Seite {{ b.page_no }}{% endif %}">
+          <span class="bild-nr">{{ b.seq }}{% if b.page_no %} · S. {{ b.page_no }}{% endif %}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
   <section>
     <h2>Vorschau</h2>

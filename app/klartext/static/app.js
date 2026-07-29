@@ -450,7 +450,7 @@
 
     var doneIds = jobs.filter(function (job) { return job.status === "done"; })
                       .map(function (job) { return job.id; });
-    if (doneIds.length > 1) {
+    if (doneIds.length > 0) {
       zipButton.href = "/app/download/zip?ids=" + doneIds.slice(0, 50).join(",");
       zipButton.hidden = false;
     } else {

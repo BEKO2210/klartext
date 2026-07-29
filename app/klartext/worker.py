@@ -199,6 +199,30 @@ async def _worker_loop(index: int, client: DoclingClient) -> None:
             await asyncio.sleep(3)
 
 
+# Jung genug, um noch zu einem laufenden Auftrag zu gehoeren: nicht anfassen.
+VERWAIST_AB_SEKUNDEN = 3600
+
+
+async def _verwaiste_dateien_entfernen() -> None:
+    bekannt: dict[str, set[str]] = {"source": set(), "result": set()}
+    for row in await db.fetch("SELECT role, storage_key FROM files"):
+        bekannt["source" if row["role"] == "source" else "result"].add(row["storage_key"])
+    for row in await db.fetch("SELECT storage_key FROM job_images"):
+        bekannt["result"].add(row["storage_key"])
+
+    entfernt = 0
+    for kind in ("source", "result"):
+        for key in storage.alle_schluessel(kind):
+            if key in bekannt[kind]:
+                continue
+            if storage.alter_sekunden(kind, key) < VERWAIST_AB_SEKUNDEN:
+                continue
+            storage.delete(kind, key)
+            entfernt += 1
+    if entfernt:
+        log.info("Aufraeumen: %s verwaiste Dateien entfernt", entfernt)
+
+
 async def _housekeeping() -> None:
     """Retention, verwaiste Jobs, alte Sessions und Zähler."""
     while not _stop.is_set():
@@ -266,6 +290,12 @@ async def _housekeeping() -> None:
                 "AND started_at < now() - ($1 || ' minutes')::interval",
                 str(CONFIG.job_stale_minutes),
             )
+
+            # Sicherheitsnetz: Dateien ohne Datenbankeintrag entfernen.
+            # Sie entstehen, wenn ein Schreibvorgang durchgeht und der Eintrag
+            # danach scheitert — sonst laegen sie fuer immer da und das
+            # Loeschversprechen waere nicht gehalten.
+            await _verwaiste_dateien_entfernen()
 
             await db.execute("DELETE FROM sessions WHERE expires_at < now()")
             await db.execute("DELETE FROM auth_tokens WHERE expires_at < now() - interval '7 days'")
