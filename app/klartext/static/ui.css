@@ -1,0 +1,337 @@
+/* Klartext — Gestaltungsebene über app.css.
+   Bewusst als eigene Datei: app.css wird parallel an anderer Stelle gepflegt.
+   Enthält keine neuen Farben, nur die vorhandenen Token aus app.css. */
+
+/* ---------------------------------------------------------------- Rhythmus */
+
+.wrap { max-width: 1120px; }
+
+.stack-lg > * + * { margin-top: 56px; }
+@media (min-width: 760px) { .stack-lg > * + * { margin-top: 88px; } }
+
+/* Fließtext braucht eine begrenzte Zeilenlänge, sonst wandert das Auge beim
+   Zeilenwechsel zu weit. 65 Zeichen ist die verträgliche Obergrenze. */
+.band > p, .feature p, .faq-antwort p { max-width: 65ch; }
+
+/* ---------------------------------------------------------------- Titel */
+
+h1 {
+  font-size: clamp(30px, 8vw, 54px);
+  font-weight: 680;
+  letter-spacing: -.032em;
+  line-height: 1.08;
+}
+.hero .lead {
+  font-size: clamp(16px, 4.2vw, 19px);
+  line-height: 1.6;
+  max-width: 60ch;
+  margin-left: auto; margin-right: auto;
+}
+.band > h2, .wrap > section > h2 {
+  font-size: clamp(21px, 5vw, 29px);
+  font-weight: 640;
+  letter-spacing: -.022em;
+}
+
+/* ---------------------------------------------------------------- Hero */
+
+.hero { padding: 40px 16px 8px; }
+@media (min-width: 760px) { .hero { padding: 72px 24px 16px; } }
+
+.eyebrow {
+  font-size: 12.5px;
+  letter-spacing: .005em;
+  padding: 7px 13px;
+  box-shadow: var(--shadow);
+  background: var(--bg);
+}
+
+.hero .btn-row { justify-content: center; margin-top: 26px; }
+.hero .btn-row .btn { padding: 13px 22px; font-size: 15.5px; }
+.hero-note { margin-top: 14px; }
+
+/* ---------------------------------------------------------------- Vorher/Nachher */
+
+.showcase { max-width: 1000px; margin-top: 40px; }
+@media (min-width: 760px) { .showcase { align-items: stretch; gap: 20px; } }
+
+.showcase-card {
+  padding: 16px;
+  border-radius: 16px;
+  display: flex; flex-direction: column;
+}
+.showcase-card > :last-child { flex: 1; }
+.showcase-card figcaption {
+  font-size: 11px; letter-spacing: .09em;
+}
+
+/* Pfeil als eigenständiges Element statt als loses Zeichen zwischen den Karten. */
+.showcase-arrow {
+  width: 38px; height: 38px; margin: 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  flex: none;
+}
+.showcase-arrow svg { width: 18px; height: 18px; }
+
+/* ---------------------------------------------------------------- Karten */
+
+.card {
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.feature { display: flex; flex-direction: column; }
+
+/* Symbol auf eigener, getönter Fläche — daneben im Titel konkurrierte es
+   mit dem Text und wirkte wie ein Aufzählungszeichen. */
+.feature-symbol {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; margin-bottom: 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--primary);
+  flex: none;
+}
+.feature-symbol svg { width: 21px; height: 21px; }
+.feature h2 {
+  display: block;
+  font-size: 17px; font-weight: 620; letter-spacing: -.012em;
+  line-height: 1.3; margin-bottom: 8px;
+}
+.feature p { color: var(--muted); margin: 0; }
+
+/* ---------------------------------------------------------------- Abschnitte */
+
+/* Vollbreite Bänder trennen die Abschnitte optisch, ohne dass jeder Block
+   als eigene Box im Rahmen sitzt. */
+.band {
+  margin-inline: calc(50% - 50vw);
+  padding: 36px calc(50vw - 50% + 16px);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.band-hell { background: var(--bg); }
+@media (min-width: 760px) {
+  .band { padding: 64px calc(50vw - 50% + 24px); }
+}
+.band > h2 { margin-bottom: 6px; }
+.band > h2 + p { margin-bottom: 22px; }
+
+/* ---------------------------------------------------------------- Aufklappbar */
+
+.faq { border-top: 1px solid var(--border); }
+
+.faq-item { border-bottom: 1px solid var(--border); }
+
+.faq-item summary {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px;
+  padding: 12px 2px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 550; font-size: 15.5px; line-height: 1.4;
+  color: var(--text);
+  transition: color .18s ease;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary:hover { color: var(--primary); }
+.faq-item summary:focus-visible {
+  outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 6px;
+}
+
+.faq-pfeil {
+  width: 19px; height: 19px; flex: none;
+  color: var(--muted);
+  transition: transform .2s ease;
+}
+.faq-item[open] .faq-pfeil { transform: rotate(180deg); }
+.faq-item[open] summary { color: var(--primary); }
+
+.faq-antwort { padding: 0 2px 14px; }
+.faq-antwort p {
+  margin: 0; color: var(--muted);
+  font-size: 14.5px; line-height: 1.65;
+}
+
+@media (prefers-reduced-motion: reduce) { .faq-pfeil { transition: none; } }
+
+/* ---------------------------------------------------------------- Listen */
+
+.usecases { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.usecases li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14.5px; line-height: 1.55;
+}
+.usecases li:last-child { border-bottom: 0; }
+
+
+/* ---------------------------------------------------------------- Tabelle */
+
+.band table th, .band table td { padding: 12px 0; }
+.band table th[scope="row"] { font-weight: 500; color: var(--text); font-size: 14.5px; }
+.band table td.num { font-weight: 600; font-variant-numeric: tabular-nums; }
+.band table tr:last-child th, .band table tr:last-child td { border-bottom: 0; }
+
+/* ---------------------------------------------------------------- Fußzeile */
+
+.footer { padding-top: 36px; }
+.footer nav { gap: 10px 22px; }
+
+/* Am Handy nimmt der Vorher/Nachher-Vergleich sonst ein Drittel der Startseite ein. */
+@media (max-width: 759px) {
+  .showcase { margin-top: 28px; gap: 8px; }
+  .showcase-card { padding: 13px; }
+  .showcase .code { font-size: 10.5px; line-height: 1.55; }
+  .paper { padding: 11px; gap: 7px; }
+  .showcase-arrow { width: 32px; height: 32px; }
+  .hero .lead { font-size: 16px; }
+}
+
+.usecases li strong { color: var(--text); font-weight: 600; }
+
+/* ---------------------------------------------------------------- Format-Karten */
+
+.karten { display: grid; gap: 14px; }
+@media (min-width: 620px) { .karten { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1000px) { .karten { grid-template-columns: repeat(3, 1fr); } }
+
+.karte {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+  box-shadow: var(--shadow);
+}
+.karte h3 { font-size: 16px; font-weight: 620; margin: 14px 0 6px; letter-spacing: -.012em; }
+.karte p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); max-width: none; }
+
+/* Illustration: gezeichnet statt Bilddatei — passt sich dem Farbschema an,
+   bleibt in jeder Größe scharf und wiegt rund ein Kilobyte statt halbes Megabyte. */
+.karte-bild {
+  display: block; width: 100%; height: auto; max-height: 96px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  padding: 8px 0;
+}
+.kb-flaeche { fill: var(--bg); }
+.kb-linie   { stroke: var(--primary); stroke-width: 2.2; stroke-linejoin: round; }
+.kb-strich  { stroke: var(--muted); stroke-width: 2; stroke-linecap: round; opacity: .75; }
+.kb-akzent  { stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------------------------------------------------------------- Anwendungsfälle */
+
+.faelle { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+@media (min-width: 760px) { .faelle { grid-template-columns: 1fr 1fr; column-gap: 36px; } }
+
+.faelle li {
+  display: flex; align-items: flex-start; gap: 13px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.fall-symbol {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: none;
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--primary);
+}
+.fall-symbol svg { width: 18px; height: 18px; }
+.fall-text { font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+.fall-text strong {
+  display: block; color: var(--text); font-weight: 600; font-size: 15px;
+  margin-bottom: 1px;
+}
+
+@media (max-width: 619px) {
+  .karte { padding: 13px 15px 15px; }
+  .karte-bild { max-height: 72px; padding: 6px 0; }
+  .karte h3 { margin-top: 11px; }
+  .karten { gap: 10px; }
+}
+
+/* Dateitypen als Marken statt als Fließtext — schneller zu erfassen. */
+.formatliste {
+  list-style: none; margin: 0 0 14px; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.formatliste li {
+  font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 9px;
+}
+.ausgabe-zeile { margin: 0; }
+.ausgabe-zeile strong { color: var(--text); font-family: var(--mono); font-size: .92em; }
+
+/* Zwei Karten nebeneinander schon am Handy — einzeln gestapelt wird
+   der Abschnitt sonst 1300 px hoch. */
+@media (min-width: 380px) and (max-width: 619px) {
+  .karten { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .karte { padding: 11px 12px 13px; }
+  .karte-bild { max-height: 56px; }
+  .karte h3 { font-size: 14.5px; margin-top: 9px; }
+  .karte p { font-size: 12.8px; line-height: 1.5; }
+}
+
+/* ---------------------------------------------------------------- Tabellen am Handy */
+
+/* Fuenf Spalten passen nicht in 412 px. Statt seitlich zu scrollen oder die
+   E-Mail buchstabenweise umzubrechen, wird jede Zeile zu einem Block mit
+   Beschriftung links und Wert rechts. */
+@media (max-width: 719px) {
+  .stapel-tabelle,
+  .stapel-tabelle tbody,
+  .stapel-tabelle tr,
+  .stapel-tabelle td { display: block; width: 100%; }
+
+  .stapel-tabelle thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  .stapel-tabelle tr {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--bg);
+  }
+  .stapel-tabelle tr:last-child { margin-bottom: 0; }
+
+  .stapel-tabelle td {
+    border: 0;
+    padding: 5px 0;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+    text-align: right;
+    font-size: 14px;
+  }
+  .stapel-tabelle td::before {
+    content: attr(data-titel);
+    flex: none;
+    color: var(--muted); font-size: 12.5px; font-weight: 550;
+    text-align: left;
+  }
+  .stapel-tabelle td.num { text-align: right; }
+
+  /* Die E-Mail bekommt die volle Breite und steht unter ihrer Beschriftung —
+     sonst bleiben pro Zeile nur wenige Zeichen uebrig. */
+  .stapel-tabelle td.konto-mail {
+    display: block; text-align: left;
+    font-weight: 600; font-size: 15px;
+    overflow-wrap: anywhere;
+    padding-bottom: 8px; margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stapel-tabelle td.konto-mail::before {
+    display: block; margin-bottom: 2px; font-weight: 500;
+  }
+  .stapel-tabelle td .btn { width: 100%; margin-top: 4px; }
+  .stapel-tabelle td[data-titel="Aktion"] { display: block; text-align: left; }
+  .stapel-tabelle td[data-titel="Aktion"]::before { display: none; }
+}

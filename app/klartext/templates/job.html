@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ job.name }} — {{ product }}{% endblock %}
+
+{% block content %}
+<div class="wrap stack">
+  <p class="small"><a href="/app">&larr; Zurück zur Übersicht</a></p>
+
+  <header>
+    <h1 class="wrap-anywhere">{{ job.name }}</h1>
+    <p class="muted small">
+      <span class="badge badge-{{ job.status }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          {% if job.status == 'done' %}
+            <path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z"/><path d="m8.4 12.2 2.5 2.5 4.7-5"/>
+          {% elif job.status == 'processing' %}
+            <path d="M20.2 12a8.2 8.2 0 1 1-2.6-6"/><path d="M20.6 4.4V9.6h-5.2"/>
+          {% elif job.status == 'queued' %}
+            <path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z"/><path d="M12 7.4V12l3.1 2.1"/>
+          {% else %}
+            <path d="M12 4.2 21 19.2H3L12 4.2Z"/><path d="M12 10v3.6"/><path d="M12 16.6h.01"/>
+          {% endif %}
+        </svg>
+        {% if job.status == 'done' %}Fertig
+        {% elif job.status == 'processing' %}Wird verarbeitet
+        {% elif job.status == 'queued' %}In Warteschlange
+        {% else %}Fehler{% endif %}
+      </span>
+      {% if job.pages %} · {{ job.pages }} Seite{{ 'n' if job.pages != 1 }}{% endif %}
+      {% if job.duration_ms %} · {{ ('%.1f'|format(job.duration_ms / 1000))|replace('.', ',') }} s{% endif %}
+      · wird gelöscht am {{ job.expires_at.strftime('%d.%m.%Y um %H:%M') }} Uhr
+    </p>
+  </header>
+
+  {% if job.status == 'error' %}
+    <div class="notice notice-error" role="alert">{{ job.error }}</div>
+  {% elif job.status != 'done' %}
+    <div class="notice">
+      Das Dokument ist noch in Arbeit. Diese Seite aktualisiert sich nicht von selbst —
+      <a href="/app">die Übersicht</a> zeigt den Fortschritt live.
+    </div>
+  {% else %}
+
+  <div class="job-cta">
+    <a class="btn btn-primary btn-block" href="/app/auftrag/{{ job.id }}/download/md">
+      Markdown herunterladen
+    </a>
+    <div class="job-cta-row">
+      <a class="btn btn-secondary" href="/app/auftrag/{{ job.id }}/download/json">JSON</a>
+      <button class="btn btn-secondary" id="copy-button" type="button">Kopieren</button>
+    </div>
+  </div>
+  <p class="smaller muted fineprint">
+    <strong>.md</strong> für Notizen und Texte, <strong>.json</strong> für eigene Programme.
+    Meistens reicht die Markdown-Datei.
+  </p>
+  <p class="smaller muted copy-status" id="copy-status" aria-live="polite"></p>
+
+  <section>
+    <h2>Vorschau</h2>
+    {% if markdown %}
+      <p class="small muted">Rohtext mit Markdown-Zeichen wie <code>#</code> und <code>|</code>.</p>
+      <pre class="md-view" id="markdown-source">{{ markdown }}</pre>
+    {% else %}
+      <p class="muted">Das Ergebnis ist nicht mehr verfügbar. Vermutlich wurde es bereits
+      automatisch gelöscht.</p>
+    {% endif %}
+  </section>
+
+  {% endif %}
+
+  <form method="post" action="/app/auftrag/{{ job.id }}/loeschen">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn btn-danger btn-small" type="submit">Auftrag jetzt löschen</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('job.js') }}" defer></script>
+{% endblock %}

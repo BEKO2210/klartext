@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Fast geschafft — {{ product }}{% endblock %}
+
+{% block content %}
+<div class="wrap-sm">
+  <h1>Fast geschafft</h1>
+  {% if mail_configured %}
+  <p>
+    Falls die Adresse noch frei war, ist eine E-Mail mit Bestätigungslink unterwegs. Der Link gilt 24 Stunden.</p>
+  <p class="small muted">
+    Nichts da? Im Spam-Ordner nachsehen.</p>
+  {% else %}
+  <p>Das Konto ist angelegt. Du kannst dich jetzt direkt anmelden.</p>
+  {% endif %}
+  <a class="btn btn-primary" href="/anmelden">Zur Anmeldung</a>
+</div>
+{% endblock %}

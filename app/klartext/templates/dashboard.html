@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Konvertieren — {{ product }}{% endblock %}
+
+{% block content %}
+<div class="wrap stack">
+
+  <section>
+    <h1>Neue Konvertierung</h1>
+    <p class="explainer">Datei hochladen, Klartext liest den Inhalt aus.</p>
+    <form id="upload-form" method="post" action="/app/upload" enctype="multipart/form-data">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M12 15.5V3.8"/>
+          <path d="M7.6 8.2 12 3.8l4.4 4.4"/>
+          <path d="M4 14.5v3.9A2.6 2.6 0 0 0 6.6 21h10.8a2.6 2.6 0 0 0 2.6-2.6v-3.9"/>
+        </svg>
+        <p class="dz-title"><strong>Dateien hierher ziehen</strong></p>
+        <p class="small muted dz-or">oder</p>
+
+        <label class="btn btn-secondary" for="file-input">Dateien auswählen</label>
+        <input class="visually-hidden" id="file-input" name="files" type="file" multiple
+               accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.webp,.bmp,.docx,.xlsx,.pptx,.html,.md">
+
+        <p class="formats">
+          {{ formats|join(' · ') }}<br>
+          max. {{ limits.max_file_size_mb }} MB · {{ limits.max_files_per_upload }} Dateien ·
+          {{ limits.max_pages }} Seiten
+        </p>
+
+        <ul class="filelist" id="file-list" hidden></ul>
+      </div>
+
+      <div id="upload-message" role="alert" aria-live="polite"></div>
+
+      <div class="btn-row form-actions">
+        <button class="btn btn-primary" id="upload-button" type="submit" disabled>
+          Konvertierung starten
+        </button>
+        <button class="btn btn-secondary" id="clear-button" type="button" hidden>Auswahl leeren</button>
+      </div>
+    </form>
+
+    <p class="smaller muted fineprint">
+      Löschung nach {{ limits.retention_hours }} Stunden. Verarbeitung nur auf diesem Server.
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Aufträge</h2>
+      <div class="btn-row">
+        <a class="btn btn-secondary btn-small" id="zip-button" href="#" hidden>Alle fertigen als ZIP</a>
+      </div>
+    </div>
+
+    <p class="smaller muted usage-line" id="usage-line">
+      Heute {{ usage.jobs_day }}/{{ limits.jobs_per_day }} Konvertierungen ·
+      {{ usage.pages_day }}/{{ limits.pages_per_day }} Seiten{% if usage.active or usage.queued %} ·
+      {{ usage.active }} in Arbeit, {{ usage.queued }} wartend{% endif %}
+    </p>
+
+    <ul class="joblist" id="job-list" aria-live="polite">
+      {% if not jobs %}
+      <li class="muted small empty" id="empty-state">
+        <p class="empty-lead">Noch nichts konvertiert. Lade oben eine Datei hoch — das Ergebnis erscheint hier.</p>
+        <ol class="empty-steps">
+          <li>Datei auswählen oder in das Feld oben ziehen.</li>
+          <li>Auf „Konvertierung starten" tippen.</li>
+          <li>Fertige Aufträge erscheinen hier mit Markdown- und JSON-Download.</li>
+        </ol>
+      </li>
+      {% endif %}
+    </ul>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('app.js') }}" defer></script>
+{% endblock %}

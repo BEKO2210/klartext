@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Konto — {{ product }}{% endblock %}
+
+{% block content %}
+<div class="wrap stack prose">
+  <h1>Konto</h1>
+
+  {% if request.query_params.get('geaendert') %}
+  <div class="notice notice-success" role="status">Das Passwort wurde geändert.</div>
+  {% endif %}
+
+  {% if errors %}
+  <div class="notice notice-error" role="alert">
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <section class="card">
+    <h2>Angemeldet als</h2>
+    <p class="wrap-anywhere">{{ user.email }}</p>
+    {% if not user.verified %}
+    <p class="small muted">Die E-Mail-Adresse ist noch nicht bestätigt.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Nutzung</h2>
+    <p class="small muted">
+      Reiner Serverschutz. Für alle Konten gleich.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Kontingent</th><th scope="col" class="num">Genutzt</th><th scope="col" class="num">Grenze</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Konvertierungen (Stunde)</th><td class="num">{{ usage.jobs_hour }}</td><td class="num">{{ limits.jobs_per_hour }}</td></tr>
+          <tr><th scope="row">Konvertierungen (Tag)</th><td class="num">{{ usage.jobs_day }}</td><td class="num">{{ limits.jobs_per_day }}</td></tr>
+          <tr><th scope="row">Seiten (Tag)</th><td class="num">{{ usage.pages_day }}</td><td class="num">{{ limits.pages_per_day }}</td></tr>
+          <tr><th scope="row">Datenmenge (Tag)</th><td class="num">{{ (usage.bytes_day / 1048576)|round(1) }} MB</td><td class="num">{{ limits.mb_per_day }} MB</td></tr>
+          <tr><th scope="row">Gleichzeitig in Arbeit</th><td class="num">{{ usage.active }}</td><td class="num">{{ limits.max_active_jobs }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Passwort ändern</h2>
+    <form method="post" action="/konto/passwort" novalidate>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="field">
+        <label for="current">Aktuelles Passwort</label>
+        <input id="current" name="current" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="field">
+        <label for="password">Neues Passwort</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required>
+        <span class="hint">Mindestens 10 Zeichen.</span>
+      </div>
+      <div class="field">
+        <label for="password2">Neues Passwort wiederholen</label>
+        <input id="password2" name="password2" type="password" autocomplete="new-password" required>
+      </div>
+      <p class="smaller muted">Alle anderen Anmeldungen werden dabei beendet.</p>
+      <button class="btn btn-primary" type="submit">Passwort speichern</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Konto löschen</h2>
+    <p class="small">
+      Konto, Aufträge und alle Dateien werden sofort und endgültig gelöscht.
+    </p>
+    <form method="post" action="/konto/loeschen" novalidate>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="field">
+        <label for="confirm">Zur Bestätigung <strong>LÖSCHEN</strong> eingeben</label>
+        <input id="confirm" name="confirm" type="text" autocomplete="off" required>
+      </div>
+      <button class="btn btn-danger" type="submit">Konto endgültig löschen</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

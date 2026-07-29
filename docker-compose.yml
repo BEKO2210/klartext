@@ -1,0 +1,148 @@
+name: klartext
+
+services:
+  db:
+    image: postgres:16.11-alpine
+    container_name: klartext-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Keine Locale-Abhaengigkeit, deterministische Sortierung
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - klartext-db:/var/lib/postgresql/data
+    networks:
+      - klartext-internal
+    # Bewusst KEIN ports:-Mapping. Nur im internen Docker-Netz erreichbar.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  docling:
+    image: quay.io/docling-project/docling-serve-cpu:v1.28.0
+    container_name: klartext-docling
+    restart: unless-stopped
+    environment:
+      # --- Sicherheit ---
+      DOCLING_SERVE_API_KEY: ${DOCLING_API_KEY}
+      DOCLING_SERVE_ENABLE_UI: "false"          # keine Gradio-Demo-UI
+      DOCLING_SERVE_ENABLE_REMOTE_SERVICES: "false"  # keine externen KI-/OCR-Dienste
+      DOCLING_SERVE_ALLOWED_SOURCE_TYPES: '["file"]' # kein URL-Import (SSRF-Schutz)
+      DOCLING_SERVE_ALLOWED_TARGET_TYPES: '["inbody"]'
+      DOCLING_SERVE_CORS_ORIGINS: '[]'
+      # --- Modelle: liegen fertig im Image unter /opt/app-root/src/.cache/docling/models
+      #     (layout-heron, docling-models/TableFormer, EasyOcr, RapidOcr, FigureClassifier).
+      #     Kein Download zur Laufzeit, kein Netzwerkzugriff noetig.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      # --- Ressourcen konservativ ---
+      DOCLING_SERVE_ENG_KIND: local
+      DOCLING_SERVE_ENG_LOC_NUM_WORKERS: ${DOCLING_NUM_WORKERS:-2}
+      DOCLING_SERVE_ENG_LOC_SHARE_MODELS: "True"
+      DOCLING_NUM_THREADS: ${DOCLING_NUM_THREADS:-2}
+      OMP_NUM_THREADS: ${DOCLING_NUM_THREADS:-2}
+      DOCLING_SERVE_MAX_DOCUMENT_TIMEOUT: ${DOCLING_DOC_TIMEOUT:-900}
+      DOCLING_SERVE_MAX_SYNC_WAIT: ${DOCLING_DOC_TIMEOUT:-900}
+      DOCLING_SERVE_SINGLE_USE_RESULTS: "true"
+      DOCLING_SERVE_LOG_LEVEL: WARNING
+      DOCLING_SERVE_OTEL_ENABLE_METRICS: "false"
+      DOCLING_SERVE_OTEL_ENABLE_TRACES: "false"
+      TESSDATA_PREFIX: /usr/share/tesseract/tessdata/
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: "5001"
+    volumes:
+      # Deutsches Tesseract-Sprachpaket (Apache-2.0), read-only eingehaengt
+      - ./ocr/tessdata/deu.traineddata:/usr/share/tesseract/tessdata/deu.traineddata:ro
+      - klartext-docling-scratch:/scratch
+    networks:
+      - klartext-internal
+    # Bewusst KEIN ports:-Mapping. Docling-API ist nie oeffentlich.
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5001/health', timeout=5).status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCLING_MEM_LIMIT:-8G}
+          cpus: "${DOCLING_CPU_LIMIT:-4.0}"
+
+  web:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    image: klartext-app:1.0.0
+    container_name: klartext-web
+    restart: unless-stopped
+    command: ["uvicorn", "klartext.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--no-server-header"]
+    env_file: [.env]
+    environment:
+      KLARTEXT_ROLE: web
+    volumes:
+      - ./data/uploads:/data/uploads
+      - ./data/results:/data/results
+    networks:
+      - klartext-internal
+    ports:
+      # Nur lokal gebunden; oeffentlich ausschliesslich ueber den Cloudflare-Tunnel
+      - "127.0.0.1:${APP_PORT:-8160}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5).status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  worker:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    image: klartext-app:1.0.0
+    container_name: klartext-worker
+    restart: unless-stopped
+    command: ["python", "-m", "klartext.worker"]
+    env_file: [.env]
+    environment:
+      KLARTEXT_ROLE: worker
+    volumes:
+      - ./data/uploads:/data/uploads
+      - ./data/results:/data/results
+    networks:
+      - klartext-internal
+    depends_on:
+      db:
+        condition: service_healthy
+      docling:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+networks:
+  klartext-internal:
+    name: klartext-internal
+    driver: bridge
+
+volumes:
+  klartext-db:
+    name: klartext-db
+  klartext-docling-scratch:
+    name: klartext-docling-scratch

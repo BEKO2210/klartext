@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+data/
+brand/
+docs/
+ocr/
+.git/
+**/__pycache__/
+**/*.pyc
+*.md
+!THIRD_PARTY_LICENSES.md

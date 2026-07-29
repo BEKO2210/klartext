@@ -1,0 +1,17 @@
+{
+  "name": "Klartext — Dokumente in sauberes Markdown",
+  "short_name": "Klartext",
+  "description": "Dokumente, Scans und Fotos in sauberes Markdown umwandeln. Verarbeitung auf eigenem Server, ohne KI-Anbieter.",
+  "lang": "de",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "theme_color": "#1E3A5F",
+  "background_color": "#FFFFFF",
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

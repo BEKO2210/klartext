@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Datenschutz — {{ product }}{% endblock %}
+{% block description %}Datenschutzhinweise von {{ product }}: was mit hochgeladenen Dokumenten passiert, Speicherdauer und deine Rechte.{% endblock %}
+
+{% block content %}
+<div class="wrap stack prose">
+  <h1>Datenschutzhinweise</h1>
+
+  {% if not cfg.legal_operator %}
+  <div class="notice notice-warn" role="alert">
+    <strong>Verantwortliche Stelle noch nicht konfiguriert.</strong>
+    Ohne diese Angabe ist der Text unvollständig. Siehe <a href="/impressum">Impressum</a>.
+  </div>
+  {% endif %}
+
+  <section>
+    <h2>Verantwortliche Stelle</h2>
+    <p>
+      {% if cfg.legal_operator %}{{ cfg.legal_operator }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}<br>
+      {% if cfg.legal_address %}{{ cfg.legal_address }}<br>{% endif %}
+      {% if cfg.legal_email %}{{ cfg.legal_email }}{% endif %}
+    </p>
+  </section>
+
+  <section>
+    <h2>Was mit hochgeladenen Dokumenten passiert</h2>
+    <p>
+      Hochgeladene Dateien werden ausschließlich auf dem Server dieses Dienstes
+      verarbeitet. Die Umwandlung erfolgt lokal durch freie Software, die auf demselben
+      Server läuft.
+    </p>
+    <p><strong>Es werden keine Dokumentinhalte an Dritte übermittelt.</strong> Insbesondere
+      nicht an:</p>
+    <ul class="small">
+      <li>OpenAI, Anthropic, Google oder andere Anbieter von Sprachmodellen</li>
+      <li>externe OCR- oder Texterkennungsdienste</li>
+      <li>externe Bildanalysedienste</li>
+      <li>Analyse-, Statistik- oder Tracking-Anbieter</li>
+      <li>Fehlerprotokoll-Dienste</li>
+    </ul>
+    <p class="small">
+      Dokumentinhalte, erkannte Texte und Dateinamen werden nicht in Anwendungsprotokolle
+      geschrieben. Protokolliert werden ausschließlich technische Ereignisse wie
+      Fehlerarten, Dauer und Seitenzahl.
+    </p>
+  </section>
+
+  <section>
+    <h2>Speicherdauer</h2>
+    <p>
+      Hochgeladene Dateien und erzeugte Ergebnisse werden automatisch nach
+      <strong>{{ limits.retention_hours }} Stunden</strong> gelöscht. Die Originaldatei wird
+      bereits kurz nach Abschluss der Verarbeitung entfernt. Jeder Auftrag kann jederzeit
+      selbst sofort gelöscht werden.
+    </p>
+  </section>
+
+  <section>
+    <h2>Konto und Verarbeitungszwecke</h2>
+    <p class="small">
+      Gespeichert werden: E-Mail-Adresse, ein Argon2id-Hash des Passworts (nie das Passwort
+      selbst), Zeitpunkt der Registrierung und der letzten Anmeldung sowie Auftragsdaten
+      (Dateiname, Dateityp, Größe, Seitenzahl, Status, Zeitpunkte). Rechtsgrundlage ist
+      Art. 6 Abs. 1 lit. b DSGVO (Erfüllung des Nutzungsverhältnisses) sowie
+      Art. 6 Abs. 1 lit. f DSGVO für den Schutz des Dienstes vor Missbrauch.
+    </p>
+  </section>
+
+  <section>
+    <h2>E-Mail-Versand</h2>
+    <p class="small">
+      Bestätigungs- und Passwort-Links werden über den E-Mail-Dienst von Google
+      versendet (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4,
+      Irland). Übermittelt wird ausschließlich die E-Mail-Adresse samt Link —
+      <strong>niemals Dokumentinhalte oder Dateinamen</strong>.
+    </p>
+    <p class="small">
+      Diese E-Mails sind reiner Text, enthalten keine Zählpixel und keine
+      umgeleiteten Links. Es wird nicht erfasst, ob oder wann eine Nachricht
+      geöffnet wurde.
+    </p>
+  </section>
+
+  <section>
+    <h2>Cookies</h2>
+    <p class="small">
+      Es werden ausschließlich technisch notwendige Cookies gesetzt: ein Sitzungscookie
+      für die Anmeldung und ein Cookie zum Schutz von Formularen gegen Fremdeinreichung
+      (CSRF). Beide sind für den Betrieb erforderlich und deshalb nach § 25 Abs. 2 TDDDG
+      nicht einwilligungspflichtig. Es gibt keine Tracking-, Werbe- oder Analyse-Cookies
+      und deshalb bewusst auch kein Cookie-Banner.
+    </p>
+  </section>
+
+  <section>
+    <h2>Server-Protokolle</h2>
+    <p class="small">
+      Zum Schutz vor Missbrauch werden IP-Adressen kurzzeitig für Zählerstände
+      (Anfragen pro Minute, Anmeldeversuche) verwendet. Diese Zähler werden nach
+      spätestens zwei Tagen gelöscht. Der Betrieb läuft hinter einem
+      Content-Delivery-Netzwerk, das den Aufruf technisch weiterleitet und dabei
+      Verbindungsdaten verarbeitet.
+    </p>
+  </section>
+
+  <section>
+    <h2>Deine Rechte</h2>
+    <p class="small">
+      Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und
+      Widerspruch nach Art. 15–21 DSGVO. Das Konto kann jederzeit selbst unter
+      <a href="/konto">Konto</a> vollständig gelöscht werden; dabei werden alle
+      zugehörigen Daten und Dateien sofort entfernt. Es besteht ein Beschwerderecht bei
+      einer Datenschutzaufsichtsbehörde.
+    </p>
+  </section>
+</div>
+{% endblock %}

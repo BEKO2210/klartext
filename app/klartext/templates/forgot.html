@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Passwort vergessen — {{ product }}{% endblock %}
+{% block description %}Passwort für dein {{ product }}-Konto zurücksetzen. Wir schicken dir einen Link, der eine Stunde gilt.{% endblock %}
+
+{% block content %}
+<div class="wrap-sm">
+  <h1>Passwort vergessen</h1>
+
+  {% if not mail_configured %}
+  <div class="notice notice-warn" role="alert">
+    Auf dieser Installation ist kein E-Mail-Versand eingerichtet. Das Zurücksetzen per
+    Link funktioniert deshalb derzeit nicht — bitte wende dich an den Betreiber.
+  </div>
+  {% endif %}
+
+  <p class="small muted">
+    Gib deine Adresse ein. Falls es dazu ein Konto gibt, schicken wir einen Link zum
+    Zurücksetzen. Der Link gilt eine Stunde und funktioniert einmal.
+  </p>
+
+  <form method="post" action="/passwort-vergessen" novalidate>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field">
+      <label for="email">E-Mail-Adresse</label>
+      <input id="email" name="email" type="email" autocomplete="email" required inputmode="email">
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Link anfordern</button>
+  </form>
+
+  <p class="small muted form-links"><a href="/anmelden">Zurück zur Anmeldung</a></p>
+</div>
+{% endblock %}

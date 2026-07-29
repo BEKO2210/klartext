@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Verwaltung — {{ product }}{% endblock %}
+
+{% block content %}
+<div class="wrap stack">
+  <h1>Verwaltung</h1>
+
+  {% if request.query_params.get('gespeichert') %}
+  <div class="notice notice-success" role="status">Die Grenzen wurden gespeichert.</div>
+  {% endif %}
+
+  <section>
+    <h2>Auslastung</h2>
+    <div class="grid grid-stats">
+      <div class="stat"><div class="value">{{ stats.queued }}</div><div class="label">wartend</div></div>
+      <div class="stat"><div class="value">{{ stats.processing }}</div><div class="label">in Arbeit</div></div>
+      <div class="stat"><div class="value">{{ stats.user_count }}</div><div class="label">Konten</div></div>
+      <div class="stat"><div class="value">{{ stats.done_day }}</div><div class="label">fertig (24 h)</div></div>
+      <div class="stat"><div class="value">{{ stats.error_day }}</div><div class="label">Fehler (24 h)</div></div>
+      <div class="stat"><div class="value">{{ (stats.avg_ms / 1000)|round(1) }} s</div><div class="label">Schnitt (24 h)</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Technische Grenzen</h2>
+    <p class="small muted">
+      Wirken sofort für alle Konten. Reiner Serverschutz — keine Tarife, kein Verkauf.
+    </p>
+    <form method="post" action="/admin/limits">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="grid grid-2">
+        {% for key, meta in limit_defs.items() %}
+        <div class="field">
+          <label for="limit-{{ key }}">{{ meta[2] }}</label>
+          <input id="limit-{{ key }}" name="{{ key }}" type="number" min="0" max="1000000"
+                 inputmode="numeric" value="{{ limits[key] }}">
+          <span class="hint">Vorgabe aus der Konfiguration: {{ meta[1] }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-primary" type="submit">Grenzen speichern</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Konten</h2>
+    <div class="table-scroll">
+      <table class="stapel-tabelle">
+        <thead>
+          <tr>
+            <th scope="col">E-Mail</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="num">Aufträge</th>
+            <th scope="col">Zuletzt aktiv</th>
+            <th scope="col">Aktion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in users %}
+          <tr>
+            <td class="konto-mail" data-titel="E-Mail">
+              {{ row.email }}{% if row.is_admin %} <span class="badge">Verwaltung</span>{% endif %}
+            </td>
+            <td data-titel="Status">
+              {% if row.is_active %}aktiv{% else %}deaktiviert{% endif %}{% if not row.email_verified %}, unbestätigt{% endif %}
+            </td>
+            <td class="num" data-titel="Aufträge">{{ row.job_count }}</td>
+            <td class="nowrap smaller" data-titel="Zuletzt aktiv">
+              {% if row.last_login_at %}{{ row.last_login_at.strftime('%d.%m.%y %H:%M') }}{% else %}nie{% endif %}
+            </td>
+            <td data-titel="Aktion">
+              {% if row.id != user_id %}
+              <form method="post" action="/admin/nutzer/{{ row.id }}/status" class="inline-form">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="btn btn-secondary btn-small" type="submit">
+                  {% if row.is_active %}Deaktivieren{% else %}Aktivieren{% endif %}
+                </button>
+              </form>
+              {% else %}
+              <span class="muted smaller">eigenes Konto</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="smaller muted fineprint">
+      Passwörter sind als Argon2id-Hash gespeichert und hier bewusst nicht einsehbar.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Zuletzt fehlgeschlagen</h2>
+    {% if failed %}
+    <div class="table-scroll">
+      <table class="stapel-tabelle">
+        <thead><tr><th scope="col">Zeitpunkt</th><th scope="col">Grund</th><th scope="col" class="num">Konto</th></tr></thead>
+        <tbody>
+          {% for row in failed %}
+          <tr>
+            <td class="nowrap smaller" data-titel="Zeitpunkt">{{ row.created_at.strftime('%d.%m.%y %H:%M') }}</td>
+            <td class="smaller" data-titel="Grund">{{ row.error_code }}</td>
+            <td class="num smaller" data-titel="Konto">#{{ row.user_id }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="smaller muted fineprint">
+      Dateinamen und Inhalte werden bewusst nicht protokolliert.
+    </p>
+    {% else %}
+    <p class="muted small">Keine fehlgeschlagenen Aufträge.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

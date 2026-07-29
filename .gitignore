@@ -1,0 +1,21 @@
+# Zugangsdaten — niemals ins Repository
+.env
+.env.*
+!.env.example
+
+# Sicherungen enthalten Datenbankabzüge und Kopien der .env mit echten Passwörtern
+backups/
+*.bak
+*.sql.gz
+
+# Laufzeitdaten: hochgeladene Dateien und Ergebnisse der Nutzer
+data/
+
+# Zwischenstände der Markenentwicklung (grosse Rasterbilder)
+brand/explorations/
+
+# Werkzeuge
+.playwright-cli/
+__pycache__/
+*.pyc
+*.log

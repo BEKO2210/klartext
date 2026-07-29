@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Impressum — {{ product }}{% endblock %}
+{% block description %}Impressum und Anbieterkennzeichnung von {{ product }}.{% endblock %}
+
+{% block content %}
+<div class="wrap stack prose">
+  <h1>Impressum</h1>
+
+  {% if not cfg.legal_operator %}
+  <div class="notice notice-warn" role="alert">
+    <strong>Noch nicht konfiguriert.</strong> Die Pflichtangaben nach § 5 DDG stehen noch aus.
+    Sie werden über die Umgebungsvariablen <code>LEGAL_OPERATOR</code>,
+    <code>LEGAL_ADDRESS</code>, <code>LEGAL_EMAIL</code>, <code>LEGAL_PHONE</code>,
+    <code>LEGAL_VAT_ID</code> und <code>LEGAL_RESPONSIBLE</code> gesetzt.
+    Es werden hier bewusst keine Angaben erfunden.
+  </div>
+  {% endif %}
+
+  <section>
+    <h2>Angaben gemäß § 5 DDG</h2>
+    <p>
+      {% if cfg.legal_operator %}{{ cfg.legal_operator }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}<br>
+      {% if cfg.legal_address %}{{ cfg.legal_address }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}
+    </p>
+  </section>
+
+  <section>
+    <h2>Kontakt</h2>
+    <p>
+      E-Mail: {% if cfg.legal_email %}{{ cfg.legal_email }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}<br>
+      {% if cfg.legal_phone %}Telefon: {{ cfg.legal_phone }}{% endif %}
+    </p>
+  </section>
+
+  {% if cfg.legal_vat_id %}
+  <section>
+    <h2>Umsatzsteuer-Identifikationsnummer</h2>
+    <p>{{ cfg.legal_vat_id }}</p>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Verantwortlich für den Inhalt</h2>
+    <p>{% if cfg.legal_responsible %}{{ cfg.legal_responsible }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}</p>
+  </section>
+
+  <section>
+    <h2>Verbraucherstreitbeilegung</h2>
+    <p class="small">
+      Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
+      Verbraucherschlichtungsstelle teilzunehmen.
+    </p>
+  </section>
+
+  <section>
+    <h2>Eingesetzte Open-Source-Software</h2>
+    <p class="small">
+      Die Konvertierung erfolgt mit freier Software. Die vollständige Liste mit Lizenzen und
+      Urheberrechtsvermerken steht unter <a href="/lizenzen">Open-Source-Lizenzen</a>.
+      {{ product }} ist ein eigenständiger Dienst und steht in keiner Verbindung zu den
+      Urhebern der eingesetzten Bibliotheken.
+    </p>
+  </section>
+</div>
+{% endblock %}

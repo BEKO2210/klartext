@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Nutzungsbedingungen — {{ product }}{% endblock %}
+{% block description %}Nutzungsbedingungen von {{ product }}: kostenlose Nutzung, faire Nutzungsgrenzen und Ergebnisqualität.{% endblock %}
+
+{% block content %}
+<div class="wrap stack prose">
+  <h1>Nutzungsbedingungen</h1>
+
+  {% if not cfg.legal_operator %}
+  <div class="notice notice-warn" role="alert">
+    <strong>Betreiber noch nicht konfiguriert.</strong> Siehe <a href="/impressum">Impressum</a>.
+  </div>
+  {% endif %}
+
+  <section>
+    <h2>1. Gegenstand</h2>
+    <p class="small">
+      {{ product }} wandelt hochgeladene Dokumente und Bilder in Markdown und eine
+      strukturierte JSON-Darstellung um. Der Dienst ist kostenlos. Es gibt keine
+      kostenpflichtigen Funktionen, keine Tarife und kein Abonnement.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. Konto</h2>
+    <p class="small">
+      Für die Nutzung ist ein Konto erforderlich. Zugangsdaten sind geheim zu halten.
+      Ein Konto darf nicht an Dritte weitergegeben werden. Das Konto kann jederzeit selbst
+      gelöscht werden.
+    </p>
+  </section>
+
+  <section>
+    <h2>3. Faire Nutzung</h2>
+    <p class="small">
+      Es gelten technische Grenzen zum Schutz des Servers: derzeit
+      {{ limits.max_file_size_mb }} MB je Datei, {{ limits.max_files_per_upload }} Dateien je
+      Upload, {{ limits.max_pages }} Seiten je Dokument, {{ limits.jobs_per_hour }} Konvertierungen
+      je Stunde und {{ limits.jobs_per_day }} je Tag. Diese Werte können zur Sicherung des
+      Betriebs angepasst werden. Automatisierte Massennutzung, Umgehungsversuche der Grenzen
+      und der Betrieb über mehrere Konten hinweg sind nicht gestattet.
+    </p>
+  </section>
+
+  <section>
+    <h2>4. Inhalte</h2>
+    <p class="small">
+      Es dürfen nur Dateien hochgeladen werden, an denen die nötigen Rechte bestehen.
+      Rechtswidrige Inhalte sind untersagt. Verantwortlich für die hochgeladenen Inhalte
+      ist ausschließlich die hochladende Person.
+    </p>
+  </section>
+
+  <section>
+    <h2>5. Verfügbarkeit und Datenverlust</h2>
+    <p class="small">
+      Der Dienst wird ohne Verfügbarkeitszusage bereitgestellt. Dateien und Ergebnisse
+      werden nach {{ limits.retention_hours }} Stunden automatisch gelöscht — der Dienst ist
+      <strong>kein Speicherort und kein Archiv</strong>. Ergebnisse sind selbst zu sichern.
+    </p>
+  </section>
+
+  <section>
+    <h2>6. Ergebnisqualität</h2>
+    <p class="small">
+      Die Umwandlung erfolgt automatisch. Ziel ist es, so wenig Information wie technisch
+      möglich zu verlieren: es wird nichts zusammengefasst, umformuliert oder
+      korrigiert. Eine fehlerfreie Erkennung — insbesondere bei gescannten Vorlagen,
+      Handschrift oder komplexen Tabellen — kann dennoch nicht zugesichert werden.
+      Markdown kann bestimmte Layoutmerkmale technisch nicht abbilden; die JSON-Ausgabe ist
+      strukturtreuer. Ergebnisse sind vor einer Weiterverwendung zu prüfen.
+    </p>
+  </section>
+
+  <section>
+    <h2>7. Sperrung</h2>
+    <p class="small">
+      Konten, die den Betrieb gefährden oder gegen diese Bedingungen verstoßen, können
+      ohne Vorankündigung deaktiviert werden.
+    </p>
+  </section>
+
+  <section>
+    <h2>8. Haftung</h2>
+    <p class="small">
+      Die Haftung richtet sich nach den gesetzlichen Vorschriften. Für einen kostenlos
+      bereitgestellten Dienst wird — soweit gesetzlich zulässig — nur bei Vorsatz und
+      grober Fahrlässigkeit gehaftet. Die Haftung für Schäden aus der Verletzung des
+      Lebens, des Körpers oder der Gesundheit bleibt unberührt.
+    </p>
+  </section>
+</div>
+{% endblock %}

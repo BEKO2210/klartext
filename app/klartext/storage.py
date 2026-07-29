@@ -1,0 +1,92 @@
+"""Dateiablage außerhalb des Webroots.
+
+Interne Dateinamen sind zufällige Hex-Strings ohne Endung. Der vom Benutzer gelieferte
+Name wird ausschließlich als Datenbankfeld geführt und beim Download neu gesetzt —
+er landet nie in einem Pfad.
+"""
+
+from __future__ import annotations
+
+import os
+import pathlib
+import re
+import secrets
+import unicodedata
+
+from .config import CONFIG
+
+UPLOAD_ROOT = pathlib.Path(CONFIG.upload_dir).resolve()
+RESULT_ROOT = pathlib.Path(CONFIG.result_dir).resolve()
+
+_KEY_RE = re.compile(r"^[0-9a-f]{2}/[0-9a-f]{32}$")
+
+
+def ensure_dirs() -> None:
+    UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
+    RESULT_ROOT.mkdir(parents=True, exist_ok=True)
+
+
+def new_key() -> str:
+    raw = secrets.token_hex(16)
+    return f"{raw[:2]}/{raw}"
+
+
+def _root(kind: str) -> pathlib.Path:
+    return UPLOAD_ROOT if kind == "source" else RESULT_ROOT
+
+
+def path_for(kind: str, key: str) -> pathlib.Path:
+    """Löst einen Storage-Key auf. Wirft bei allem, was kein sauberer Key ist."""
+    if not _KEY_RE.match(key):
+        raise ValueError("ungültiger Storage-Key")
+    root = _root(kind)
+    target = (root / key).resolve()
+    # Zweite, unabhängige Absicherung gegen Path Traversal.
+    if not target.is_relative_to(root):
+        raise ValueError("Pfad außerhalb des Speicherbereichs")
+    return target
+
+
+def write(kind: str, key: str, data: bytes) -> int:
+    target = path_for(kind, key)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".part")
+    with open(tmp, "wb") as fh:
+        fh.write(data)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, target)
+    os.chmod(target, 0o600)
+    return len(data)
+
+
+def read(kind: str, key: str) -> bytes:
+    return path_for(kind, key).read_bytes()
+
+
+def delete(kind: str, key: str) -> None:
+    try:
+        path_for(kind, key).unlink(missing_ok=True)
+    except ValueError:
+        return
+
+
+_UNSAFE = re.compile(r'[\x00-\x1f\x7f/\\:*?"<>|]')
+
+
+def safe_download_name(original: str, suffix: str) -> str:
+    """Erzeugt einen unbedenklichen Dateinamen für den Content-Disposition-Header."""
+    name = unicodedata.normalize("NFC", original or "dokument")
+    name = name.replace("\r", " ").replace("\n", " ")
+    name = _UNSAFE.sub("_", name)
+    name = name.strip(" .") or "dokument"
+    stem = pathlib.PurePosixPath(name).stem or "dokument"
+    stem = stem[:120]
+    return f"{stem}{suffix}"
+
+
+def display_name(original: str) -> str:
+    """Nur zur Anzeige — Steuerzeichen raus, Länge begrenzt."""
+    name = unicodedata.normalize("NFC", original or "")
+    name = "".join(ch for ch in name if ch.isprintable())
+    return name[:180] or "unbenannt"
