@@ -1022,10 +1022,11 @@ async def delete_account(request: Request, confirm: str = Form(""), csrf: str = 
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
+    # Auch ohne Anmeldung 404 statt Weiterleitung: eine Weiterleitung wuerde
+    # bestaetigen, dass es diesen Bereich ueberhaupt gibt.
     session = getattr(request.state, "session", None)
-    if session is None:
-        return _redirect_login()
-    _admin(request)
+    if session is None or not session["is_admin"]:
+        raise HttpProblem(404, "Diese Seite gibt es nicht.")
 
     users = await db.fetch(
         "SELECT u.id, u.email, u.is_admin, u.is_active, u.email_verified, u.created_at, "
