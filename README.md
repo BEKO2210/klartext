@@ -131,6 +131,14 @@ Alle angezeigten Zeiten stehen in deutscher Ortszeit. Der Server läuft auf UTC 
 ohne Umrechnung zeigten serverseitig gerenderte Zeiten zwei Stunden weniger an
 als die im Browser berechneten, im selben Bild.
 
+**Zustellbarkeit.** Ausgehende Mails tragen `Message-ID`, `Date`, `Reply-To` und
+`Auto-Submitted` — aiosmtplib setzt davon keine, und fehlende Standardkopfzeilen
+zählen bei Spamfiltern negativ. Grenze der Konstruktion: der Versand läuft über
+ein persönliches Gmail-Konto, und die Mail verweist auf eine junge Domain. Manche
+Anbieter (beobachtet bei Yahoo) nehmen die Mail an und legen sie still weg. Wer
+verlässliche Zustellung braucht, sollte einen Versanddienst mit eigener,
+signierter Domain einrichten (SPF, DKIM, DMARC) und `SMTP_*` darauf umstellen.
+
 **Bestätigungsmail erneut anfordern** unter `/bestaetigung`. Ohne das ist jeder
 verloren, bei dem die erste Mail im Spam landet — es gab keinen Weg zurück ins
 Konto. Die Antwort ist immer dieselbe, egal ob die Adresse existiert oder schon

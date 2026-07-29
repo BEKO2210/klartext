@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 from email.message import EmailMessage
+from email.utils import formatdate, make_msgid, parseaddr
 
 import aiosmtplib
 
@@ -36,6 +37,16 @@ def unzustellbar(adresse: str) -> bool:
     return any(domain == tot or domain.endswith("." + tot) for tot in _TOTE_DOMAINS)
 
 
+def _absender_domain() -> str:
+    """Domain fuer die Message-ID — aus der oeffentlichen Adresse des Dienstes."""
+    rest = CONFIG.public_url.split("//", 1)[-1]
+    domain = rest.split("/", 1)[0].split(":", 1)[0].strip()
+    if domain:
+        return domain
+    _, adresse = parseaddr(CONFIG.smtp_from)
+    return adresse.rpartition("@")[2] or "localhost"
+
+
 async def _send(to: str, subject: str, body: str) -> bool:
     if unzustellbar(to):
         # Absichtlich still: der Aufrufer soll sich genauso verhalten wie sonst,
@@ -48,6 +59,16 @@ async def _send(to: str, subject: str, body: str) -> bool:
     message["From"] = CONFIG.smtp_from
     message["To"] = to
     message["Subject"] = subject
+    # Standardkopfzeilen selbst setzen. aiosmtplib ergaenzt weder Message-ID noch
+    # Date; manche Postfaecher bewerten das Fehlen als Spam-Merkmal. Die Kennung
+    # wird aus der eigenen Domain gebildet, damit sie eindeutig bleibt.
+    message["Date"] = formatdate(localtime=True)
+    message["Message-ID"] = make_msgid(domain=_absender_domain())
+    # Antworten sollen beim Betreiber landen, nicht ins Leere laufen.
+    message["Reply-To"] = CONFIG.smtp_from
+    # Kennzeichnet die Nachricht als maschinell erzeugt: Abwesenheitsantworten
+    # und Autoresponder sollen darauf nicht reagieren (RFC 3834).
+    message["Auto-Submitted"] = "auto-generated"
     message.set_content(body)
     try:
         await aiosmtplib.send(
