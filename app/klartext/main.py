@@ -620,7 +620,8 @@ async def dashboard(request: Request):
 async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
     rows = await db.fetch(
         "SELECT public_id, original_name, mime_type, size_bytes, status, error_code, "
-        "       page_count, created_at, started_at, finished_at, duration_ms, expires_at, "
+        "       page_count, image_count, link_count, "
+        "       created_at, started_at, finished_at, duration_ms, expires_at, "
         "       (SELECT COUNT(*) FROM jobs q WHERE q.status = 'queued' "
         "         AND q.created_at < jobs.created_at) AS ahead "
         "FROM jobs WHERE user_id = $1 AND status <> 'deleted' "
@@ -636,6 +637,8 @@ async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
             "status": r["status"],
             "error": message_for(r["error_code"]) if r["error_code"] else None,
             "pages": r["page_count"],
+            "images": r["image_count"],
+            "links": r["link_count"],
             "created_at": r["created_at"].isoformat(),
             "started_at": r["started_at"].isoformat() if r["started_at"] else None,
             # Wie viele Auftraege stehen noch davor — fuer eine ehrliche Wartenanzeige.
@@ -770,7 +773,7 @@ async def _owned_job(user_id: int, public_id: str):
         raise HttpProblem(404, "Dieser Auftrag existiert nicht.") from None
     row = await db.fetchrow(
         "SELECT id, public_id, original_name, status, error_code, page_count, size_bytes, "
-        "       created_at, duration_ms, expires_at "
+        "       image_count, link_count, created_at, duration_ms, expires_at "
         "FROM jobs WHERE public_id = $1 AND user_id = $2 AND status <> 'deleted'",
         job_uuid,
         user_id,
@@ -810,6 +813,8 @@ async def job_detail(request: Request, public_id: str):
                 "status": job["status"],
                 "error": message_for(job["error_code"]) if job["error_code"] else None,
                 "pages": job["page_count"],
+                "images": job["image_count"],
+                "links": job["link_count"],
                 "size": job["size_bytes"],
                 "duration_ms": job["duration_ms"],
                 "expires_at": job["expires_at"],
@@ -857,6 +862,30 @@ async def download(request: Request, public_id: str, fmt: str):
     )
 
 
+@app.get("/app/auftrag/{public_id}/bild/{seq}")
+async def bild(request: Request, public_id: str, seq: int):
+    session = _session(request)
+    job = await _owned_job(session["user_id"], public_id)
+    row = await db.fetchrow(
+        "SELECT storage_key, mime_type FROM job_images "
+        "WHERE job_id = $1 AND user_id = $2 AND seq = $3",
+        job["id"], session["user_id"], seq,
+    )
+    if row is None:
+        raise HttpProblem(404, "Dieses Bild gibt es nicht.")
+    try:
+        daten = storage.read("result", row["storage_key"])
+    except (OSError, ValueError):
+        raise HttpProblem(404, "Das Bild ist nicht mehr verfügbar.") from None
+    return Response(
+        content=daten,
+        media_type=row["mime_type"],
+        headers={"X-Content-Type-Options": "nosniff",
+                 "Content-Disposition": "inline",
+                 "Cache-Control": "private, max-age=600"},
+    )
+
+
 @app.get("/app/download/zip")
 async def download_zip(request: Request, ids: str = ""):
     session = _session(request)
@@ -881,6 +910,23 @@ async def download_zip(request: Request, ids: str = ""):
                 job["id"],
                 session["user_id"],
             )
+            for bild_row in await db.fetch(
+                "SELECT seq, storage_key, mime_type FROM job_images "
+                "WHERE job_id = $1 AND user_id = $2 ORDER BY seq",
+                job["id"], session["user_id"],
+            ):
+                endung = {"image/png": ".png", "image/jpeg": ".jpg",
+                          "image/webp": ".webp", "image/tiff": ".tif"}.get(
+                              bild_row["mime_type"], ".bin")
+                # Ordnername genau wie im Markdown referenziert.
+                basis = storage.safe_download_name(job["original_name"], "")
+                name = f"{basis}-bilder/bild-{bild_row['seq']:03d}{endung}"
+                try:
+                    archive.writestr(name, storage.read("result", bild_row["storage_key"]))
+                    count += 1
+                except (OSError, ValueError):
+                    continue
+
             for row in rows:
                 suffix = ".md" if row["role"] == "markdown" else ".json"
                 # Namen im Archiv werden von uns erzeugt, nie vom Benutzer übernommen.
@@ -923,6 +969,13 @@ async def delete_job(request: Request, public_id: str, csrf: str = Form("")):
     )
     for row in rows:
         storage.delete("source" if row["role"] == "source" else "result", row["storage_key"])
+    bilder = await db.fetch(
+        "SELECT storage_key FROM job_images WHERE job_id = $1 AND user_id = $2",
+        job["id"], session["user_id"],
+    )
+    for row in bilder:
+        storage.delete("result", row["storage_key"])
+    await db.execute("DELETE FROM job_images WHERE job_id = $1", job["id"])
     await db.execute("DELETE FROM files WHERE job_id = $1", job["id"])
     await db.execute(
         "UPDATE jobs SET status = 'deleted', purged_at = now() WHERE id = $1", job["id"]
@@ -1008,6 +1061,10 @@ async def delete_account(request: Request, confirm: str = Form(""), csrf: str = 
     )
     for row in rows:
         storage.delete("source" if row["role"] == "source" else "result", row["storage_key"])
+    for row in await db.fetch(
+        "SELECT storage_key FROM job_images WHERE user_id = $1", session["user_id"]
+    ):
+        storage.delete("result", row["storage_key"])
     # users kaskadiert auf sessions, jobs, files, usage_events, auth_tokens.
     await db.execute("DELETE FROM users WHERE id = $1", session["user_id"])
     await db.execute("INSERT INTO audit_log(action) VALUES('account_deleted')")

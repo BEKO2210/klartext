@@ -32,6 +32,7 @@ def new_key() -> str:
 
 
 def _root(kind: str) -> pathlib.Path:
+    # Bilder liegen wie Ergebnisse — sie entstehen aus der Konvertierung.
     return UPLOAD_ROOT if kind == "source" else RESULT_ROOT
 
 

@@ -61,8 +61,10 @@ class DoclingClient:
             "ocr_preset": CONFIG.ocr_engine,
             "pdf_backend": "docling_parse",
             "pipeline": "standard",
-            "image_export_mode": "placeholder",
-            "include_images": "false",
+            # Bilder werden eingebettet geliefert und danach von uns als eigene
+            # Dateien abgelegt — sonst gingen alle Abbildungen des Dokuments verloren.
+            "image_export_mode": "embedded",
+            "include_images": "true",
             "include_page_images": "false",
             # Keine externen Dienste, keine Bild-/Formel-/Code-Anreicherung durch Modelle,
             # die den Originaltext umschreiben könnten.

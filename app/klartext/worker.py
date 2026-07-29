@@ -13,7 +13,7 @@ import json
 import logging
 import signal
 
-from . import db, quota, settings_store, storage
+from . import db, postprocess, quota, settings_store, storage
 from .config import CONFIG
 from .docling_client import ConversionError, DoclingClient
 
@@ -98,10 +98,31 @@ async def _process(client: DoclingClient, job) -> None:
         log.info("Job fehlgeschlagen (%s)", exc.code)
         return
 
+    markdown = result["markdown"]
+    struktur = result["json"]
+
+    # --- Nachbearbeitung -------------------------------------------------
+    # 1) Bilder aus der Struktur loesen und als eigene Dateien ablegen.
+    bilder = postprocess.bilder_ausloesen(struktur if isinstance(struktur, dict) else {})
+    markdown = postprocess.markdown_bilder_verweisen(markdown, bilder)
+
+    # 2) Verweise aus der PDF retten — Docling exportiert nur den Text.
+    links = []
+    if job["mime_type"] == "application/pdf":
+        links = postprocess.links_lesen(data)
+        markdown = postprocess.markdown_links_anhaengen(markdown, links)
+
+    # 3) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
+    #    Nur im Markdown; die JSON bleibt vollstaendig.
+    elemente = []
+    if job["mime_type"] == "application/pdf":
+        elemente = postprocess.wiederkehrende_texte(data, markdown)
+        markdown = postprocess.seitenelemente_zusammenfassen(markdown, elemente)
+
     md_key = storage.new_key()
     json_key = storage.new_key()
-    md_bytes = result["markdown"].encode("utf-8")
-    json_bytes = json.dumps(result["json"], ensure_ascii=False, indent=1).encode("utf-8")
+    md_bytes = markdown.encode("utf-8")
+    json_bytes = json.dumps(struktur, ensure_ascii=False, indent=1).encode("utf-8")
     storage.write("result", md_key, md_bytes)
     storage.write("result", json_key, json_bytes)
 
@@ -121,12 +142,26 @@ async def _process(client: DoclingClient, job) -> None:
         json_key,
         len(json_bytes),
     )
+    for bild in bilder:
+        key = storage.new_key()
+        storage.write("result", key, bild["data"])
+        await db.execute(
+            "INSERT INTO job_images(job_id, user_id, seq, page_no, storage_key, "
+            "                       mime_type, size_bytes) "
+            "VALUES($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (job_id, seq) DO NOTHING",
+            job_id, job["user_id"], bild["seq"], bild.get("page_no"),
+            key, bild["mime"], len(bild["data"]),
+        )
+
     await db.execute(
         "UPDATE jobs SET status = 'done', page_count = $2, finished_at = now(), "
+        "image_count = $3, link_count = $4, "
         "duration_ms = (EXTRACT(EPOCH FROM (now() - started_at)) * 1000)::int "
         "WHERE id = $1",
         job_id,
         result["pages"],
+        len(bilder),
+        len(links),
     )
     # Der Verbrauch wurde beim Einstellen mit der geschätzten Seitenzahl gebucht.
     # Hier wird nur noch die Differenz zur tatsächlichen Seitenzahl nachgetragen.
@@ -137,7 +172,8 @@ async def _process(client: DoclingClient, job) -> None:
             job["user_id"],
             delta,
         )
-    log.info("Job fertig: %s Seiten", result["pages"])
+    log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise",
+             result["pages"], len(bilder), len(links))
 
 
 async def _worker_loop(index: int, client: DoclingClient) -> None:
@@ -167,6 +203,18 @@ async def _housekeeping() -> None:
     """Retention, verwaiste Jobs, alte Sessions und Zähler."""
     while not _stop.is_set():
         try:
+            # Bilder eines abgelaufenen Auftrags zuerst — sie haengen an derselben Frist.
+            alte_bilder = await db.fetch(
+                "SELECT b.id, b.storage_key FROM job_images b "
+                "JOIN jobs j ON j.id = b.job_id "
+                "WHERE j.expires_at < now() AND j.purged_at IS NULL"
+            )
+            for row in alte_bilder:
+                storage.delete("result", row["storage_key"])
+            if alte_bilder:
+                await db.execute("DELETE FROM job_images WHERE id = ANY($1::bigint[])",
+                                 [r["id"] for r in alte_bilder])
+
             expired = await db.fetch(
                 "SELECT f.id, f.role, f.storage_key FROM files f "
                 "JOIN jobs j ON j.id = f.job_id "

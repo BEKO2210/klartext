@@ -81,6 +81,35 @@ Umlaute und ganze Tabellenzeilen; auch der einzige Fehltreffer von RapidOCR — 
 Telefonnummer mit Leerzeichen und Schrägstrich — trat nur im niedrig aufgelösten
 Bild auf. Bei Handyfotos also nah genug herangehen und nicht künstlich verkleinern.
 
+## Was über Docling hinaus passiert
+
+Docling liefert Text und Struktur, aber drei Dinge fehlen im Export. Die ergänzt
+Klartext selbst (`app/klartext/postprocess.py`):
+
+**Bilder** werden aus dem Ergebnis gelöst und als eigene Dateien abgelegt. Im
+Markdown stehen Verweise darauf, im ZIP liegen sie in einem Unterordner. Ohne das
+schreibt Docling die Rohdaten als base64 mitten in die Markdown-Datei — bei einer
+51-seitigen PDF wurden daraus 15 MB statt 97 KB.
+
+**Verweise** liegen in der PDF in einer eigenen Annotationsebene und gehen beim
+Textexport vollständig verloren. Sie werden ausgelesen und nach Seiten geordnet
+angehängt. Gemessen an derselben PDF: 146 Verweise statt 8.
+
+**Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
+in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie
+noch auf einer eigenen Zeile. Im Markdown werden sie einmal aufgeführt statt auf
+jeder Seite wiederholt. **Die JSON-Ausgabe bleibt davon unberührt** und enthält
+weiterhin jede Fundstelle.
+
+## Grenzen, die bleiben
+
+Eine PDF beschreibt, wie etwas aussieht, nicht wie es aufgebaut ist. Kapitel,
+Tabellen und Lesereihenfolge müssen erschlossen werden. Auf mehrspaltigen oder
+grafiklastigen Seiten stimmt die Reihenfolge deshalb nicht immer, und
+Tabellenzellen können falsch zugeordnet werden. Das ist eine Grenze des
+Layout-Modells, keine Einstellungssache. Eine verlustfreie 1:1-Umwandlung
+beliebiger PDFs leistet kein Werkzeug.
+
 ## Verlustarm heißt hier
 
 Kein Zusammenfassen, kein Umformulieren, keine Rechtschreibkorrektur, keine
