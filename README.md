@@ -12,6 +12,8 @@ Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
 [![Status](https://img.shields.io/badge/Status-im%20Betrieb-15803D)](https://klartext.it-handwerk-stuttgart.de)
+[![Live](https://img.shields.io/badge/Live-v1.1.2-1E3A5F)](CHANGELOG.md)
+[![Sprachen](https://img.shields.io/badge/Sprachen-English%20%C2%B7%20Deutsch-15803D)](CHANGELOG.md)
 
 [Live ansehen](https://klartext.it-handwerk-stuttgart.de) ·
 [Architektur](ARCHITECTURE.md) ·
