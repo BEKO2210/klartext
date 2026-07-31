@@ -102,6 +102,36 @@ Damit gibt es keine Zusammenfassung, keine Umformulierung und keine erfundenen I
 Seitenstruktur nachvollziehbar bleibt. Die JSON-Ausgabe enthält die vollständige
 `DoclingDocument`-Struktur mit Seiten, Blöcken, Bounding-Boxen und Tabellenzellen.
 
+## Sprachen
+
+Englisch ist die Standardfassung und liegt auf den blanken Pfaden, Deutsch unter
+`/de`. Beispiel: `/login` und `/de/anmelden`. Der Zulauf kommt überwiegend aus
+dem englischsprachigen Raum, deutsche Bestandsnutzer sollen aber nichts verlieren.
+
+* **Texte:** `strings_en.py` und `strings_de.py`, ein Schlüssel je Satz. Fehlt ein
+  deutscher Schlüssel, greift automatisch der englische — nie eine leere Stelle.
+* **Auswahl je Anfrage** (`i18n.py`, Middleware in `main.py`): Sprache im Pfad
+  schlägt Sprachcookie, Cookie schlägt `Accept-Language`. Wer laut Browser Deutsch
+  bevorzugt und noch nichts gewählt hat, wird einmalig von `/…` auf `/de/…`
+  geschickt. Der Umschalter in der Kopfzeile setzt `klartext_lang` und beendet
+  diese Automatik.
+* **Alte deutsche Adressen** (`/anmelden`, `/lizenzen`, `/konto`,
+  `/app/auftrag/<id>` …) antworten dauerhaft mit 301, Formularpfade mit 308.
+  Suchtreffer und fremde Verweise laufen dadurch nicht ins Leere.
+* **Angemeldeter Bereich:** eine Adresse für beide Sprachen (`/app`, `/account`,
+  `/admin`). Dort indexiert niemand, und ein Sprachwechsel soll keine
+  Auftragsadresse verändern.
+* **Suchmaschinen:** `hreflang`-Paare plus `x-default` in jeder öffentlichen
+  Seite, beide Fassungen in `sitemap.xml`, `Vary: Accept-Language, Cookie` auf
+  allen HTML-Antworten.
+* **Ergebnisse:** `jobs.lang` hält fest, in welcher Sprache ein Auftrag
+  eingestellt wurde. Der Worker schreibt Hinweise und Zusatzabschnitte im
+  Markdown in derselben Sprache.
+* **Browser-Texte:** `app.js` und `job.js` lesen ihre Sätze aus einem Datenblock
+  in der Seite (`#i18n-daten`). Inline-JavaScript verbietet die Inhaltsrichtlinie.
+* **Rechtstexte:** Die deutsche Fassung ist die maßgebliche; die englische trägt
+  einen Hinweis darauf.
+
 ## Sitzungen
 
 Beim Anmelden wird ein Zufallstoken (32 Byte) erzeugt. Der Browser bekommt es als

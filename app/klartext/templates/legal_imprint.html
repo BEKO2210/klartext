@@ -1,65 +1,65 @@
 {% extends "base.html" %}
-{% block title %}Impressum — {{ product }}{% endblock %}
-{% block description %}Impressum und Anbieterkennzeichnung von {{ product }}.{% endblock %}
+{% block title %}{{ t('imprint.title') }}{% endblock %}
+{% block description %}{{ t('imprint.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap stack prose">
-  <h1>Impressum</h1>
+  <h1>{{ t('imprint.h1') }}</h1>
+
+  {# In der englischen Fassung steht der Hinweis, dass die deutsche Fassung die
+     rechtlich massgebliche ist. In der deutschen Fassung ist der Text leer. #}
+  {% if t('imprint.legal_note') %}
+  {% set de_link = '<a href="' ~ ('/de/impressum') ~ '" hreflang="de">Impressum</a>' %}
+  <p class="small muted">{{ t('imprint.legal_note', link=de_link)|safe }}</p>
+  {% endif %}
 
   {% if not cfg.legal_operator %}
   <div class="notice notice-warn" role="alert">
-    <strong>Noch nicht konfiguriert.</strong> Die Pflichtangaben nach § 5 DDG stehen noch aus.
-    Sie werden über die Umgebungsvariablen <code>LEGAL_OPERATOR</code>,
-    <code>LEGAL_ADDRESS</code>, <code>LEGAL_EMAIL</code>, <code>LEGAL_PHONE</code>,
-    <code>LEGAL_VAT_ID</code> und <code>LEGAL_RESPONSIBLE</code> gesetzt.
-    Es werden hier bewusst keine Angaben erfunden.
+    <strong>{{ t('imprint.unconfigured') }}</strong>
+    {% set vars = '<code>LEGAL_OPERATOR</code>, <code>LEGAL_ADDRESS</code>, '
+                  '<code>LEGAL_EMAIL</code>, <code>LEGAL_PHONE</code>, '
+                  '<code>LEGAL_VAT_ID</code>, <code>LEGAL_RESPONSIBLE</code>' %}
+    {{ t('imprint.unconfigured.p', vars=vars)|safe }}
   </div>
   {% endif %}
 
   <section>
-    <h2>Angaben gemäß § 5 DDG</h2>
+    <h2>{{ t('imprint.provider.h') }}</h2>
     <p>
-      {% if cfg.legal_operator %}{{ cfg.legal_operator }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}<br>
-      {% if cfg.legal_address %}{{ cfg.legal_address }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}
+      {% if cfg.legal_operator %}{{ cfg.legal_operator }}{% else %}<em>{{ t('imprint.none') }}</em>{% endif %}<br>
+      {% if cfg.legal_address %}{{ cfg.legal_address }}{% else %}<em>{{ t('imprint.none') }}</em>{% endif %}
     </p>
   </section>
 
   <section>
-    <h2>Kontakt</h2>
+    <h2>{{ t('imprint.contact.h') }}</h2>
     <p>
-      E-Mail: {% if cfg.legal_email %}{{ cfg.legal_email }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}<br>
-      {% if cfg.legal_phone %}Telefon: {{ cfg.legal_phone }}{% endif %}
+      {{ t('imprint.contact.email') }}: {% if cfg.legal_email %}{{ cfg.legal_email }}{% else %}<em>{{ t('imprint.none') }}</em>{% endif %}<br>
+      {% if cfg.legal_phone %}{{ t('imprint.contact.phone') }}: {{ cfg.legal_phone }}{% endif %}
     </p>
   </section>
 
   {% if cfg.legal_vat_id %}
   <section>
-    <h2>Umsatzsteuer-Identifikationsnummer</h2>
+    <h2>{{ t('imprint.vat.h') }}</h2>
     <p>{{ cfg.legal_vat_id }}</p>
   </section>
   {% endif %}
 
   <section>
-    <h2>Verantwortlich für den Inhalt</h2>
-    <p>{% if cfg.legal_responsible %}{{ cfg.legal_responsible }}{% else %}<em>— nicht konfiguriert —</em>{% endif %}</p>
+    <h2>{{ t('imprint.responsible.h') }}</h2>
+    <p>{% if cfg.legal_responsible %}{{ cfg.legal_responsible }}{% else %}<em>{{ t('imprint.none') }}</em>{% endif %}</p>
   </section>
 
   <section>
-    <h2>Verbraucherstreitbeilegung</h2>
-    <p class="small">
-      Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
-      Verbraucherschlichtungsstelle teilzunehmen.
-    </p>
+    <h2>{{ t('imprint.dispute.h') }}</h2>
+    <p class="small">{{ t('imprint.dispute.p') }}</p>
   </section>
 
   <section>
-    <h2>Eingesetzte Open-Source-Software</h2>
-    <p class="small">
-      Die Konvertierung erfolgt mit freier Software. Die vollständige Liste mit Lizenzen und
-      Urheberrechtsvermerken steht unter <a href="/lizenzen">Open-Source-Lizenzen</a>.
-      {{ product }} ist ein eigenständiger Dienst und steht in keiner Verbindung zu den
-      Urhebern der eingesetzten Bibliotheken.
-    </p>
+    <h2>{{ t('imprint.oss.h') }}</h2>
+    {% set lizenz_link = '<a href="' ~ path_for('licenses') ~ '">' ~ t('footer.licenses') ~ '</a>' %}
+    <p class="small">{{ t('imprint.oss.p', link=lizenz_link)|safe }}</p>
   </section>
 </div>
 {% endblock %}

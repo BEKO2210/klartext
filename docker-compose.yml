@@ -81,7 +81,7 @@ services:
     build:
       context: .
       dockerfile: app/Dockerfile
-    image: klartext-app:1.0.0
+    image: klartext-app:1.1.1
     container_name: klartext-web
     restart: unless-stopped
     command: ["uvicorn", "klartext.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--no-server-header"]
@@ -120,7 +120,7 @@ services:
     build:
       context: .
       dockerfile: app/Dockerfile
-    image: klartext-app:1.0.0
+    image: klartext-app:1.1.1
     container_name: klartext-worker
     restart: unless-stopped
     command: ["python", "-m", "klartext.worker"]

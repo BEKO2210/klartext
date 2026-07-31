@@ -1,18 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Fast geschafft — {{ product }}{% endblock %}
+{% block title %}{{ t('register_done.title') }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
-  <h1>Fast geschafft</h1>
+  <h1>{{ t('register_done.h1') }}</h1>
   {% if mail_configured %}
-  <p>
-    Falls die Adresse noch frei war, ist eine E-Mail mit Bestätigungslink unterwegs. Der Link gilt 24 Stunden.</p>
-  <p class="small muted">
-    Nichts da? Bitte im Spam-Ordner nachsehen. Wenn nach ein paar Minuten nichts
-    ankommt, <a href="/bestaetigung">schicken wir die Mail erneut</a>.</p>
+  <p>{{ t('register_done.mail') }}</p>
+  {% set again = '<a href="' ~ path_for('verify_again') ~ '">' ~ t('register_done.spam_link') ~ '</a>' %}
+  <p class="small muted">{{ t('register_done.spam', link=again)|safe }}</p>
   {% else %}
-  <p>Das Konto ist angelegt. Du kannst dich jetzt direkt anmelden.</p>
+  <p>{{ t('register_done.nomail') }}</p>
   {% endif %}
-  <a class="btn btn-primary" href="/anmelden">Zur Anmeldung</a>
+  <a class="btn btn-primary" href="{{ path_for('login') }}">{{ t('register_done.to_login') }}</a>
 </div>
 {% endblock %}

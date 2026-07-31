@@ -8,6 +8,12 @@
   var status = document.getElementById("copy-status");
   if (!button || !source) { return; }
 
+  // Die beiden Rueckmeldungen stehen als Datenblock in der Seite: Inline-Skript
+  // verbietet die Inhaltsrichtlinie, und die Sprache steht erst zur Laufzeit fest.
+  var daten = document.getElementById("i18n-daten");
+  var TEXTE = {};
+  try { TEXTE = JSON.parse(daten.getAttribute("data-strings")); } catch (fehler) { TEXTE = {}; }
+
   function fallbackCopy(text) {
     var area = document.createElement("textarea");
     area.value = text;
@@ -26,8 +32,8 @@
     var text = source.textContent;
     var done = function (ok) {
       status.textContent = ok
-        ? "Markdown in die Zwischenablage kopiert."
-        : "Kopieren hat nicht geklappt. Bitte den Text markieren und manuell kopieren.";
+        ? (TEXTE["copied"] || "")
+        : (TEXTE["copy_failed"] || "");
       setTimeout(function () { status.textContent = ""; }, 4000);
     };
 

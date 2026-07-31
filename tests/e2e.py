@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import pathlib
 import re
 import secrets
@@ -28,6 +29,8 @@ from http.cookiejar import CookieJar
 BASE = (sys.argv[1] if len(sys.argv) > 1 else "https://klartext.it-handwerk-stuttgart.de").rstrip("/")
 FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures"
 PASSWORD = "Testpasswort-2026!x"
+# Gegen eine Probeinstanz laeuft der Test auf einer eigenen Datenbank.
+DB_NAME = os.environ.get("KLARTEXT_DB", "klartext")
 
 results: list[tuple[str, bool, str]] = []
 
@@ -55,7 +58,7 @@ class Client:
     def request(self, method, path, data=None, headers=None, follow=False):
         url = path if path.startswith("http") else BASE + path
         merged = {"User-Agent": self.UA,
-                  "Accept-Language": "de-DE,de;q=0.9",
+                  "Accept-Language": "en-US,en;q=0.9",
                   "Accept": "text/html,application/xhtml+xml"}
         merged.update(headers or {})
         req = urllib.request.Request(url, data=data, method=method, headers=merged)
@@ -97,7 +100,7 @@ class Client:
         headers.update(kw.pop("headers", {}))
         return self.request("POST", path, data=buf.getvalue(), headers=headers, **kw)
 
-    def csrf(self, path="/anmelden"):
+    def csrf(self, path="/login"):
         _, _, body = self.get(path)
         match = re.search(rb'name="csrf" value="([^"]+)"', body)
         return match.group(1).decode() if match else ""
@@ -111,7 +114,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def psql(sql: str) -> str:
     """Direkter Datenbankzugriff fuer Testvorbereitung (E-Mail-Bestaetigung)."""
     out = subprocess.run(
-        ["docker", "exec", "klartext-db", "psql", "-U", "klartext", "-d", "klartext",
+        ["docker", "exec", "klartext-db", "psql", "-U", "klartext", "-d", DB_NAME,
          "-tAc", sql],
         capture_output=True, text=True, timeout=30,
     )
@@ -119,8 +122,8 @@ def psql(sql: str) -> str:
 
 
 def register(client: Client, email: str, verify_directly=True) -> None:
-    csrf = client.csrf("/registrieren")
-    client.post_form("/registrieren", {
+    csrf = client.csrf("/register")
+    client.post_form("/register", {
         "csrf": csrf, "email": email, "password": PASSWORD,
         "password2": PASSWORD, "accept": "ja",
     })
@@ -129,8 +132,8 @@ def register(client: Client, email: str, verify_directly=True) -> None:
 
 
 def login(client: Client, email: str, password: str = PASSWORD):
-    csrf = client.csrf("/anmelden")
-    return client.post_form("/anmelden", {"csrf": csrf, "email": email, "password": password})
+    csrf = client.csrf("/login")
+    return client.post_form("/login", {"csrf": csrf, "email": email, "password": password})
 
 
 def wait_for_jobs(client: Client, expected: int, timeout: int = 420):
@@ -173,8 +176,8 @@ def main() -> int:
 
     # 1 Registrierung ------------------------------------------------------
     a = Client()
-    csrf = a.csrf("/registrieren")
-    status, _, body = a.post_form("/registrieren", {
+    csrf = a.csrf("/register")
+    status, _, body = a.post_form("/register", {
         "csrf": csrf, "email": mail_a, "password": PASSWORD,
         "password2": PASSWORD, "accept": "ja"})
     check("01 Registrierung", status in (200, 303), f"HTTP {status}")
@@ -211,7 +214,7 @@ def main() -> int:
     anon = Client()
     status, headers, _ = anon.get("/app")
     check("05 Dashboard ohne Anmeldung leitet zur Anmeldung",
-          status == 303 and headers.get("Location") == "/anmelden", f"HTTP {status}")
+          status == 303 and headers.get("Location") == "/login", f"HTTP {status}")
     status, _, _ = anon.get("/api/jobs", headers={"Accept": "application/json"})
     check("05b Job-Schnittstelle ohne Anmeldung gesperrt", status == 401, f"HTTP {status}")
 
@@ -266,7 +269,7 @@ def main() -> int:
         job = done.get(name)
         if not job:
             return ""
-        status, _, body = a.get(f"/app/auftrag/{job['id']}/download/md")
+        status, _, body = a.get(f"/app/job/{job['id']}/download/md")
         return body.decode("utf-8") if status == 200 else ""
 
     png_md = markdown_of("test-text.png")
@@ -313,7 +316,7 @@ def main() -> int:
 
     # 20 JSON ---------------------------------------------------------------
     job = pdf_job
-    status, headers, body = a.get(f"/app/auftrag/{job['id']}/download/json")
+    status, headers, body = a.get(f"/app/job/{job['id']}/download/json")
     payload = json.loads(body) if status == 200 else {}
     check("20 JSON-Download mit Docling-Struktur",
           status == 200 and payload.get("schema_name") == "DoclingDocument"
@@ -384,10 +387,10 @@ def main() -> int:
     login(b, mail_b)
     victim = pdf_job["id"]
 
-    status, _, _ = b.get(f"/app/auftrag/{victim}")
+    status, _, _ = b.get(f"/app/job/{victim}")
     check("27 Benutzer B sieht Auftrag von A nicht", status == 404, f"HTTP {status}")
 
-    status, _, _ = b.get(f"/app/auftrag/{victim}/download/md")
+    status, _, _ = b.get(f"/app/job/{victim}/download/md")
     check("28 Benutzer B kann Ergebnis von A nicht laden", status == 404, f"HTTP {status}")
 
     status, _, body = b.get(f"/app/download/zip?ids={victim}")
@@ -399,7 +402,7 @@ def main() -> int:
     check("28c Auftragsliste von B ist leer", b_jobs == [], f"{len(b_jobs)} Eintraege")
 
     csrf_b = b.csrf("/app")
-    status, _, _ = b.post_form(f"/app/auftrag/{victim}/loeschen", {"csrf": csrf_b})
+    status, _, _ = b.post_form(f"/app/job/{victim}/delete", {"csrf": csrf_b})
     check("28d Benutzer B kann Auftrag von A nicht loeschen", status == 404, f"HTTP {status}")
 
     still_there = psql(f"SELECT status FROM jobs WHERE public_id = '{victim}'")
@@ -414,7 +417,7 @@ def main() -> int:
 
     # 30 Abmelden -----------------------------------------------------------
     csrf_b = b.csrf("/app")
-    status, _, _ = b.post_form("/abmelden", {"csrf": csrf_b})
+    status, _, _ = b.post_form("/logout", {"csrf": csrf_b})
     check("30 Abmelden", status == 303, f"HTTP {status}")
     status, _, _ = b.get("/api/jobs", headers={"Accept": "application/json"})
     check("30b Sitzung nach Abmelden ungueltig", status == 401, f"HTTP {status}")
@@ -422,9 +425,9 @@ def main() -> int:
     # 31 Passwort aendern beendet alle Sitzungen ----------------------------
     c = Client()
     login(c, mail_a)
-    csrf_c = c.csrf("/konto")
+    csrf_c = c.csrf("/account")
     new_password = PASSWORD + "-neu"
-    status, _, _ = c.post_form("/konto/passwort", {
+    status, _, _ = c.post_form("/account/password", {
         "csrf": csrf_c, "current": PASSWORD,
         "password": new_password, "password2": new_password})
     check("31 Passwort geaendert", status == 303, f"HTTP {status}")
@@ -447,8 +450,8 @@ def main() -> int:
     keys = psql(f"SELECT f.storage_key FROM files f JOIN users u ON u.id = f.user_id "
                 f"WHERE u.email_norm = '{mail_a.lower()}' LIMIT 3").splitlines()
 
-    csrf_c = c.csrf("/konto")
-    status, _, _ = c.post_form("/konto/loeschen", {"csrf": csrf_c, "confirm": "LOESCHEN"})
+    csrf_c = c.csrf("/account")
+    status, _, _ = c.post_form("/account/delete", {"csrf": csrf_c, "confirm": "LOESCHEN"})
     check("33 Konto geloescht", status == 303, f"HTTP {status}")
 
     left = psql(f"SELECT COUNT(*) FROM users WHERE email_norm = '{mail_a.lower()}'")
@@ -640,15 +643,15 @@ def main() -> int:
           probe2 or "keine Antwort")
 
     # 45 Bestätigungsmail erneut anfordern -------------------------------------
-    status, _, _ = anon.get("/bestaetigung")
+    status, _, _ = anon.get("/resend-confirmation")
     check("45 Formular für neue Bestätigungsmail erreichbar", status == 200, f"HTTP {status}")
 
     # Die Antwort darf nicht verraten, ob es das Konto gibt.
-    csrf_v = anon.csrf("/bestaetigung")
-    _, _, mit = anon.post_form("/bestaetigung", {"csrf": csrf_v, "email": mail_a})
-    csrf_v = anon.csrf("/bestaetigung")
+    csrf_v = anon.csrf("/resend-confirmation")
+    _, _, mit = anon.post_form("/resend-confirmation", {"csrf": csrf_v, "email": mail_a})
+    csrf_v = anon.csrf("/resend-confirmation")
     _, _, ohne = anon.post_form(
-        "/bestaetigung", {"csrf": csrf_v, "email": f"gibtsnicht-{suffix}@example.invalid"})
+        "/resend-confirmation", {"csrf": csrf_v, "email": f"gibtsnicht-{suffix}@example.invalid"})
     check("45b Keine Auskunft, ob die Adresse existiert", mit == ohne,
           f"{len(mit)} vs {len(ohne)} Bytes")
 

@@ -8,6 +8,30 @@
   var form = document.getElementById("upload-form");
   if (!form) { return; }
 
+  // Texte und Adressen kommen als Datenblock aus der Seite. Inline-JavaScript
+  // verbietet die Inhaltsrichtlinie, und fest verdrahtete deutsche Saetze
+  // waeren in der englischen Fassung schlicht falsch.
+  var daten = document.getElementById("i18n-daten");
+  var TEXTE = {};
+  try { TEXTE = JSON.parse(daten.getAttribute("data-strings")); } catch (fehler) { TEXTE = {}; }
+  var SPRACHE = (daten && daten.getAttribute("data-lang")) || "en";
+  var LOCALE = SPRACHE === "de" ? "de-DE" : "en-GB";
+  var LOGIN_URL = (daten && daten.getAttribute("data-login")) || "/login";
+
+  function T(schluessel, werte) {
+    var text = TEXTE[schluessel];
+    if (text === undefined) { return schluessel; }
+    if (!werte) { return text; }
+    return text.replace(/\{(\w+)\}/g, function (treffer, name) {
+      return werte[name] !== undefined ? werte[name] : treffer;
+    });
+  }
+
+  function zahl(wert, stellen) {
+    return wert.toFixed(stellen === undefined ? 0 : stellen)
+               .replace(".", SPRACHE === "de" ? "," : ".");
+  }
+
   var input       = document.getElementById("file-input");
   var dropzone    = document.getElementById("dropzone");
   var fileList    = document.getElementById("file-list");
@@ -29,13 +53,13 @@
   function formatSize(bytes) {
     if (bytes < 1024) { return bytes + " B"; }
     if (bytes < 1024 * 1024) { return (bytes / 1024).toFixed(0) + " KB"; }
-    return (bytes / 1024 / 1024).toFixed(1).replace(".", ",") + " MB";
+    return zahl(bytes / 1024 / 1024, 1) + " MB";
   }
 
   function formatTime(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) { return ""; }
-    return d.toLocaleString("de-DE", {
+    return d.toLocaleString(LOCALE, {
       day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
     });
   }
@@ -80,8 +104,8 @@
     var box = el("div", "notice notice-warn");
     box.appendChild(el("p", null, kopf));
     box.appendChild(el("p", null, liste.length === 1
-      ? "Eine Datei wurde nicht angenommen:"
-      : liste.length + " Dateien wurden nicht angenommen:"));
+      ? T("rejected.one")
+      : T("rejected.many")));
     var ul = el("ul");
     liste.forEach(function (eintrag) {
       var li = el("li");
@@ -159,7 +183,7 @@
     if (selected.length === 0) { return; }
 
     uploadBtn.disabled = true;
-    uploadBtn.textContent = "Wird hochgeladen ...";
+    uploadBtn.textContent = T("uploading");
     clearBtn.disabled = true;
     showMessage("");
 
@@ -180,13 +204,13 @@
       var percent = Math.round(progressEvent.loaded / progressEvent.total * 100);
       bar.set(percent);
       if (percent >= 100) {
-        bar.label("Hochgeladen — wird geprüft ...");
+        bar.label(T("checking"));
         bar.indeterminate();
       }
     });
 
     function finish() {
-      uploadBtn.textContent = "Konvertierung starten";
+      uploadBtn.textContent = T("submit");
       clearBtn.disabled = false;
       uploadBtn.disabled = selected.length === 0;
     }
@@ -201,8 +225,8 @@
         var anzahl = payload.created || 0;
         var liegen = payload.abgelehnt || [];
         var text = anzahl === 1
-          ? "1 Datei hochgeladen. Die Umwandlung läuft — der Auftrag steht unten in der Liste."
-          : anzahl + " Dateien hochgeladen. Die Umwandlung läuft — die Aufträge stehen unten in der Liste.";
+          ? T("uploaded.one")
+          : T("uploaded.many", { count: anzahl });
         if (liegen.length) {
           // Teilweise angenommen: die guten Dateien laufen, die uebrigen werden
           // einzeln benannt. Sonst weiss niemand, welche liegen geblieben ist.
@@ -218,16 +242,16 @@
           jobSection.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       } else if (request.status === 401) {
-        window.location.href = "/anmelden";
+        window.location.href = LOGIN_URL;
       } else {
-        showMessage(payload.error || "Der Upload wurde abgelehnt.", "error");
+        showMessage(payload.error || T("upload_rejected"), "error");
       }
       finish();
     });
 
     request.addEventListener("error", function () {
       hideUploadProgress();
-      showMessage("Die Verbindung wurde unterbrochen. Bitte erneut versuchen.", "error");
+      showMessage(T("connection_lost"), "error");
       finish();
     });
 
@@ -248,7 +272,7 @@
     hideUploadProgress();
 
     var wrap  = el("div", "progress-block");
-    var label = el("div", "progress-label", "Wird hochgeladen ...");
+    var label = el("div", "progress-label", T("uploading"));
     var track = el("div", "progress");
     var fill  = el("div", "progress-fill");
     var value = el("span", "progress-value", startPercent + " %");
@@ -257,7 +281,7 @@
     track.setAttribute("aria-valuemin", "0");
     track.setAttribute("aria-valuemax", "100");
     track.setAttribute("aria-valuenow", String(startPercent));
-    track.setAttribute("aria-label", "Fortschritt des Uploads");
+    track.setAttribute("aria-label", T("progress_aria"));
     fill.style.width = startPercent + "%";
 
     track.appendChild(fill);
@@ -297,9 +321,9 @@
     var start = new Date(isoStart);
     if (isNaN(start.getTime())) { return ""; }
     var seconds = Math.max(0, Math.round((Date.now() - start.getTime()) / 1000));
-    if (seconds < 60) { return seconds + " s"; }
+    if (seconds < 60) { return T("seconds", { value: seconds }); }
     var minutes = Math.floor(seconds / 60);
-    return minutes + " min " + (seconds % 60) + " s";
+    return T("minutes", { min: minutes, sec: seconds % 60 });
   }
 
   // Laufende Konvertierung: es gibt von der Engine keinen echten Prozentwert.
@@ -312,10 +336,10 @@
     var text;
     if (job.status === "queued") {
       text = job.ahead > 0
-        ? (job.ahead === 1 ? "1 Auftrag davor" : job.ahead + " Aufträge davor")
-        : "als Nächstes an der Reihe";
+        ? (job.ahead === 1 ? T("ahead.one") : T("ahead.many", { count: job.ahead }))
+        : T("ahead.next");
     } else {
-      text = "seit " + elapsedText(job.started_at || job.created_at);
+      text = T("since", { value: elapsedText(job.started_at || job.created_at) });
     }
     wrap.appendChild(el("div", "progress-label", text));
 
@@ -333,10 +357,12 @@
   // sonst springt der Text beim ersten Aktualisieren sichtbar um.
   function updateUsage(usage, limits) {
     if (!usageLine || !usage || !limits) { return; }
-    var text = "Heute " + usage.jobs_day + "/" + limits.jobs_per_day + " Konvertierungen · "
-             + usage.pages_day + "/" + limits.pages_per_day + " Seiten";
+    var text = T("usage", {
+      jobs: usage.jobs_day, jobs_max: limits.jobs_per_day,
+      pages: usage.pages_day, pages_max: limits.pages_per_day
+    });
     if (usage.active || usage.queued) {
-      text += " · " + usage.active + " in Arbeit, " + usage.queued + " wartend";
+      text += " · " + T("usage_active", { active: usage.active, queued: usage.queued });
     }
     usageLine.textContent = text;
   }
@@ -344,10 +370,10 @@
   // ---------------------------------------------------------------- Auftragsliste
 
   var STATUS_TEXT = {
-    queued:     "In Warteschlange",
-    processing: "Wird verarbeitet",
-    done:       "Fertig",
-    error:      "Fehler"
+    queued:     T("status.queued"),
+    processing: T("status.processing"),
+    done:       T("status.done"),
+    error:      T("status.error")
   };
 
   // Selbst gezeichnete Symbole auf 24er-Raster — der Zustand hängt nie nur an der Farbe.
@@ -416,20 +442,22 @@
     var head = el("div", "job-head");
     head.appendChild(nameKnoten(job.name, "job-name"));
     head.appendChild(el("span", "job-state", STATUS_TEXT[job.status] || job.status));
-    if (istNeu(job)) { head.appendChild(el("span", "job-neu", "neu")); }
+    if (istNeu(job)) { head.appendChild(el("span", "job-neu", T("new"))); }
     row.appendChild(head);
 
     var meta = [formatSize(job.size)];
-    if (job.pages) { meta.push(job.pages + (job.pages === 1 ? " Seite" : " Seiten")); }
+    if (job.pages) {
+      meta.push(job.pages === 1 ? T("pages.one", { count: job.pages })
+                                : T("pages.many", { count: job.pages }));
+    }
     meta.push(formatTime(job.created_at));
     if (job.status === "done" && job.duration_ms) {
-      meta.push((job.duration_ms / 1000).toFixed(1).replace(".", ",") + " s");
+      meta.push(T("seconds", { value: zahl(job.duration_ms / 1000, 1) }));
     }
     row.appendChild(el("p", "job-meta", meta.join(" · ")));
 
     if (job.note) {
-      row.appendChild(el("p", "job-note",
-        "Vorlage grob aufgel\u00f6st — einzelne Zeichen k\u00f6nnen falsch gelesen werden."));
+      row.appendChild(el("p", "job-note", T("note.lowres")));
     }
     if (job.status === "error" && job.error) {
       row.appendChild(el("p", "job-error", job.error));
@@ -442,18 +470,18 @@
     if (job.status === "done") {
       var group = el("div", "job-actions-main");
 
-      var view = el("a", "btn btn-secondary btn-small", "Ansehen");
-      view.href = "/app/auftrag/" + encodeURIComponent(job.id);
+      var view = el("a", "btn btn-secondary btn-small", T("view"));
+      view.href = "/app/job/" + encodeURIComponent(job.id);
       group.appendChild(view);
 
       var md = el("a", "btn btn-secondary btn-small", ".md");
-      md.href = "/app/auftrag/" + encodeURIComponent(job.id) + "/download/md";
-      md.setAttribute("aria-label", "Markdown herunterladen: " + job.name);
+      md.href = "/app/job/" + encodeURIComponent(job.id) + "/download/md";
+      md.setAttribute("aria-label", T("download_md", { name: job.name }));
       group.appendChild(md);
 
       var js = el("a", "btn btn-secondary btn-small", ".json");
-      js.href = "/app/auftrag/" + encodeURIComponent(job.id) + "/download/json";
-      js.setAttribute("aria-label", "JSON herunterladen: " + job.name);
+      js.href = "/app/job/" + encodeURIComponent(job.id) + "/download/json";
+      js.setAttribute("aria-label", T("download_json", { name: job.name }));
       group.appendChild(js);
 
       actions.appendChild(group);
@@ -461,7 +489,7 @@
 
     var deleteForm = document.createElement("form");
     deleteForm.method = "post";
-    deleteForm.action = "/app/auftrag/" + encodeURIComponent(job.id) + "/loeschen";
+    deleteForm.action = "/app/job/" + encodeURIComponent(job.id) + "/delete";
     deleteForm.className = "inline-form job-delete";
     var token = document.createElement("input");
     token.type = "hidden"; token.name = "csrf"; token.value = csrf;
@@ -471,12 +499,12 @@
     // und vor dem Loeschen wird ohnehin nachgefragt.
     var del = el("button", "btn btn-danger btn-icon");
     del.type = "submit";
-    del.setAttribute("aria-label", "Auftrag löschen: " + job.name);
-    del.title = "Auftrag löschen";
+    del.setAttribute("aria-label", T("delete_aria", { name: job.name }));
+    del.title = T("delete_title");
     del.appendChild(binIcon());
     deleteForm.appendChild(del);
     deleteForm.addEventListener("submit", function (event) {
-      if (!window.confirm("Diesen Auftrag mit allen Ergebnissen endgültig löschen?")) {
+      if (!window.confirm(T("delete_confirm"))) {
         event.preventDefault();
       }
     });
@@ -509,14 +537,9 @@
       // Auftrags eine andere Seite als beim normalen Aufruf.
       var empty = el("li", "muted small empty");
       empty.id = "empty-state";
-      empty.appendChild(el("p", "empty-lead",
-        "Noch nichts konvertiert. Lade oben eine Datei hoch — das Ergebnis erscheint hier."));
+      empty.appendChild(el("p", "empty-lead", T("empty")));
       var schritte = el("ol", "empty-steps");
-      [
-        "Datei auswählen oder in das Feld oben ziehen.",
-        "Auf „Konvertierung starten\u201c tippen.",
-        "Fertige Aufträge erscheinen hier mit Markdown- und JSON-Download."
-      ].forEach(function (text) { schritte.appendChild(el("li", null, text)); });
+      [T("empty.1"), T("empty.2"), T("empty.3")].forEach(function (text) { schritte.appendChild(el("li", null, text)); });
       empty.appendChild(schritte);
       jobList.appendChild(empty);
       zipButton.hidden = true;
@@ -547,7 +570,7 @@
       credentials: "same-origin",
       headers: { "Accept": "application/json" }
     }).then(function (response) {
-      if (response.status === 401) { window.location.href = "/anmelden"; return null; }
+      if (response.status === 401) { window.location.href = LOGIN_URL; return null; }
       return response.ok ? response.json() : null;
     }).then(function (payload) {
       if (!payload) { return; }

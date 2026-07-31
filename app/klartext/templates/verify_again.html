@@ -1,34 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Bestätigungsmail erneut senden — {{ product }}{% endblock %}
-{% block description %}Keine Bestätigungsmail von {{ product }} bekommen? Hier neu anfordern — der Link gilt 24 Stunden.{% endblock %}
+{% block title %}{{ t('verify_again.title') }}{% endblock %}
+{% block description %}{{ t('verify_again.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
-  <h1>Bestätigungsmail erneut senden</h1>
+  <h1>{{ t('verify_again.h1') }}</h1>
 
   {% if not mail_configured %}
-  <div class="notice notice-warn" role="alert">
-    Auf dieser Installation ist kein E-Mail-Versand eingerichtet. Bitte wende dich
-    an den Betreiber.
-  </div>
+  <div class="notice notice-warn" role="alert">{{ t('verify_again.nomail') }}</div>
   {% endif %}
 
-  <p class="small muted">
-    Gib deine Adresse ein. Falls dazu ein noch unbestätigtes Konto gehört, schicken
-    wir einen neuen Link. Er gilt 24 Stunden; ältere Links werden dabei ungültig.
-  </p>
+  <p class="small muted">{{ t('verify_again.intro') }}</p>
 
-  <form method="post" action="/bestaetigung" novalidate>
+  <form method="post" action="{{ path_for('verify_again') }}" novalidate>
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <div class="field">
-      <label for="email">E-Mail-Adresse</label>
+      <label for="email">{{ t('verify_again.email') }}</label>
       <input id="email" name="email" type="email" autocomplete="email" required inputmode="email">
     </div>
-    <button class="btn btn-primary btn-block" type="submit">Mail neu schicken</button>
+    <button class="btn btn-primary btn-block" type="submit">{{ t('verify_again.submit') }}</button>
   </form>
 
   <p class="small muted form-links">
-    <a href="/anmelden">Zurück zur Anmeldung</a>
+    <a href="{{ path_for('login') }}">{{ t('verify_again.back') }}</a>
   </p>
 </div>
 {% endblock %}

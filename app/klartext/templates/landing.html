@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% block title %}{{ product }} — PDF, Scan & Foto in Markdown, kostenlos{% endblock %}
-{% block description %}PDF, Scan, Foto, Word oder Excel in sauberes Markdown und JSON umwandeln. Kostenlos, ohne Konto-Tarife, Texterkennung lokal auf dem Server.{% endblock %}
+{% block title %}{{ t('landing.title') }}{% endblock %}
+{% block description %}{{ t('landing.description') }}{% endblock %}
 
 {% block content %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "{{ product }}",
-  "description": "Wandelt PDF, Fotos, Scans, Word-, Excel- und PowerPoint-Dateien in sauberes Markdown und strukturtreues JSON um. Verarbeitung ausschließlich auf einem eigenen Server, ohne Weitergabe an externe KI- oder OCR-Dienste.",
+  "name": {{ product|tojson }},
+  "description": {{ t('landing.schema.description')|tojson }},
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
-  "url": "{{ public_url }}/",
+  "url": "{{ public_url }}{{ path_for('home') }}",
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "EUR"
   },
-  "inLanguage": "de",
+  "inLanguage": "{{ lang }}",
   "isAccessibleForFree": true
 }
 </script>
@@ -25,32 +25,25 @@
 <section class="hero">
   <p class="eyebrow">
     <span class="dot" aria-hidden="true"></span>
-    Kostenlos · Lokal verarbeitet · Ohne KI-Anbieter
+    {{ t('landing.eyebrow') }}
   </p>
 
-  <h1>Aus Dokumenten wird Klartext.</h1>
+  <h1>{{ t('landing.h1') }}</h1>
 
-  <p class="lead">
-    PDF, Foto, Scan, Word oder Excel hochladen — heraus kommt sauberes Markdown
-    zum Weiterverwenden. Kein Abtippen mehr.
-  </p>
+  <p class="lead">{{ t('landing.lead') }}</p>
 
   <div class="btn-row">
-    <a class="btn btn-primary" href="/registrieren">Kostenloses Konto erstellen</a>
-    <a class="btn btn-secondary" href="/anmelden">Anmelden</a>
+    <a class="btn btn-primary" href="{{ path_for('register') }}">{{ t('landing.cta.primary') }}</a>
+    <a class="btn btn-secondary" href="{{ path_for('login') }}">{{ t('landing.cta.secondary') }}</a>
   </div>
 
-  <p class="smaller muted hero-note">
-    Dauerhaft kostenlos. Keine Tarife, keine Zahlung, keine gesperrten Funktionen.
-  </p>
+  <p class="smaller muted hero-note">{{ t('landing.hero_note') }}</p>
 
   <!-- Zeigt in einem Blick, was der Dienst macht. Reines HTML und CSS,
        keine Bilddatei, kein externer Request. -->
-  <div class="showcase" role="img"
-       aria-label="Links ein gescanntes Dokument mit einer Tabelle, rechts das daraus
-                   erzeugte Markdown mit derselben Tabelle.">
+  <div class="showcase" role="img" aria-label="{{ t('landing.showcase.aria') }}">
     <figure class="showcase-card">
-      <figcaption>Vorher — Scan oder Foto</figcaption>
+      <figcaption>{{ t('landing.showcase.before') }}</figcaption>
       <div class="paper" aria-hidden="true">
         <span class="ln w-60 strong"></span>
         <span class="ln w-95"></span>
@@ -73,23 +66,18 @@
     </div>
 
     <figure class="showcase-card">
-      <figcaption>Nachher — Markdown</figcaption>
-      <pre class="code" aria-hidden="true"><span class="c-h"># Preisliste 2026</span>
+      <figcaption>{{ t('landing.showcase.after') }}</figcaption>
+      <pre class="code" aria-hidden="true"><span class="c-h">{{ t('landing.showcase.code.heading') }}</span>
 
-| Artikelnummer | Bezeichnung      | Preis  |
-|---------------|------------------|--------|
-| A-1001        | Kupferrohr 15 mm | 8,40 € |
-| B-2010        | Dämmschale 20 mm | 4,95 € |
-
-Alle Preise zzgl. MwSt.</pre>
+{{ t('landing.showcase.code.body') }}</pre>
     </figure>
   </div>
 </section>
 
 {# Laufband der tatsaechlich unterstuetzten Formate. Bewusst keine fremden
    Firmenlogos: Klartext hat keine Sponsoren, und erfundene waeren gelogen. #}
-<div class="laufband" role="group" aria-label="Unterstützte Dateiformate">
-  <p class="laufband-titel">Liest zuverlässig</p>
+<div class="laufband" role="group" aria-label="{{ t('landing.formats.aria') }}">
+  <p class="laufband-titel">{{ t('landing.formats.title') }}</p>
   <div class="laufband-fenster">
     <div class="laufband-spur">
       <span class="laufband-satz">
@@ -103,11 +91,11 @@ Alle Preise zzgl. MwSt.</pre>
 </div>
 
 <div class="wrap stack-lg">
-  <section class="kennzahlen" aria-label="Eckdaten">
-    <div><strong>{{ formats_kurz|length }}</strong><span>Formate</span></div>
-    <div><strong>{{ limits.max_pages }}</strong><span>Seiten je Dokument</span></div>
-    <div><strong>{{ limits.retention_hours }} h</strong><span>dann gelöscht</span></div>
-    <div><strong>0 €</strong><span>dauerhaft</span></div>
+  <section class="kennzahlen" aria-label="{{ t('landing.stats.aria') }}">
+    <div><strong>{{ formats_kurz|length }}</strong><span>{{ t('landing.stats.formats') }}</span></div>
+    <div><strong>{{ limits.max_pages }}</strong><span>{{ t('landing.stats.pages') }}</span></div>
+    <div><strong>{{ limits.retention_hours }} h</strong><span>{{ t('landing.stats.retention') }}</span></div>
+    <div><strong>0 €</strong><span>{{ t('landing.stats.price') }}</span></div>
   </section>
 
   <div class="grid grid-3">
@@ -117,12 +105,8 @@ Alle Preise zzgl. MwSt.</pre>
           <path d="M12 3 5 5.8v5.1c0 4.2 2.8 7.9 7 9.1 4.2-1.2 7-4.9 7-9.1V5.8L12 3Z"/>
           <path d="m9 12 2.1 2.1L15.2 10"/>
         </svg></span>
-      <h2>Nichts verlässt den Server</h2>
-      <p class="small">
-        Alles läuft auf diesem Server. Keine Inhalte an OpenAI, Anthropic, Google
-        oder einen anderen Dienst. Keine Werbenetzwerke, keine Verfolgung über
-        Seiten hinweg.
-      </p>
+      <h2>{{ t('landing.feature.1.h') }}</h2>
+      <p class="small">{{ t('landing.feature.1.p') }}</p>
     </article>
 
     <article class="card feature">
@@ -132,11 +116,8 @@ Alle Preise zzgl. MwSt.</pre>
           <path d="M8.4 4.3v2.4h2.4"/>
           <path d="M14 8.6h7M14 12h7M14 15.4h4.6"/>
         </svg></span>
-      <h2>So wenig Verlust wie möglich</h2>
-      <p class="small">
-        Zahlen, Namen und Tabellen bleiben, wie sie im Original stehen. Nichts wird
-        zusammengefasst oder umformuliert.
-      </p>
+      <h2>{{ t('landing.feature.2.h') }}</h2>
+      <p class="small">{{ t('landing.feature.2.p') }}</p>
     </article>
 
     <article class="card feature">
@@ -148,73 +129,70 @@ Alle Preise zzgl. MwSt.</pre>
           <path d="M17.4 10.5a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8Z"/>
           <path d="M17.4 12.8v2.6l1.8 1.2"/>
         </svg></span>
-      <h2>Automatisch gelöscht</h2>
-      <p class="small">
-        Dateien und Ergebnisse verschwinden nach {{ limits.retention_hours }} Stunden
-        von selbst — oder sofort, wenn du willst.
-      </p>
+      <h2>{{ t('landing.feature.3.h') }}</h2>
+      <p class="small">{{ t('landing.feature.3.p', hours=limits.retention_hours) }}</p>
     </article>
   </div>
 
   <section class="band band-hell">
-    <h2>Wofür Leute das nutzen</h2>
-    <p class="small muted">Alltagsfälle, keine Technik.</p>
+    <h2>{{ t('landing.uses.h') }}</h2>
+    <p class="small muted">{{ t('landing.uses.sub') }}</p>
     <ul class="faelle">
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 3h9l3 3v14l-2.2-1.4L13.6 20l-2.2-1.4L9.2 20 7 18.6 4.8 20V6z"/><path d="M8 9h6M8 13h4"/></svg>
         </span>
-        <span class="fall-text"><strong>Rechnung abfotografiert</strong>Positionen zum Kopieren statt abtippen.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.1.h') }}</strong>{{ t('landing.uses.1.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 8h13l3 3v5h-2"/><path d="M3 8v8h2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>
         </span>
-        <span class="fall-text"><strong>Lieferschein gescannt</strong>Mengen und Artikelnummern als Tabelle.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.2.h') }}</strong>{{ t('landing.uses.2.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h3"/></svg>
         </span>
-        <span class="fall-text"><strong>Vertrag als PDF</strong>Einzelne Klauseln per Textsuche finden.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.3.h') }}</strong>{{ t('landing.uses.3.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M9 10v9"/></svg>
         </span>
-        <span class="fall-text"><strong>Preisliste fotografiert</strong>Tabelle direkt für Excel.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.4.h') }}</strong>{{ t('landing.uses.4.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M8 8h7M8 12h5"/></svg>
         </span>
-        <span class="fall-text"><strong>Vorlesungsskript</strong>Text für Zusammenfassungen und Karteikarten.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.5.h') }}</strong>{{ t('landing.uses.5.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 4h6l2 3h8v13H4z"/><path d="M8 12h8M8 16h5"/></svg>
         </span>
-        <span class="fall-text"><strong>Altes Schreiben aus dem Ordner</strong>Durchsuchbar statt nur ein Bild.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.6.h') }}</strong>{{ t('landing.uses.6.p') }}</span>
       </li>
       <li>
         <span class="fall-symbol" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg>
         </span>
-        <span class="fall-text"><strong>Excel-Tabelle</strong>Als Markdown für Programme ohne XLSX.</span>
+        <span class="fall-text"><strong>{{ t('landing.uses.7.h') }}</strong>{{ t('landing.uses.7.p') }}</span>
       </li>
     </ul>
   </section>
 
   <section class="band">
-    <h2>Die wichtigsten Umwandlungen</h2>
-    <p class="small muted">Was dabei erhalten bleibt und was nicht.</p>
+    <h2>{{ t('landing.conv.h') }}</h2>
+    <p class="small muted">{{ t('landing.conv.sub') }}</p>
     <div class="karten">
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -226,8 +204,8 @@ Alle Preise zzgl. MwSt.</pre>
         <path class="kb-linie" d="M76 16a4 4 0 0 1 4-4h22a4 4 0 0 1 4 4v40a4 4 0 0 1-4 4H80a4 4 0 0 1-4-4z"/>
         <path class="kb-strich" d="M83 24h16M83 32h16M83 40h16M83 48h10"/>
       </svg>
-        <h3>PDF in Markdown</h3>
-        <p>Rechnungen, Verträge, Handbücher. Überschriften, Absätze und Tabellen werden übernommen. Bei mehrspaltigem Layout kann die Reihenfolge durcheinandergeraten.</p>
+        <h3>{{ t('landing.conv.1.h') }}</h3>
+        <p>{{ t('landing.conv.1.p') }}</p>
       </article>
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -238,8 +216,8 @@ Alle Preise zzgl. MwSt.</pre>
         <path class="kb-strich" d="M54 25h12M54 31h12M54 37h8"/>
         <path class="kb-akzent" d="M48 16v-4h5M72 16v-4h-5M48 50v4h5M72 50v4h-5"/>
       </svg>
-        <h3>Foto in Text</h3>
-        <p>Ein abfotografiertes Dokument wird zu kopierbarem Text. Ein gerades, scharfes Foto liefert das beste Ergebnis.</p>
+        <h3>{{ t('landing.conv.2.h') }}</h3>
+        <p>{{ t('landing.conv.2.p') }}</p>
       </article>
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -248,8 +226,8 @@ Alle Preise zzgl. MwSt.</pre>
         <path class="kb-akzent" d="M34 24h20"/>
         <path class="kb-strich" d="M34 34h52M34 42h52M34 50h34"/>
       </svg>
-        <h3>Word in Markdown</h3>
-        <p>Überschriften, Absätze, Listen und Tabellen kommen strukturiert an. Kommentare, Fußnoten und Textfelder bleiben auf der Strecke.</p>
+        <h3>{{ t('landing.conv.3.h') }}</h3>
+        <p>{{ t('landing.conv.3.p') }}</p>
       </article>
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -258,8 +236,8 @@ Alle Preise zzgl. MwSt.</pre>
         <path class="kb-akzent" d="M20 26h80"/>
         <path class="kb-strich" d="M20 40h80M20 52h80M47 12v48M73 12v48"/>
       </svg>
-        <h3>Excel in Markdown</h3>
-        <p>Jede Tabelle wird zur Markdown-Tabelle mit Kopfzeile. Zellformate, Formeln und Diagramme werden nicht übertragen.</p>
+        <h3>{{ t('landing.conv.4.h') }}</h3>
+        <p>{{ t('landing.conv.4.p') }}</p>
       </article>
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -268,8 +246,8 @@ Alle Preise zzgl. MwSt.</pre>
         <path class="kb-strich" d="M42 18h36M42 26h36M42 46h36M42 54h24"/>
         <path class="kb-akzent" d="M28 36h64"/>
       </svg>
-        <h3>Scan in Text</h3>
-        <p>Auch ein altes, vergilbtes Schreiben wird durchsuchbar. Bei schlechter Scanqualität oder Handschrift sinkt die Erkennung.</p>
+        <h3>{{ t('landing.conv.5.h') }}</h3>
+        <p>{{ t('landing.conv.5.p') }}</p>
       </article>
       <article class="karte">
         <svg class="karte-bild" viewBox="0 0 120 72" fill="none" aria-hidden="true" focusable="false">
@@ -280,246 +258,89 @@ Alle Preise zzgl. MwSt.</pre>
           <rect class="kb-strich" x="70" y="30" width="18" height="16" rx="2"/>
           <path class="kb-linie" d="M60 56v6M52 62h16"/>
         </svg>
-        <h3>PowerPoint in Markdown</h3>
-        <p>Jede Folie wird zu Überschrift und Aufzählung. Grafiken, Animationen und
-        Notizen bleiben auf der Strecke.</p>
+        <h3>{{ t('landing.conv.6.h') }}</h3>
+        <p>{{ t('landing.conv.6.p') }}</p>
       </article>
     </div>
   </section>
 
   <section class="card">
-    <h2>Was hineingeht, was herauskommt</h2>
-    <p class="small muted">Diese Dateitypen nimmt {{ product }} an:</p>
+    <h2>{{ t('landing.io.h') }}</h2>
+    <p class="small muted">{{ t('landing.io.sub') }}</p>
     <ul class="formatliste">
       {% for f in formats %}<li>{{ f }}</li>{% endfor %}
     </ul>
-    <p class="small muted ausgabe-zeile">
-      Heraus kommen immer zwei Dateien: <strong>.md</strong> zum Lesen und
-      Weiterverwenden, <strong>.json</strong> mit der vollständigen Struktur für
-      andere Programme.
-    </p>
+    <p class="small muted ausgabe-zeile">{{ t('landing.io.note')|safe }}</p>
   </section>
 
   <section class="card">
-    <h2>Grenzen für alle gleich</h2>
-    <p class="small muted">
-      Damit der Dienst für alle stabil bleibt, gelten technische Fair-Use-Grenzen.
-      Sie dienen dem Schutz vor Überlastung — nicht dem Verkauf.
-    </p>
+    <h2>{{ t('landing.limits.h') }}</h2>
+    <p class="small muted">{{ t('landing.limits.sub') }}</p>
     <div class="table-scroll">
       <table>
         <tbody>
-          <tr><th scope="row">Größe je Datei</th><td class="num">{{ limits.max_file_size_mb }} MB</td></tr>
-          <tr><th scope="row">Dateien je Upload</th><td class="num">{{ limits.max_files_per_upload }}</td></tr>
-          <tr><th scope="row">Seiten je Dokument</th><td class="num">{{ limits.max_pages }}</td></tr>
-          <tr><th scope="row">Konvertierungen pro Tag</th><td class="num">{{ limits.jobs_per_day }}</td></tr>
+          <tr><th scope="row">{{ t('landing.limits.filesize') }}</th><td class="num">{{ limits.max_file_size_mb }} MB</td></tr>
+          <tr><th scope="row">{{ t('landing.limits.files') }}</th><td class="num">{{ limits.max_files_per_upload }}</td></tr>
+          <tr><th scope="row">{{ t('landing.limits.pages') }}</th><td class="num">{{ limits.max_pages }}</td></tr>
+          <tr><th scope="row">{{ t('landing.limits.perday') }}</th><td class="num">{{ limits.jobs_per_day }}</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
+  {# Fragen und Antworten stehen einmal hier und einmal maschinenlesbar am Ende
+     der Seite. Zwei Fassungen derselben Liste gingen beim naechsten Zusatz
+     auseinander, deshalb kommen beide aus derselben Variablen. #}
+  {% set faq = [
+    (t('landing.faq.1.q'), t('landing.faq.1.a'), t('landing.faq.1.a')),
+    (t('landing.faq.2.q'), t('landing.faq.2.a_html'), t('landing.faq.2.a')),
+    (t('landing.faq.3.q'), t('landing.faq.3.a'), t('landing.faq.3.a')),
+    (t('landing.faq.4.q'), t('landing.faq.4.a'), t('landing.faq.4.a')),
+    (t('landing.faq.5.q'), t('landing.faq.5.a', hours=limits.retention_hours),
+                           t('landing.faq.5.a', hours=limits.retention_hours)),
+    (t('landing.faq.6.q'), t('landing.faq.6.a'), t('landing.faq.6.a')),
+    (t('landing.faq.7.q'), t('landing.faq.7.a'), t('landing.faq.7.a')),
+    (t('landing.faq.8.q'), t('landing.faq.8.a'), t('landing.faq.8.a')),
+    (t('landing.faq.9.q'), formats|join(', ') ~ '.', formats|join(', ') ~ '.'),
+    (t('landing.faq.10.q'), t('landing.faq.10.a'), t('landing.faq.10.a'))
+  ] %}
+
   <section class="band" aria-labelledby="faq-heading">
-    <h2 id="faq-heading">Häufige Fragen</h2>
+    <h2 id="faq-heading">{{ t('landing.faq.h') }}</h2>
 
     <div class="faq">
+      {% for frage, antwort, _klartext in faq %}
       <details class="faq-item">
         <summary>
-          <span class="faq-frage">Ist {{ product }} wirklich kostenlos?</span>
+          <span class="faq-frage">{{ frage }}</span>
           <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </summary>
-        <div class="faq-antwort"><p>Ja. Es gibt keine Tarife, keine Zahlung und keine gesperrten Funktionen. Für die
-      Nutzung ist lediglich ein kostenloses Konto nötig.</p></div>
+        <div class="faq-antwort"><p>{{ antwort|safe }}</p></div>
       </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Was ist Markdown überhaupt?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Eine einfache Auszeichnungssprache für Text: Überschriften, Listen und Tabellen
-      werden mit gewöhnlichen Zeichen wie <code>#</code> oder <code>|</code> markiert.
-      Lesbar als reiner Text und, in Notiz-Apps, Wikis oder auf GitHub, hübsch
-      formatiert.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Wozu dient die JSON-Datei?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Sie enthält dieselben Inhalte maschinenlesbar aufgeschlüsselt — mit Seiten,
-      Blöcken und Tabellenzellen einzeln erfasst. Praktisch zum Einbinden in eigene
-      Programme, Automatisierungen oder Datenbanken, wo Markdown zu grob wäre.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Werden meine Dokumente an einen KI-Anbieter weitergegeben?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Nein. Die gesamte Umwandlung läuft auf einem eigenen Server. Es werden keine
-      Inhalte an OpenAI, Anthropic, Google oder andere KI- oder OCR-Dienste geschickt.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Werden meine Dokumente gespeichert?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Nur vorübergehend, zur Verarbeitung. Hochgeladene Dateien und Ergebnisse werden
-      automatisch nach {{ limits.retention_hours }} Stunden gelöscht, und lassen sich
-      bei jedem Auftrag auch von Hand vorher entfernen. {{ product }} ist kein
-      dauerhafter Speicherort.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Ist das Ergebnis fehlerfrei?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Nein. Die Umwandlung läuft automatisch und kann bei schlechten Scans, Handschrift
-      oder verschachtelten Tabellen Fehler enthalten. Markdown kann außerdem nicht jedes
-      Layout abbilden — für die strukturtreuere Version eignet sich die JSON-Datei.
-      Ergebnisse sollten vor der Weiterverwendung geprüft werden.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Wie gut erkennt {{ product }} Handschrift?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Ehrlich gesagt schlecht. Die Texterkennung ist auf gedruckten Text trainiert.
-      Handschriftliche Notizen, Unterschriften oder von Hand ausgefüllte Formulare
-      werden oft falsch oder gar nicht erkannt — für Gedrucktes und gute Scans
-      funktioniert sie zuverlässig.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Funktioniert es mit Fotos vom Handy?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Ja. Entscheidend sind Schärfe und Auflösung: Ein gerades, scharfes und gut
-      ausgeleuchtetes Foto liefert brauchbare Ergebnisse, ein verwackeltes oder
-      dunkles Foto lässt die Texterkennung öfter stolpern.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Welche Dateien kann ich hochladen?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>{{ formats|join(', ') }}.</p></div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span class="faq-frage">Warum brauche ich ein Konto?</span>
-          <svg class="faq-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
-        </summary>
-        <div class="faq-antwort"><p>Die Registrierung ist kostenlos und sorgt dafür, dass die Fair-Use-Grenzen pro
-      Person gelten, statt sich alle Besucher eine gemeinsame Grenze zu teilen.</p></div>
-      </details>
+      {% endfor %}
     </div>
   </section>
 </div>
 
+{# Dieselben Fragen maschinenlesbar. Ohne HTML-Auszeichnung: in strukturierten
+   Daten haben <code>-Marken nichts zu suchen. #}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {% for frage, _html, antwort in faq %}
     {
       "@type": "Question",
-      "name": "Ist {{ product }} wirklich kostenlos?",
+      "name": {{ frage|tojson }},
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ja. Es gibt keine Tarife, keine Zahlung und keine gesperrten Funktionen. Für die Nutzung ist lediglich ein kostenloses Konto nötig."
+        "text": {{ antwort|tojson }}
       }
-    },
-    {
-      "@type": "Question",
-      "name": "Was ist Markdown überhaupt?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Eine einfache Auszeichnungssprache für Text: Überschriften, Listen und Tabellen werden mit gewöhnlichen Zeichen wie # oder | markiert. Lesbar als reiner Text und, in Notiz-Apps, Wikis oder auf GitHub, hübsch formatiert."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Wozu dient die JSON-Datei?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Sie enthält dieselben Inhalte maschinenlesbar aufgeschlüsselt — mit Seiten, Blöcken und Tabellenzellen einzeln erfasst. Praktisch zum Einbinden in eigene Programme, Automatisierungen oder Datenbanken, wo Markdown zu grob wäre."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Werden meine Dokumente an einen KI-Anbieter weitergegeben?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Nein. Die gesamte Umwandlung läuft auf einem eigenen Server. Es werden keine Inhalte an OpenAI, Anthropic, Google oder andere KI- oder OCR-Dienste geschickt."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Werden meine Dokumente gespeichert?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Nur vorübergehend, zur Verarbeitung. Hochgeladene Dateien und Ergebnisse werden automatisch nach {{ limits.retention_hours }} Stunden gelöscht, und lassen sich bei jedem Auftrag auch von Hand vorher entfernen. {{ product }} ist kein dauerhafter Speicherort."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Ist das Ergebnis fehlerfrei?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Nein. Die Umwandlung läuft automatisch und kann bei schlechten Scans, Handschrift oder verschachtelten Tabellen Fehler enthalten. Markdown kann außerdem nicht jedes Layout abbilden — für die strukturtreuere Version eignet sich die JSON-Datei. Ergebnisse sollten vor der Weiterverwendung geprüft werden."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Wie gut erkennt {{ product }} Handschrift?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Ehrlich gesagt schlecht. Die Texterkennung ist auf gedruckten Text trainiert. Handschriftliche Notizen, Unterschriften oder von Hand ausgefüllte Formulare werden oft falsch oder gar nicht erkannt — für Gedrucktes und gute Scans funktioniert sie zuverlässig."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Funktioniert es mit Fotos vom Handy?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Ja. Entscheidend sind Schärfe und Auflösung: Ein gerades, scharfes und gut ausgeleuchtetes Foto liefert brauchbare Ergebnisse, ein verwackeltes oder dunkles Foto lässt die Texterkennung öfter stolpern."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Welche Dateien kann ich hochladen?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "{{ formats|join(', ') }}."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Warum brauche ich ein Konto?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Die Registrierung ist kostenlos und sorgt dafür, dass die Fair-Use-Grenzen pro Person gelten, statt sich alle Besucher eine gemeinsame Grenze zu teilen."
-      }
-    }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
   ]
 }
 </script>

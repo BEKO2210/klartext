@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Anmelden — {{ product }}{% endblock %}
-{% block description %}Bei {{ product }} anmelden und Dokumente in Markdown und JSON umwandeln.{% endblock %}
+{% block title %}{{ t('login.title') }}{% endblock %}
+{% block description %}{{ t('login.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
-  <h1>Anmelden</h1>
+  <h1>{{ t('login.h1') }}</h1>
 
   {% if errors %}
   <div class="notice notice-error" role="alert">
@@ -12,27 +12,27 @@
   </div>
   {% endif %}
 
-  <form method="post" action="/anmelden" novalidate>
+  <form method="post" action="{{ path_for('login') }}" novalidate>
     <input type="hidden" name="csrf" value="{{ csrf }}">
 
     <div class="field">
-      <label for="email">E-Mail-Adresse</label>
+      <label for="email">{{ t('login.email') }}</label>
       <input id="email" name="email" type="email" autocomplete="email" required
              inputmode="email" value="{{ email|default('') }}">
     </div>
 
     <div class="field">
-      <label for="password">Passwort</label>
+      <label for="password">{{ t('login.password') }}</label>
       <input id="password" name="password" type="password" autocomplete="current-password" required>
     </div>
 
-    <button class="btn btn-primary btn-block" type="submit">Anmelden</button>
+    <button class="btn btn-primary btn-block" type="submit">{{ t('login.submit') }}</button>
   </form>
 
   <p class="small muted form-links">
-    <a href="/bestaetigung">Bestätigungsmail erneut senden</a><br>
-    <a href="/passwort-vergessen">Passwort vergessen?</a><br>
-    Noch kein Konto? <a href="/registrieren">Konto erstellen</a>
+    <a href="{{ path_for('verify_again') }}">{{ t('login.resend') }}</a><br>
+    <a href="{{ path_for('forgot') }}">{{ t('login.forgot') }}</a><br>
+    {{ t('login.no_account') }} <a href="{{ path_for('register') }}">{{ t('login.create') }}</a>
   </p>
 </div>
 {% endblock %}

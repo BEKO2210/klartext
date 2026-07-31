@@ -1,25 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Fehler {{ status }} — {{ product }}{% endblock %}
+{% block title %}{{ t('error.title', status=status) }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
   <h1>
-    {% if status == 401 %}Anmeldung nötig
-    {% elif status == 404 %}Nicht gefunden
-    {% elif status == 413 %}Datei zu groß
-    {% elif status == 429 %}Kurz warten, bitte
-    {% elif status == 400 %}Das hat nicht geklappt
-    {% else %}Da ist etwas schiefgelaufen
-    {% endif %}
+    {% if status in [401, 404, 413, 429, 400] %}{{ t('error.h.' ~ status) }}
+    {% else %}{{ t('error.h.other') }}{% endif %}
   </h1>
-  <p class="small muted">Fehler {{ status }}</p>
+  <p class="small muted">{{ t('error.code', status=status) }}</p>
   <p>{{ message }}</p>
   <div class="btn-row">
-    <a class="btn btn-secondary" href="{% if user %}/app{% else %}/{% endif %}">
-      {% if user %}Zur Übersicht{% else %}Zur Startseite{% endif %}
+    <a class="btn btn-secondary" href="{% if user %}{{ path_for('app') }}{% else %}{{ path_for('home') }}{% endif %}">
+      {% if user %}{{ t('error.to_app') }}{% else %}{{ t('error.to_home') }}{% endif %}
     </a>
     {% if status == 401 and not user %}
-    <a class="btn btn-primary" href="/anmelden">Zur Anmeldung</a>
+    <a class="btn btn-primary" href="{{ path_for('login') }}">{{ t('error.to_login') }}</a>
     {% endif %}
   </div>
 </div>

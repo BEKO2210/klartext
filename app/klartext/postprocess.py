@@ -23,6 +23,8 @@ from collections import Counter
 
 from pypdf import PdfReader
 
+from . import i18n
+
 log = logging.getLogger("klartext.postprocess")
 
 # Ab diesem Anteil an Seiten gilt eine Zeile als wiederkehrendes Seitenelement.
@@ -154,17 +156,18 @@ def links_lesen(pdf_bytes: bytes) -> list[dict]:
     return gefunden
 
 
-def markdown_links_anhaengen(markdown: str, links: list[dict]) -> str:
+def markdown_links_anhaengen(markdown: str, links: list[dict],
+                             lang: str = i18n.DEFAULT_LANG) -> str:
     if not links:
         return markdown
-    zeilen = ["", "", "## Verweise im Dokument", "",
-              "Diese Verweise liegen in der PDF als anklickbare Verknuepfungen vor "
-              "und tauchen im Fliesstext nicht auf.", ""]
+    zeilen = ["", "", "## " + i18n.translate(lang, "result.links.h"), "",
+              i18n.translate(lang, "result.links.intro"), ""]
     letzte_seite = None
     for eintrag in links:
         if eintrag["page_no"] != letzte_seite:
             letzte_seite = eintrag["page_no"]
-            zeilen.append(f"**Seite {letzte_seite}**")
+            zeilen.append(
+                "**" + i18n.translate(lang, "result.links.page", page=letzte_seite) + "**")
             zeilen.append("")
         zeilen.append(f"- <{eintrag['url']}>")
     zeilen.append("")
@@ -232,7 +235,8 @@ def wiederkehrende_texte(pdf_bytes: bytes, markdown: str) -> list[str]:
     return treffer
 
 
-def seitenelemente_zusammenfassen(markdown: str, elemente: list[str]) -> str:
+def seitenelemente_zusammenfassen(markdown: str, elemente: list[str],
+                                  lang: str = i18n.DEFAULT_LANG) -> str:
     """Entfernt die Wiederholungen aus dem Fliesstext und nennt sie einmal.
 
     Nur im Markdown. Die JSON-Ausgabe bleibt unangetastet und vollstaendig.
@@ -261,11 +265,8 @@ def seitenelemente_zusammenfassen(markdown: str, elemente: list[str]) -> str:
     gekuerzt = re.sub(r" +\|", " |", gekuerzt)
     gekuerzt = re.sub(r"\n{3,}", "\n\n", gekuerzt).strip()
 
-    kopf = ["## Wiederkehrende Seitenelemente", "",
-            "Dieser Text steht in der Vorlage auf nahezu jeder Seite "
-            "(Kopf- oder Fusszeile, Wasserzeichen). Er ist hier einmal aufgefuehrt "
-            "statt auf jeder Seite wiederholt. Die JSON-Ausgabe enthaelt ihn "
-            "unveraendert an jeder Fundstelle.", ""]
+    kopf = ["## " + i18n.translate(lang, "result.repeated.h"), "",
+            i18n.translate(lang, "result.repeated.intro"), ""]
     for text in elemente:
         kopf.append(f"- {text}")
     kopf.extend(["", "---", ""])
@@ -471,10 +472,11 @@ def _zeilenhoehe(struktur: dict) -> float | None:
     return hoehen[len(hoehen) // 2]
 
 
-def aufloesung_pruefen(daten: bytes, mime: str, struktur: dict | None = None) -> str | None:
+def aufloesung_pruefen(daten: bytes, mime: str, struktur: dict | None = None,
+                       lang: str = i18n.DEFAULT_LANG) -> str | None:
     """Meldet zu grobe Vorlagen. Gibt einen Hinweistext zurueck oder nichts."""
     if mime == "application/pdf":
-        return _aufloesung_pdf(daten)
+        return _aufloesung_pdf(daten, lang)
     if not mime.startswith("image/"):
         return None
     if not isinstance(struktur, dict):
@@ -485,14 +487,10 @@ def aufloesung_pruefen(daten: bytes, mime: str, struktur: dict | None = None) ->
         return None
 
     masse = bildgroesse(daten)
-    groesse = f" ({masse[0]} × {masse[1]} Bildpunkte)" if masse else ""
-    return (
-        f"Auf dieser Vorlage ist die Schrift nur etwa {round(hoehe)} Bildpunkte "
-        f"hoch{groesse}. Für eine sichere Texterkennung sollten es mindestens "
-        f"{_MINDEST_ZEILENHOEHE} sein. Einzelne Zeichen können deshalb falsch "
-        "gelesen werden. Am besten die Vorlage noch einmal näher heran und mit "
-        "voller Kameraauflösung aufnehmen."
-    )
+    groesse = (i18n.translate(lang, "note.image_lowres.size",
+                              width=masse[0], height=masse[1]) if masse else "")
+    return i18n.translate(lang, "note.image_lowres", height=round(hoehe),
+                          size=groesse, min=_MINDEST_ZEILENHOEHE)
 
 
 def _bilder_einer_seite(seite) -> list[tuple[int, int]]:
@@ -521,7 +519,7 @@ def _bilder_einer_seite(seite) -> list[tuple[int, int]]:
     return masse
 
 
-def _aufloesung_pdf(daten: bytes) -> str | None:
+def _aufloesung_pdf(daten: bytes, lang: str = i18n.DEFAULT_LANG) -> str | None:
     """Prueft eingescannte PDF-Seiten: kein Textlayer, nur ein grobes Bild.
 
     Der Hinweis erscheint nur, wenn das Dokument ueberwiegend aus solchen Seiten
@@ -572,12 +570,8 @@ def _aufloesung_pdf(daten: bytes) -> str | None:
     if schlechteste is None or grobe_seiten * 2 < len(seiten):
         return None
     breite, hoehe, punkte_je_zoll = schlechteste
-    return (
-        f"Dieses PDF enthält gescannte Seiten mit {breite} × {hoehe} Bildpunkten "
-        f"— etwa {round(punkte_je_zoll)} Punkte je Zoll, empfohlen sind "
-        f"{_MINDEST_PUNKTE_JE_ZOLL}. Einzelne Zeichen können deshalb falsch "
-        "gelesen werden. Am besten mit mindestens 300 Punkten je Zoll neu einscannen."
-    )
+    return i18n.translate(lang, "note.pdf_lowres", width=breite, height=hoehe,
+                          dpi=round(punkte_je_zoll), min=_MINDEST_PUNKTE_JE_ZOLL)
 
 
 # --- Einheiten prüfen ----------------------------------------------------

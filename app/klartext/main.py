@@ -2,6 +2,9 @@
 
 Alle Ressourcen sind an eine user_id gebunden und werden serverseitig geprüft.
 Es gibt keine Stelle, an der eine ID allein zum Zugriff genügt.
+
+Sprachen: Englisch liegt auf den blanken Pfaden, Deutsch unter /de. Welche
+Fassung ausgeliefert wird, entscheidet die Middleware — siehe i18n.py.
 """
 
 from __future__ import annotations
@@ -16,19 +19,23 @@ import uuid
 import zipfile
 from contextlib import asynccontextmanager
 from datetime import timedelta
+from urllib.parse import urlencode
 
 import httpx
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from . import db, mail, quota, security, settings_store, storage, uploads
+from . import db, i18n, mail, quota, security, settings_store, storage, uploads
 from .config import CONFIG, LIMIT_DEFS
+from .i18n import APP_PATHS as AP
+from .i18n import PATHS as P
 from .web_helpers import (
     CSRF_COOKIE,
     HttpProblem,
     base_context,
     client_ip,
+    lang_of,
     message_for,
     templates,
     verify_csrf,
@@ -85,13 +92,30 @@ SECURITY_HEADERS = {
     "Cross-Origin-Resource-Policy": "same-origin",
 }
 
+_LANG_COOKIE_JAHR = 365 * 24 * 3600
+
+
+def _mit_query(request: Request, pfad: str, ohne: str = "") -> str:
+    paare = [(k, v) for k, v in request.query_params.multi_items() if k != ohne]
+    return f"{pfad}?{urlencode(paare)}" if paare else pfad
+
 
 @app.middleware("http")
 async def request_pipeline(request: Request, call_next):
     request.state.session = None
+    request.state.lang = i18n.DEFAULT_LANG
+    pfad = request.url.path
 
-    if request.url.path == "/healthz":
+    if pfad == "/healthz":
         return await call_next(request)
+
+    # 0) Alte deutsche Adressen. Sie standen ein Jahr lang in Suchtreffern und
+    #    fremden Verweisen; deshalb dauerhaft weiterleiten statt fallen lassen.
+    #    Bei Formularen 308, sonst ginge die Methode samt Rumpf verloren.
+    alt = i18n.legacy_target(pfad)
+    if alt is not None:
+        code = 301 if request.method in {"GET", "HEAD"} else 308
+        return RedirectResponse(_mit_query(request, alt), status_code=code)
 
     # 1) Grobes Anfragelimit pro IP
     ip = client_ip(request)
@@ -102,9 +126,38 @@ async def request_pipeline(request: Request, call_next):
     except Exception:  # noqa: BLE001 - Datenbank noch nicht da: Anfrage nicht blockieren
         allowed = True
     if not allowed:
-        return _plain_error(request, 429, "Zu viele Anfragen. Bitte kurz warten.")
+        return _plain_error(request, 429, "error.rate_limited")
 
-    # 2) Session laden
+    # 2) Sprache bestimmen
+    gewuenscht = i18n.normalize(request.query_params.get("lang"))
+    cookie_sprache = i18n.normalize(request.cookies.get(i18n.LANG_COOKIE))
+    pfad_sprache = i18n.lang_from_path(pfad)
+    browser_sprache = i18n.preferred_from_header(request.headers.get("accept-language", ""))
+    request.state.lang = pfad_sprache or cookie_sprache or browser_sprache
+
+    # Ausdrueckliche Wahl über den Umschalter: merken und auf die Fassung in der
+    # gewaehlten Sprache schicken. Ohne das Merken wuerde die Umleitung nach
+    # Browsersprache die Wahl beim naechsten Aufruf sofort wieder umwerfen.
+    if gewuenscht and request.method in {"GET", "HEAD"}:
+        ziel = _mit_query(request, i18n.twin(pfad, gewuenscht), ohne="lang")
+        antwort = RedirectResponse(ziel, status_code=303)
+        _set_cookie(antwort, i18n.LANG_COOKIE, gewuenscht,
+                    http_only=False, max_age=_LANG_COOKIE_JAHR)
+        return antwort
+
+    # Englisch ist die Standardfassung. Wer laut Browser Deutsch bevorzugt und
+    # noch nichts gewaehlt hat, landet einmalig auf der deutschen Fassung.
+    if (
+        request.method in {"GET", "HEAD"}
+        and pfad_sprache == "en"
+        and cookie_sprache is None
+        and browser_sprache == "de"
+    ):
+        antwort = RedirectResponse(_mit_query(request, i18n.twin(pfad, "de")), status_code=302)
+        antwort.headers["Vary"] = "Accept-Language, Cookie"
+        return antwort
+
+    # 3) Session laden
     try:
         request.state.session = await security.load_session(
             request.cookies.get(CONFIG.session_cookie)
@@ -112,7 +165,7 @@ async def request_pipeline(request: Request, call_next):
     except Exception:  # noqa: BLE001
         request.state.session = None
 
-    # 3) Body-Größe begrenzen, bevor irgendetwas gelesen wird
+    # 4) Body-Größe begrenzen, bevor irgendetwas gelesen wird
     if request.method in {"POST", "PUT", "PATCH"}:
         limits = await _limits_safe()
         max_body = (
@@ -120,7 +173,7 @@ async def request_pipeline(request: Request, call_next):
         ) * 1024 * 1024
         length = request.headers.get("content-length")
         if length and length.isdigit() and int(length) > max_body:
-            return _plain_error(request, 413, "Der Upload ist zu groß.")
+            return _plain_error(request, 413, "error.upload_too_large")
 
     response = await call_next(request)
 
@@ -130,6 +183,11 @@ async def request_pipeline(request: Request, call_next):
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
+    # Dieselbe Adresse kann je nach Browsersprache und Sprachcookie
+    # unterschiedlich ausfallen. Ohne diesen Hinweis liefern Zwischenspeicher
+    # die zuerst gesehene Fassung an alle weiteren Besucher aus.
+    if response.headers.get("content-type", "").startswith("text/html"):
+        response.headers.setdefault("Vary", "Accept-Language, Cookie")
 
     fresh = getattr(request.state, "fresh_csrf", None)
     if fresh and request.state.session is None:
@@ -156,7 +214,9 @@ def _set_cookie(response: Response, name: str, value: str, *, http_only: bool, m
     )
 
 
-def _plain_error(request: Request, status: int, message: str) -> Response:
+def _plain_error(request: Request, status: int, key: str, **werte) -> Response:
+    lang = lang_of(request)
+    message = i18n.translate(lang, key, **werte)
     if request.headers.get("accept", "").startswith("application/json"):
         return JSONResponse({"error": message}, status_code=status)
     return templates.TemplateResponse(
@@ -169,21 +229,19 @@ def _plain_error(request: Request, status: int, message: str) -> Response:
 
 @app.exception_handler(HttpProblem)
 async def handle_problem(request: Request, exc: HttpProblem):
-    return _plain_error(request, exc.status, exc.message)
+    return _plain_error(request, exc.status, exc.key, **exc.werte)
 
 
 @app.exception_handler(404)
 async def handle_404(request: Request, exc):  # noqa: ANN001
-    return _plain_error(request, 404, "Diese Seite gibt es nicht.")
+    return _plain_error(request, 404, "error.not_found")
 
 
 @app.exception_handler(Exception)
 async def handle_unexpected(request: Request, exc: Exception):
     # Details bleiben im Log. Der Benutzer bekommt nie Stacktrace, Pfad oder Containernamen.
     log.exception("Unerwarteter Fehler auf %s", request.url.path)
-    return _plain_error(
-        request, 500, "Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es erneut."
-    )
+    return _plain_error(request, 500, "error.unexpected")
 
 
 # --------------------------------------------------------------------------- Zugriff
@@ -192,7 +250,7 @@ async def handle_unexpected(request: Request, exc: Exception):
 def _session(request: Request):
     session = getattr(request.state, "session", None)
     if session is None:
-        raise HttpProblem(401, "Bitte melde dich an.")
+        raise HttpProblem(401, "error.login_required")
     return session
 
 
@@ -200,12 +258,19 @@ def _admin(request: Request):
     session = _session(request)
     if not session["is_admin"]:
         # Bewusst 404: Admin-Bereich wird für Nicht-Admins nicht einmal bestätigt.
-        raise HttpProblem(404, "Diese Seite gibt es nicht.")
+        raise HttpProblem(404, "error.not_found")
     return session
 
 
-def _redirect_login() -> RedirectResponse:
-    return RedirectResponse("/anmelden", status_code=303)
+def _redirect_login(request: Request) -> RedirectResponse:
+    return RedirectResponse(i18n.path_for("login", lang_of(request)), status_code=303)
+
+
+def _passwort_problem(request: Request, password: str) -> str | None:
+    key = security.password_problem(password)
+    if key is None:
+        return None
+    return i18n.translate(lang_of(request), key, min=security.MIN_PASSWORD_LEN)
 
 
 # --------------------------------------------------------------------------- Öffentlich
@@ -218,21 +283,6 @@ async def healthz():
     except Exception:  # noqa: BLE001
         return JSONResponse({"status": "degraded"}, status_code=503)
     return {"status": "ok"}
-
-
-# Öffentliche Seiten, die eine Suchmaschine sehen und indexieren darf.
-# /app, /konto und /admin brauchen eine Anmeldung und liefern für Gäste ohnehin
-# keinen sinnvollen Inhalt — deshalb weder in der Sitemap noch zum Crawlen frei.
-_PUBLIC_PATHS = [
-    "/",
-    "/registrieren",
-    "/anmelden",
-    "/passwort-vergessen",
-    "/impressum",
-    "/datenschutz",
-    "/nutzungsbedingungen",
-    "/lizenzen",
-]
 
 
 # --- Reichweitenmessung ------------------------------------------------------
@@ -248,7 +298,7 @@ _MESSUNG_SKRIPT: bytes | None = None
 @app.get("/js/script.js")
 async def messung_skript():
     if not CONFIG.messung_aktiv:
-        raise HttpProblem(404, "Diese Datei gibt es nicht.")
+        raise HttpProblem(404, "error.file_missing")
     global _MESSUNG_SKRIPT
     if _MESSUNG_SKRIPT is None:
         try:
@@ -273,10 +323,10 @@ async def messung_skript():
 @app.post("/api/event")
 async def messung_ereignis(request: Request):
     if not CONFIG.messung_aktiv:
-        raise HttpProblem(404, "Diese Adresse gibt es nicht.")
+        raise HttpProblem(404, "error.address_missing")
     rumpf = await request.body()
     if len(rumpf) > 4096:
-        raise HttpProblem(400, "Die Anfrage ist zu gross.")
+        raise HttpProblem(400, "error.request_too_large")
     # Die echte Besucheradresse weiterreichen, sonst zaehlt Plausible alle
     # Aufrufe als denselben Besucher. Cloudflare stellt sie in diesem Kopffeld
     # bereit; sie wird von Plausible nur als taeglich wechselnder Hashwert
@@ -304,7 +354,7 @@ async def robots_txt():
         "User-agent: *",
         "Allow: /",
         "Disallow: /app",
-        "Disallow: /konto",
+        "Disallow: /account",
         "Disallow: /admin",
         "Disallow: /api",
         "",
@@ -315,22 +365,42 @@ async def robots_txt():
 
 @app.get("/sitemap.xml")
 async def sitemap_xml():
-    urls = "".join(
-        f"<url><loc>{CONFIG.public_url}{path}</loc></url>" for path in _PUBLIC_PATHS
-    )
+    """Beide Sprachfassungen, jeweils mit Verweis auf die andere.
+
+    Ohne die Verweise behandelt eine Suchmaschine /login und /de/anmelden als
+    zwei konkurrierende Seiten statt als dieselbe Seite in zwei Sprachen.
+    """
+    stuecke = []
+    for key in i18n.SITEMAP_KEYS:
+        alternates = "".join(
+            f'<xhtml:link rel="alternate" hreflang="{code}" '
+            f'href="{CONFIG.public_url}{i18n.path_for(key, code)}"/>'
+            for code in i18n.LANGS
+        )
+        alternates += (
+            f'<xhtml:link rel="alternate" hreflang="x-default" '
+            f'href="{CONFIG.public_url}{i18n.path_for(key, i18n.DEFAULT_LANG)}"/>'
+        )
+        for code in i18n.LANGS:
+            stuecke.append(
+                f"<url><loc>{CONFIG.public_url}{i18n.path_for(key, code)}</loc>"
+                f"{alternates}</url>"
+            )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-        f"{urls}"
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+        f"{''.join(stuecke)}"
         "</urlset>"
     )
     return Response(body, media_type="application/xml")
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get(P["home"]["en"], response_class=HTMLResponse)
+@app.get(P["home"]["de"], response_class=HTMLResponse)
 async def landing(request: Request):
     if getattr(request.state, "session", None):
-        return RedirectResponse("/app", status_code=303)
+        return RedirectResponse(AP["app"], status_code=303)
     limits = await _limits_safe()
     return templates.TemplateResponse(
         request,
@@ -338,16 +408,18 @@ async def landing(request: Request):
     )
 
 
-@app.get("/registrieren", response_class=HTMLResponse)
+@app.get(P["register"]["en"], response_class=HTMLResponse)
+@app.get(P["register"]["de"], response_class=HTMLResponse)
 async def register_form(request: Request):
     if getattr(request.state, "session", None):
-        return RedirectResponse("/app", status_code=303)
+        return RedirectResponse(AP["app"], status_code=303)
     return templates.TemplateResponse(
         request,
         "register.html", base_context(request))
 
 
-@app.post("/registrieren", response_class=HTMLResponse)
+@app.post(P["register"]["en"], response_class=HTMLResponse)
+@app.post(P["register"]["de"], response_class=HTMLResponse)
 async def register_submit(
     request: Request,
     email: str = Form(""),
@@ -357,26 +429,27 @@ async def register_submit(
     csrf: str = Form(""),
 ):
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     ip = client_ip(request)
     if not await security.rate_limit_hit(f"reg:{ip}", 3600, CONFIG.register_per_hour_per_ip):
-        raise HttpProblem(429, "Zu viele Registrierungen von dieser Verbindung. Bitte später.")
+        raise HttpProblem(429, "error.register_flood")
 
     email = email.strip()
     problems: list[str] = []
     if not security.valid_email(email):
-        problems.append("Bitte gib eine gültige E-Mail-Adresse an.")
-    pw_problem = security.password_problem(password)
+        problems.append(i18n.translate(lang, "error.email_invalid"))
+    pw_problem = _passwort_problem(request, password)
     if pw_problem:
         problems.append(pw_problem)
     if password != password2:
-        problems.append("Die beiden Passwörter stimmen nicht überein.")
+        problems.append(i18n.translate(lang, "error.password_mismatch"))
     if accept != "ja":
-        problems.append("Bitte bestätige die Nutzungsbedingungen und die Datenschutzhinweise.")
+        problems.append(i18n.translate(lang, "error.accept_required"))
 
     if problems:
         return templates.TemplateResponse(
-        request,
-        "register.html",
+            request,
+            "register.html",
             base_context(request, errors=problems, email=email),
             status_code=400,
         )
@@ -398,8 +471,8 @@ async def register_submit(
     if user_id is None:
         # Kein Hinweis darauf, ob die Adresse bereits existiert (keine Enumeration).
         return templates.TemplateResponse(
-        request,
-        "register_done.html",
+            request,
+            "register_done.html",
             base_context(request, email=email, mail_configured=CONFIG.mail_configured),
         )
 
@@ -415,21 +488,22 @@ async def register_submit(
             security.token_hash(token),
             user_id,
         )
-        await mail.send_verification(email, token)
+        await mail.send_verification(email, token, lang)
         return templates.TemplateResponse(
-        request,
-        "register_done.html",
+            request,
+            "register_done.html",
             base_context(request, email=email, mail_configured=True),
         )
 
     token, _ = await security.create_session(user_id)
-    response = RedirectResponse("/app", status_code=303)
+    response = RedirectResponse(AP["app"], status_code=303)
     _set_cookie(response, CONFIG.session_cookie, token, http_only=True,
                 max_age=CONFIG.session_hours * 3600)
     return response
 
 
-@app.get("/bestaetigung", response_class=HTMLResponse)
+@app.get(P["verify_again"]["en"], response_class=HTMLResponse)
+@app.get(P["verify_again"]["de"], response_class=HTMLResponse)
 async def bestaetigung_form(request: Request):
     """Formular, um die Bestätigungsmail erneut zu schicken."""
     return templates.TemplateResponse(
@@ -438,7 +512,8 @@ async def bestaetigung_form(request: Request):
     )
 
 
-@app.post("/bestaetigung")
+@app.post(P["verify_again"]["en"])
+@app.post(P["verify_again"]["de"])
 async def bestaetigung_erneut(request: Request, email: str = Form(""), csrf: str = Form("")):
     """Schickt die Bestätigungsmail erneut.
 
@@ -447,15 +522,15 @@ async def bestaetigung_erneut(request: Request, email: str = Form(""), csrf: str
     registriert sind.
     """
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     norm = security.normalize_email(email)
     ip = client_ip(request)
 
     # Bremse gegen Missbrauch als Mailschleuder: je Verbindung und je Adresse.
     if not await security.rate_limit_hit(f"verify-again-ip:{ip}", 3600, 10):
-        raise HttpProblem(429, "Zu viele Anfragen von dieser Verbindung. Bitte später.")
+        raise HttpProblem(429, "error.verify_flood_ip")
     if norm and not await security.rate_limit_hit(f"verify-again:{norm}", 3600, 3):
-        raise HttpProblem(429, "Diese Adresse hat schon mehrere Mails erhalten. "
-                               "Bitte warte eine Stunde.")
+        raise HttpProblem(429, "error.verify_flood_mail")
 
     row = await db.fetchrow(
         "SELECT id, email, email_verified FROM users WHERE email_norm = $1 AND is_active = TRUE",
@@ -476,23 +551,23 @@ async def bestaetigung_erneut(request: Request, email: str = Form(""), csrf: str
             security.token_hash(token),
             row["id"],
         )
-        await mail.send_verification(row["email"], token)
+        await mail.send_verification(row["email"], token, lang)
 
     return templates.TemplateResponse(
         request,
         "info.html",
         base_context(
             request,
-            heading="Mail ist unterwegs",
-            text="Falls die Adresse zu einem noch unbestätigten Konto gehört, haben wir "
-                 "einen neuen Bestätigungslink geschickt. Er gilt 24 Stunden. Nichts da? "
-                 "Bitte auch im Spam-Ordner nachsehen.",
+            heading=i18n.translate(lang, "info.verify_sent.h"),
+            text=i18n.translate(lang, "info.verify_sent.p"),
         ),
     )
 
 
-@app.get("/verify", response_class=HTMLResponse)
+@app.get(P["verify"]["en"], response_class=HTMLResponse)
+@app.get(P["verify"]["de"], response_class=HTMLResponse)
 async def verify_email(request: Request, token: str = ""):
+    lang = lang_of(request)
     row = await db.fetchrow(
         "SELECT id, user_id FROM auth_tokens "
         "WHERE token_hash = $1 AND kind = 'verify_email' "
@@ -501,12 +576,12 @@ async def verify_email(request: Request, token: str = ""):
     )
     if row is None:
         return templates.TemplateResponse(
-        request,
-        "info.html",
+            request,
+            "info.html",
             base_context(
                 request,
-                heading="Link ungültig",
-                text="Dieser Bestätigungslink ist abgelaufen oder wurde bereits benutzt.",
+                heading=i18n.translate(lang, "info.verify_dead.h"),
+                text=i18n.translate(lang, "info.verify_dead.p"),
             ),
             status_code=400,
         )
@@ -517,24 +592,26 @@ async def verify_email(request: Request, token: str = ""):
         "info.html",
         base_context(
             request,
-            heading="E-Mail bestätigt",
-            text="Deine Adresse ist bestätigt. Du kannst dich jetzt anmelden.",
-            link="/anmelden",
-            link_text="Zur Anmeldung",
+            heading=i18n.translate(lang, "info.verified.h"),
+            text=i18n.translate(lang, "info.verified.p"),
+            link=i18n.path_for("login", lang),
+            link_text=i18n.translate(lang, "info.to_login"),
         ),
     )
 
 
-@app.get("/anmelden", response_class=HTMLResponse)
+@app.get(P["login"]["en"], response_class=HTMLResponse)
+@app.get(P["login"]["de"], response_class=HTMLResponse)
 async def login_form(request: Request):
     if getattr(request.state, "session", None):
-        return RedirectResponse("/app", status_code=303)
+        return RedirectResponse(AP["app"], status_code=303)
     return templates.TemplateResponse(
         request,
         "login.html", base_context(request))
 
 
-@app.post("/anmelden", response_class=HTMLResponse)
+@app.post(P["login"]["en"], response_class=HTMLResponse)
+@app.post(P["login"]["de"], response_class=HTMLResponse)
 async def login_submit(
     request: Request,
     email: str = Form(""),
@@ -542,17 +619,17 @@ async def login_submit(
     csrf: str = Form(""),
 ):
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     norm = security.normalize_email(email)
     ip = client_ip(request)
 
-    ok_ip = await security.rate_limit_hit(f"login-ip:{ip}", 900, CONFIG.login_attempts_per_15min * 3)
+    ok_ip = await security.rate_limit_hit(
+        f"login-ip:{ip}", 900, CONFIG.login_attempts_per_15min * 3)
     ok_account = await security.rate_limit_hit(
         f"login-acct:{norm}", 900, CONFIG.login_attempts_per_15min
     )
     if not (ok_ip and ok_account):
-        raise HttpProblem(
-            429, "Zu viele Anmeldeversuche. Bitte warte 15 Minuten und versuche es erneut."
-        )
+        raise HttpProblem(429, "error.login_flood")
 
     row = await db.fetchrow(
         "SELECT id, password_hash, is_active, email_verified FROM users WHERE email_norm = $1",
@@ -562,31 +639,33 @@ async def login_submit(
 
     if not ok or row is None:
         return templates.TemplateResponse(
-        request,
-        "login.html",
+            request,
+            "login.html",
             base_context(
                 request,
-                errors=["E-Mail-Adresse oder Passwort stimmt nicht."],
+                errors=[i18n.translate(lang, "error.login_wrong")],
                 email=email,
             ),
             status_code=401,
         )
     if not row["is_active"]:
         return templates.TemplateResponse(
-        request,
-        "login.html",
-            base_context(request, errors=["Dieses Konto ist deaktiviert."], email=email),
+            request,
+            "login.html",
+            base_context(
+                request,
+                errors=[i18n.translate(lang, "error.account_disabled")],
+                email=email,
+            ),
             status_code=403,
         )
     if CONFIG.require_email_verification and CONFIG.mail_configured and not row["email_verified"]:
         return templates.TemplateResponse(
-        request,
-        "login.html",
+            request,
+            "login.html",
             base_context(
                 request,
-                errors=["Bitte bestätige zuerst deine E-Mail-Adresse über den Link, "
-                        "den wir dir geschickt haben. Keine Mail bekommen? Unter "
-                        "„Bestätigungsmail erneut senden“ schicken wir sie neu."],
+                errors=[i18n.translate(lang, "error.email_unverified")],
                 email=email,
             ),
             status_code=403,
@@ -600,23 +679,28 @@ async def login_submit(
     await security.rate_limit_reset(f"login-acct:{norm}")
     await db.execute("UPDATE users SET last_login_at = now() WHERE id = $1", row["id"])
     token, _ = await security.create_session(row["id"])
-    response = RedirectResponse("/app", status_code=303)
+    response = RedirectResponse(AP["app"], status_code=303)
     _set_cookie(response, CONFIG.session_cookie, token, http_only=True,
                 max_age=CONFIG.session_hours * 3600)
+    # Die gewaehlte Sprache ueberdauert die Anmeldung: im angemeldeten Bereich
+    # steht sie in keinem Pfad mehr, dort entscheidet allein das Cookie.
+    _set_cookie(response, i18n.LANG_COOKIE, lang, http_only=False,
+                max_age=_LANG_COOKIE_JAHR)
     response.delete_cookie(CSRF_COOKIE, path="/")
     return response
 
 
-@app.post("/abmelden")
+@app.post(AP["logout"])
 async def logout(request: Request, csrf: str = Form("")):
     verify_csrf(request, csrf)
     await security.destroy_session(request.cookies.get(CONFIG.session_cookie))
-    response = RedirectResponse("/", status_code=303)
+    response = RedirectResponse(i18n.path_for("home", lang_of(request)), status_code=303)
     response.delete_cookie(CONFIG.session_cookie, path="/")
     return response
 
 
-@app.get("/passwort-vergessen", response_class=HTMLResponse)
+@app.get(P["forgot"]["en"], response_class=HTMLResponse)
+@app.get(P["forgot"]["de"], response_class=HTMLResponse)
 async def forgot_form(request: Request):
     return templates.TemplateResponse(
         request,
@@ -624,12 +708,14 @@ async def forgot_form(request: Request):
     )
 
 
-@app.post("/passwort-vergessen", response_class=HTMLResponse)
+@app.post(P["forgot"]["en"], response_class=HTMLResponse)
+@app.post(P["forgot"]["de"], response_class=HTMLResponse)
 async def forgot_submit(request: Request, email: str = Form(""), csrf: str = Form("")):
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     ip = client_ip(request)
     if not await security.rate_limit_hit(f"forgot:{ip}", 3600, 5):
-        raise HttpProblem(429, "Zu viele Anfragen. Bitte später noch einmal.")
+        raise HttpProblem(429, "error.forgot_flood")
 
     norm = security.normalize_email(email)
     row = await db.fetchrow("SELECT id, email FROM users WHERE email_norm = $1 AND is_active", norm)
@@ -641,7 +727,7 @@ async def forgot_submit(request: Request, email: str = Form(""), csrf: str = For
             security.token_hash(token),
             row["id"],
         )
-        await mail.send_password_reset(row["email"], token)
+        await mail.send_password_reset(row["email"], token, lang)
 
     # Immer dieselbe Antwort — keine Auskunft darüber, ob es das Konto gibt.
     return templates.TemplateResponse(
@@ -649,23 +735,24 @@ async def forgot_submit(request: Request, email: str = Form(""), csrf: str = For
         "info.html",
         base_context(
             request,
-            heading="E-Mail unterwegs",
-            text="Falls es zu dieser Adresse ein Konto gibt, ist eine E-Mail mit einem "
-            "Link zum Zurücksetzen unterwegs. Der Link gilt eine Stunde.",
-            link="/anmelden",
-            link_text="Zur Anmeldung",
+            heading=i18n.translate(lang, "info.forgot_sent.h"),
+            text=i18n.translate(lang, "info.forgot_sent.p"),
+            link=i18n.path_for("login", lang),
+            link_text=i18n.translate(lang, "info.to_login"),
         ),
     )
 
 
-@app.get("/passwort-neu", response_class=HTMLResponse)
+@app.get(P["reset"]["en"], response_class=HTMLResponse)
+@app.get(P["reset"]["de"], response_class=HTMLResponse)
 async def reset_form(request: Request, token: str = ""):
     return templates.TemplateResponse(
         request,
         "reset.html", base_context(request, token=token))
 
 
-@app.post("/passwort-neu", response_class=HTMLResponse)
+@app.post(P["reset"]["en"], response_class=HTMLResponse)
+@app.post(P["reset"]["de"], response_class=HTMLResponse)
 async def reset_submit(
     request: Request,
     token: str = Form(""),
@@ -674,16 +761,17 @@ async def reset_submit(
     csrf: str = Form(""),
 ):
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     problems = []
-    pw_problem = security.password_problem(password)
+    pw_problem = _passwort_problem(request, password)
     if pw_problem:
         problems.append(pw_problem)
     if password != password2:
-        problems.append("Die beiden Passwörter stimmen nicht überein.")
+        problems.append(i18n.translate(lang, "error.password_mismatch"))
     if problems:
         return templates.TemplateResponse(
-        request,
-        "reset.html",
+            request,
+            "reset.html",
             base_context(request, token=token, errors=problems),
             status_code=400,
         )
@@ -695,12 +783,12 @@ async def reset_submit(
     )
     if row is None:
         return templates.TemplateResponse(
-        request,
-        "reset.html",
+            request,
+            "reset.html",
             base_context(
                 request,
                 token="",
-                errors=["Dieser Link ist abgelaufen oder wurde bereits benutzt."],
+                errors=[i18n.translate(lang, "error.reset_link_dead")],
             ),
             status_code=400,
         )
@@ -721,10 +809,10 @@ async def reset_submit(
         "info.html",
         base_context(
             request,
-            heading="Passwort geändert",
-            text="Du kannst dich jetzt mit dem neuen Passwort anmelden.",
-            link="/anmelden",
-            link_text="Zur Anmeldung",
+            heading=i18n.translate(lang, "info.password_changed.h"),
+            text=i18n.translate(lang, "info.password_changed.p"),
+            link=i18n.path_for("login", lang),
+            link_text=i18n.translate(lang, "info.to_login"),
         ),
     )
 
@@ -732,14 +820,14 @@ async def reset_submit(
 # --------------------------------------------------------------------------- Dashboard
 
 
-@app.get("/app", response_class=HTMLResponse)
+@app.get(AP["app"], response_class=HTMLResponse)
 async def dashboard(request: Request):
     session = getattr(request.state, "session", None)
     if session is None:
-        return _redirect_login()
+        return _redirect_login(request)
     limits = await settings_store.limits()
     usage = await quota.current_usage(session["user_id"])
-    jobs = await _jobs_for(session["user_id"])
+    jobs = await _jobs_for(session["user_id"], lang_of(request))
     return templates.TemplateResponse(
         request,
         "dashboard.html",
@@ -747,7 +835,7 @@ async def dashboard(request: Request):
     )
 
 
-async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
+async def _jobs_for(user_id: int, lang: str, limit: int = 60) -> list[dict]:
     rows = await db.fetch(
         "SELECT public_id, original_name, mime_type, size_bytes, status, error_code, "
         "       page_count, image_count, link_count, quality_note, "
@@ -765,7 +853,7 @@ async def _jobs_for(user_id: int, limit: int = 60) -> list[dict]:
             "name": storage.display_name(r["original_name"]),
             "size": r["size_bytes"],
             "status": r["status"],
-            "error": message_for(r["error_code"]) if r["error_code"] else None,
+            "error": message_for(r["error_code"], lang) if r["error_code"] else None,
             "pages": r["page_count"],
             "images": r["image_count"],
             "links": r["link_count"],
@@ -789,7 +877,7 @@ async def api_jobs(request: Request):
     limits = await settings_store.limits()
     usage = await quota.current_usage(session["user_id"])
     return {
-        "jobs": await _jobs_for(session["user_id"]),
+        "jobs": await _jobs_for(session["user_id"], lang_of(request)),
         "usage": {
             "jobs_day": usage.jobs_day,
             "pages_day": usage.pages_day,
@@ -803,7 +891,7 @@ async def api_jobs(request: Request):
     }
 
 
-@app.post("/app/upload")
+@app.post(AP["upload"])
 async def upload(
     request: Request,
     files: list[UploadFile] = File(default=[]),
@@ -811,14 +899,15 @@ async def upload(
 ):
     session = _session(request)
     verify_csrf(request, csrf)
+    lang = lang_of(request)
     user_id = session["user_id"]
     limits = await settings_store.limits()
 
     incoming = [f for f in files if f.filename]
     if not incoming:
-        raise HttpProblem(400, message_for("no_files"))
+        raise HttpProblem(400, "error.no_files")
     if len(incoming) > limits["max_files_per_upload"]:
-        raise HttpProblem(400, message_for("too_many_files"))
+        raise HttpProblem(400, "error.too_many_files")
 
     max_bytes = limits["max_file_size_mb"] * 1024 * 1024
     prepared: list[dict] = []
@@ -832,7 +921,7 @@ async def upload(
     erste_ablehnung: list = []
 
     def ablehnen(name: str, status: int, code: str, zusatz: str = "") -> None:
-        text = message_for(code) + (f" {zusatz}" if zusatz else "")
+        text = message_for(code, lang) + (f" {zusatz}" if zusatz else "")
         abgelehnt.append({"name": storage.display_name(name), "grund": text})
         if not erste_ablehnung:
             erste_ablehnung.append((status, text))
@@ -842,7 +931,8 @@ async def upload(
             data = await item.read(max_bytes + 1)
             if len(data) > max_bytes:
                 ablehnen(item.filename, 413, "file_too_large",
-                         f"Erlaubt sind {limits['max_file_size_mb']} MB.")
+                         i18n.translate(lang, "error.max_size_hint",
+                                        mb=limits["max_file_size_mb"]))
                 continue
             try:
                 mime, _label = uploads.check(item.filename, data)
@@ -858,7 +948,8 @@ async def upload(
                     continue
                 if counted > limits["max_pages"]:
                     ablehnen(item.filename, 400, "too_many_pages",
-                             f"Diese hat {counted}, erlaubt sind {limits['max_pages']}.")
+                             i18n.translate(lang, "error.pages_hint",
+                                            count=counted, max=limits["max_pages"]))
                     continue
                 pages = counted
 
@@ -868,15 +959,17 @@ async def upload(
                              "mime": mime, "pages": pages})
 
     if not prepared:
-        status, text = erste_ablehnung[0] if erste_ablehnung else (400, message_for("no_files"))
+        status, text = (erste_ablehnung[0] if erste_ablehnung
+                        else (400, message_for("no_files", lang)))
         if len(incoming) > 1 and abgelehnt:
-            text = f"„{abgelehnt[0]['name']}“: {text}"
-        raise HttpProblem(status, text)
+            text = i18n.translate(lang, "error.rejected_file",
+                                  name=abgelehnt[0]["name"], reason=text)
+        raise HttpProblem(status, "error.passthrough", text=text)
 
     try:
         await quota.check_batch(user_id, len(prepared), total_bytes, est_pages)
     except quota.QuotaExceeded as exc:
-        raise HttpProblem(429, message_for(exc.code)) from None
+        raise HttpProblem(429, f"error.{exc.code}") from None
 
     batch_id = uuid.uuid4()
     retention = timedelta(hours=limits["retention_hours"])
@@ -887,8 +980,8 @@ async def upload(
         storage.write("source", key, entry["data"])
         job_id = await db.fetchval(
             "INSERT INTO jobs(public_id, batch_id, user_id, original_name, mime_type, "
-            "                 size_bytes, page_count, expires_at) "
-            "VALUES($1, $2, $3, $4, $5, $6, $7, now() + $8::interval) RETURNING id",
+            "                 size_bytes, page_count, expires_at, lang) "
+            "VALUES($1, $2, $3, $4, $5, $6, $7, now() + $8::interval, $9) RETURNING id",
             uuid.uuid4(),
             batch_id,
             user_id,
@@ -897,6 +990,7 @@ async def upload(
             len(entry["data"]),
             entry["pages"],
             retention,
+            lang,
         )
         await db.execute(
             "INSERT INTO files(job_id, user_id, role, storage_key, size_bytes) "
@@ -926,7 +1020,7 @@ async def _owned_job(user_id: int, public_id: str):
     try:
         job_uuid = uuid.UUID(public_id)
     except (ValueError, AttributeError):
-        raise HttpProblem(404, "Dieser Auftrag existiert nicht.") from None
+        raise HttpProblem(404, "error.job_missing") from None
     row = await db.fetchrow(
         "SELECT id, public_id, original_name, status, error_code, page_count, size_bytes, "
         "       image_count, link_count, quality_note, quality_findings, "
@@ -937,15 +1031,16 @@ async def _owned_job(user_id: int, public_id: str):
     )
     if row is None:
         # Gleiche Antwort für 'gibt es nicht' und 'gehört jemand anderem'.
-        raise HttpProblem(404, "Dieser Auftrag existiert nicht.")
+        raise HttpProblem(404, "error.job_missing")
     return row
 
 
-@app.get("/app/auftrag/{public_id}", response_class=HTMLResponse)
+@app.get("/app/job/{public_id}", response_class=HTMLResponse)
 async def job_detail(request: Request, public_id: str):
     session = getattr(request.state, "session", None)
     if session is None:
-        return _redirect_login()
+        return _redirect_login(request)
+    lang = lang_of(request)
     job = await _owned_job(session["user_id"], public_id)
 
     markdown = None
@@ -975,7 +1070,7 @@ async def job_detail(request: Request, public_id: str):
                 "id": str(job["public_id"]),
                 "name": storage.display_name(job["original_name"]),
                 "status": job["status"],
-                "error": message_for(job["error_code"]) if job["error_code"] else None,
+                "error": message_for(job["error_code"], lang) if job["error_code"] else None,
                 "pages": job["page_count"],
                 "images": job["image_count"],
                 "links": job["link_count"],
@@ -996,11 +1091,11 @@ _DOWNLOAD_ROLES = {
 }
 
 
-@app.get("/app/auftrag/{public_id}/download/{fmt}")
+@app.get("/app/job/{public_id}/download/{fmt}")
 async def download(request: Request, public_id: str, fmt: str):
     session = _session(request)
     if fmt not in _DOWNLOAD_ROLES:
-        raise HttpProblem(404, "Dieses Format gibt es nicht.")
+        raise HttpProblem(404, "error.format_missing")
     role, suffix, content_type = _DOWNLOAD_ROLES[fmt]
 
     job = await _owned_job(session["user_id"], public_id)
@@ -1011,11 +1106,11 @@ async def download(request: Request, public_id: str, fmt: str):
         session["user_id"],
     )
     if row is None:
-        raise HttpProblem(404, "Das Ergebnis ist nicht (mehr) verfügbar.")
+        raise HttpProblem(404, "error.result_gone")
     try:
         data = storage.read("result", row["storage_key"])
     except (OSError, ValueError):
-        raise HttpProblem(404, "Das Ergebnis ist nicht mehr verfügbar.") from None
+        raise HttpProblem(404, "error.result_gone") from None
 
     name = storage.safe_download_name(job["original_name"], suffix, job["created_at"])
     return Response(
@@ -1028,7 +1123,7 @@ async def download(request: Request, public_id: str, fmt: str):
     )
 
 
-@app.get("/app/auftrag/{public_id}/bild/{seq}")
+@app.get("/app/job/{public_id}/image/{seq}")
 async def bild(request: Request, public_id: str, seq: int):
     session = _session(request)
     job = await _owned_job(session["user_id"], public_id)
@@ -1038,11 +1133,11 @@ async def bild(request: Request, public_id: str, seq: int):
         job["id"], session["user_id"], seq,
     )
     if row is None:
-        raise HttpProblem(404, "Dieses Bild gibt es nicht.")
+        raise HttpProblem(404, "error.image_missing")
     try:
         daten = storage.read("result", row["storage_key"])
     except (OSError, ValueError):
-        raise HttpProblem(404, "Das Bild ist nicht mehr verfügbar.") from None
+        raise HttpProblem(404, "error.image_gone") from None
     return Response(
         content=daten,
         media_type=row["mime_type"],
@@ -1052,12 +1147,13 @@ async def bild(request: Request, public_id: str, seq: int):
     )
 
 
-@app.get("/app/download/zip")
+@app.get(AP["zip"])
 async def download_zip(request: Request, ids: str = ""):
     session = _session(request)
+    lang = lang_of(request)
     wanted = [part for part in ids.split(",") if part][:50]
     if not wanted:
-        raise HttpProblem(400, "Es wurden keine Ergebnisse ausgewählt.")
+        raise HttpProblem(400, "error.zip_empty")
 
     buffer = io.BytesIO()
     verwendet: set[str] = set()
@@ -1122,13 +1218,15 @@ async def download_zip(request: Request, ids: str = ""):
                 zeilen = [job["quality_note"]]
                 auffaellig = json.loads(job["quality_findings"] or "[]")
                 if auffaellig:
-                    zeilen += ["", "Auffällige Zellen (unverändert übernommen):", ""]
+                    zeilen += ["", i18n.translate(lang, "note.file.cells"), ""]
                 for fund in auffaellig:
-                    ort = f"Seite {fund['seite']}" if fund.get("seite") else "Tabelle"
-                    zeile = fund.get("zeile") or "ohne Bezeichnung"
-                    zeilen.append(
-                        f"- {ort}, Zeile \"{zeile}\", Spalte \"{fund['spalte']}\": "
-                        f"gelesen als \"{fund['wert']}\"")
+                    ort = (i18n.translate(lang, "note.file.page", page=fund["seite"])
+                           if fund.get("seite")
+                           else i18n.translate(lang, "note.file.table"))
+                    zeile = fund.get("zeile") or i18n.translate(lang, "note.file.unnamed")
+                    zeilen.append(i18n.translate(
+                        lang, "note.file.line", place=ort, row=zeile,
+                        column=fund["spalte"], value=fund["wert"]))
                 hinweis_name = "hinweis.txt" if ordner else f"{basis}-hinweis.txt"
                 archive.writestr(f"{ordner}{hinweis_name}", "\n".join(zeilen) + "\n")
                 count += 1
@@ -1144,7 +1242,7 @@ async def download_zip(request: Request, ids: str = ""):
                     continue
 
     if count == 0:
-        raise HttpProblem(404, "Es gibt keine fertigen Ergebnisse zum Herunterladen.")
+        raise HttpProblem(404, "error.zip_nothing")
 
     # Bei einem Auftrag traegt das Archiv dessen Namen, bei mehreren den
     # Zeitpunkt des Herunterladens. So heisst keine zwei Dateien im
@@ -1162,7 +1260,7 @@ async def download_zip(request: Request, ids: str = ""):
     )
 
 
-@app.post("/app/auftrag/{public_id}/loeschen")
+@app.post("/app/job/{public_id}/delete")
 async def delete_job(request: Request, public_id: str, csrf: str = Form("")):
     session = _session(request)
     verify_csrf(request, csrf)
@@ -1186,17 +1284,17 @@ async def delete_job(request: Request, public_id: str, csrf: str = Form("")):
     await db.execute(
         "UPDATE jobs SET status = 'deleted', purged_at = now() WHERE id = $1", job["id"]
     )
-    return RedirectResponse("/app", status_code=303)
+    return RedirectResponse(AP["app"], status_code=303)
 
 
 # --------------------------------------------------------------------------- Konto
 
 
-@app.get("/konto", response_class=HTMLResponse)
+@app.get(AP["account"], response_class=HTMLResponse)
 async def account(request: Request):
     session = getattr(request.state, "session", None)
     if session is None:
-        return _redirect_login()
+        return _redirect_login(request)
     limits = await settings_store.limits()
     usage = await quota.current_usage(session["user_id"])
     return templates.TemplateResponse(
@@ -1205,7 +1303,7 @@ async def account(request: Request):
     )
 
 
-@app.post("/konto/passwort", response_class=HTMLResponse)
+@app.post(AP["account_password"], response_class=HTMLResponse)
 async def change_password(
     request: Request,
     current: str = Form(""),
@@ -1215,25 +1313,26 @@ async def change_password(
 ):
     session = _session(request)
     verify_csrf(request, csrf)
+    lang = lang_of(request)
 
     row = await db.fetchrow("SELECT password_hash FROM users WHERE id = $1", session["user_id"])
     ok, _ = security.verify_password(row["password_hash"] if row else None, current)
 
     problems = []
     if not ok:
-        problems.append("Das aktuelle Passwort stimmt nicht.")
-    pw_problem = security.password_problem(password)
+        problems.append(i18n.translate(lang, "error.password_current_wrong"))
+    pw_problem = _passwort_problem(request, password)
     if pw_problem:
         problems.append(pw_problem)
     if password != password2:
-        problems.append("Die beiden neuen Passwörter stimmen nicht überein.")
+        problems.append(i18n.translate(lang, "error.password_new_mismatch"))
 
     if problems:
         limits = await settings_store.limits()
         usage = await quota.current_usage(session["user_id"])
         return templates.TemplateResponse(
-        request,
-        "account.html",
+            request,
+            "account.html",
             base_context(request, errors=problems, limits=limits, usage=usage),
             status_code=400,
         )
@@ -1248,19 +1347,24 @@ async def change_password(
         "INSERT INTO audit_log(user_id, action) VALUES($1, 'password_change')", session["user_id"]
     )
     token, _ = await security.create_session(session["user_id"])
-    response = RedirectResponse("/konto?geaendert=1", status_code=303)
+    response = RedirectResponse(f"{AP['account']}?changed=1", status_code=303)
     _set_cookie(response, CONFIG.session_cookie, token, http_only=True,
                 max_age=CONFIG.session_hours * 3600)
     return response
 
 
-@app.post("/konto/loeschen")
+# Das Bestaetigungswort steht in der Sprache der Oberflaeche auf dem Knopf.
+# Beide Schreibweisen des deutschen Worts bleiben gueltig — auf Handytastaturen
+# ist das Ö umstaendlich.
+_LOESCH_WOERTER = {"LÖSCHEN", "LOESCHEN", "DELETE"}
+
+
+@app.post(AP["account_delete"])
 async def delete_account(request: Request, confirm: str = Form(""), csrf: str = Form("")):
     session = _session(request)
     verify_csrf(request, csrf)
-    # Beide Schreibweisen akzeptieren — auf Handytastaturen ist das Ö umständlich.
-    if confirm.strip().upper() not in {"LÖSCHEN", "LOESCHEN"}:
-        raise HttpProblem(400, "Zur Bestätigung muss LÖSCHEN eingegeben werden.")
+    if confirm.strip().upper() not in _LOESCH_WOERTER:
+        raise HttpProblem(400, "error.delete_confirm")
 
     rows = await db.fetch(
         "SELECT role, storage_key FROM files WHERE user_id = $1", session["user_id"]
@@ -1275,7 +1379,7 @@ async def delete_account(request: Request, confirm: str = Form(""), csrf: str = 
     await db.execute("DELETE FROM users WHERE id = $1", session["user_id"])
     await db.execute("INSERT INTO audit_log(action) VALUES('account_deleted')")
 
-    response = RedirectResponse("/", status_code=303)
+    response = RedirectResponse(i18n.path_for("home", lang_of(request)), status_code=303)
     response.delete_cookie(CONFIG.session_cookie, path="/")
     return response
 
@@ -1283,13 +1387,13 @@ async def delete_account(request: Request, confirm: str = Form(""), csrf: str = 
 # --------------------------------------------------------------------------- Admin
 
 
-@app.get("/admin", response_class=HTMLResponse)
+@app.get(AP["admin"], response_class=HTMLResponse)
 async def admin_page(request: Request):
     # Auch ohne Anmeldung 404 statt Weiterleitung: eine Weiterleitung wuerde
     # bestaetigen, dass es diesen Bereich ueberhaupt gibt.
     session = getattr(request.state, "session", None)
     if session is None or not session["is_admin"]:
-        raise HttpProblem(404, "Diese Seite gibt es nicht.")
+        raise HttpProblem(404, "error.not_found")
 
     users = await db.fetch(
         "SELECT u.id, u.email, u.is_admin, u.is_active, u.email_verified, u.created_at, "
@@ -1329,7 +1433,7 @@ async def admin_page(request: Request):
     )
 
 
-@app.post("/admin/limits")
+@app.post(AP["admin_limits"])
 async def admin_limits(request: Request):
     _admin(request)
     form = await request.form()
@@ -1342,15 +1446,15 @@ async def admin_limits(request: Request):
             await settings_store.set_limit(key, int(str(raw)))
         except (ValueError, KeyError):
             continue
-    return RedirectResponse("/admin?gespeichert=1", status_code=303)
+    return RedirectResponse(f"{AP['admin']}?saved=1", status_code=303)
 
 
-@app.post("/admin/nutzer/{user_id}/status")
+@app.post("/admin/users/{user_id}/status")
 async def admin_toggle_user(request: Request, user_id: int, csrf: str = Form("")):
     session = _admin(request)
     verify_csrf(request, csrf)
     if user_id == session["user_id"]:
-        raise HttpProblem(400, "Das eigene Konto kann hier nicht deaktiviert werden.")
+        raise HttpProblem(400, "error.admin_self")
     active = await db.fetchval(
         "UPDATE users SET is_active = NOT is_active WHERE id = $1 RETURNING is_active", user_id
     )
@@ -1361,20 +1465,22 @@ async def admin_toggle_user(request: Request, user_id: int, csrf: str = Form("")
         session["user_id"],
         str(user_id),
     )
-    return RedirectResponse("/admin", status_code=303)
+    return RedirectResponse(AP["admin"], status_code=303)
 
 
 # --------------------------------------------------------------------------- Rechtliches
 
 
-@app.get("/impressum", response_class=HTMLResponse)
+@app.get(P["imprint"]["en"], response_class=HTMLResponse)
+@app.get(P["imprint"]["de"], response_class=HTMLResponse)
 async def imprint(request: Request):
     return templates.TemplateResponse(
         request,
         "legal_imprint.html", base_context(request, cfg=CONFIG))
 
 
-@app.get("/datenschutz", response_class=HTMLResponse)
+@app.get(P["privacy"]["en"], response_class=HTMLResponse)
+@app.get(P["privacy"]["de"], response_class=HTMLResponse)
 async def privacy(request: Request):
     limits = await _limits_safe()
     return templates.TemplateResponse(
@@ -1383,7 +1489,8 @@ async def privacy(request: Request):
     )
 
 
-@app.get("/nutzungsbedingungen", response_class=HTMLResponse)
+@app.get(P["terms"]["en"], response_class=HTMLResponse)
+@app.get(P["terms"]["de"], response_class=HTMLResponse)
 async def terms(request: Request):
     limits = await _limits_safe()
     return templates.TemplateResponse(
@@ -1392,10 +1499,9 @@ async def terms(request: Request):
     )
 
 
-@app.get("/lizenzen", response_class=HTMLResponse)
+@app.get(P["licenses"]["en"], response_class=HTMLResponse)
+@app.get(P["licenses"]["de"], response_class=HTMLResponse)
 async def licenses(request: Request):
-    import pathlib
-
     path = pathlib.Path("/srv/THIRD_PARTY_LICENSES.md")
     text = path.read_text(encoding="utf-8") if path.exists() else ""
     return templates.TemplateResponse(

@@ -13,7 +13,7 @@ import json
 import logging
 import signal
 
-from . import db, ocr_wahl, postprocess, quota, settings_store, storage
+from . import db, i18n, ocr_wahl, postprocess, quota, settings_store, storage
 from .config import CONFIG
 from .docling_client import ConversionError, DoclingClient
 
@@ -33,7 +33,7 @@ async def _claim_job(con, max_active_per_user: int):
     async with con.transaction():
         row = await con.fetchrow(
             "SELECT j.id, j.user_id, j.original_name, j.mime_type, j.size_bytes, "
-            "       j.page_count "
+            "       j.page_count, j.lang "
             "FROM jobs j WHERE j.status = 'queued' "
             "  AND (SELECT COUNT(*) FROM jobs a "
             "        WHERE a.user_id = j.user_id AND a.status = 'processing') < $1 "
@@ -102,6 +102,9 @@ async def _process(client: DoclingClient, job) -> None:
 
     markdown = result["markdown"]
     struktur = result["json"]
+    # Sprache des Auftrags: Hinweise und Zusatzabschnitte im Ergebnis sollen in
+    # derselben Sprache stehen wie die Oberflaeche beim Hochladen.
+    sprache = job["lang"] if job["lang"] in i18n.LANGS else i18n.DEFAULT_LANG
 
     # --- Nachbearbeitung -------------------------------------------------
     # 1) Bilder aus der Struktur loesen und als eigene Dateien ablegen.
@@ -112,11 +115,11 @@ async def _process(client: DoclingClient, job) -> None:
     links = []
     if job["mime_type"] == "application/pdf":
         links = postprocess.links_lesen(data)
-        markdown = postprocess.markdown_links_anhaengen(markdown, links)
+        markdown = postprocess.markdown_links_anhaengen(markdown, links, sprache)
 
     # 3) Vorlage zu grob? Dann kann die Texterkennung Zeichen verwechseln.
     hinweis = postprocess.aufloesung_pruefen(
-        data, job["mime_type"], struktur if isinstance(struktur, dict) else None
+        data, job["mime_type"], struktur if isinstance(struktur, dict) else None, sprache
     )
 
     # Einheiten gegen eine Liste bekannter Einheiten pruefen. Auffaellige Zellen
@@ -126,12 +129,10 @@ async def _process(client: DoclingClient, job) -> None:
     funde = postprocess.einheiten_pruefen(struktur if isinstance(struktur, dict) else {})
     if funde:
         anzahl = len(funde)
-        satz = ("Eine Zelle in einer Einheiten-Spalte ergibt keine bekannte Einheit"
-                if anzahl == 1 else
-                f"{anzahl} Zellen in Einheiten-Spalten ergeben keine bekannte Einheit")
-        meldung = (f"{satz} — vermutlich hat die Texterkennung sie falsch gelesen. "
-                   "Die Werte stehen unverändert im Ergebnis und sind unten einzeln "
-                   "aufgeführt; korrigiert wird nichts, weil das Raten wäre.")
+        satz = i18n.translate(sprache,
+                              "note.units.one" if anzahl == 1 else "note.units.many",
+                              count=anzahl)
+        meldung = i18n.translate(sprache, "note.units.tail", lead=satz)
         hinweis = f"{hinweis} {meldung}" if hinweis else meldung
 
     # 4) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
@@ -144,7 +145,7 @@ async def _process(client: DoclingClient, job) -> None:
     elemente = []
     if job["mime_type"] == "application/pdf":
         elemente = postprocess.wiederkehrende_texte(data, markdown)
-        markdown = postprocess.seitenelemente_zusammenfassen(markdown, elemente)
+        markdown = postprocess.seitenelemente_zusammenfassen(markdown, elemente, sprache)
 
     md_key = storage.new_key()
     json_key = storage.new_key()

@@ -6,11 +6,11 @@
   <h1>{{ heading }}</h1>
   <p>{{ text }}</p>
   {% if link %}
-  <a class="btn btn-primary" href="{{ link }}">{{ link_text|default('Weiter') }}</a>
+  <a class="btn btn-primary" href="{{ link }}">{{ link_text|default(t('info.continue')) }}</a>
   {% elif user %}
-  <a class="btn btn-primary" href="/app">Zur Übersicht</a>
+  <a class="btn btn-primary" href="{{ path_for('app') }}">{{ t('info.to_app') }}</a>
   {% else %}
-  <a class="btn btn-primary" href="/anmelden">Zur Anmeldung</a>
+  <a class="btn btn-primary" href="{{ path_for('login') }}">{{ t('info.to_login') }}</a>
   {% endif %}
 </div>
 {% endblock %}

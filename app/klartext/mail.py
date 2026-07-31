@@ -12,6 +12,7 @@ from email.utils import formatdate, make_msgid, parseaddr
 
 import aiosmtplib
 
+from . import i18n
 from .config import CONFIG
 
 log = logging.getLogger("klartext.mail")
@@ -86,36 +87,23 @@ async def _send(to: str, subject: str, body: str) -> bool:
         return False
 
 
-async def send_verification(to: str, token: str) -> bool:
-    link = f"{CONFIG.public_url}/verify?token={token}"
+async def send_verification(to: str, token: str, lang: str = i18n.DEFAULT_LANG) -> bool:
+    # Der Link zeigt auf die Sprachfassung, in der die Registrierung lief —
+    # sonst landet man nach dem Bestaetigen in der falschen Sprache.
+    link = f"{CONFIG.public_url}{i18n.path_for('verify', lang)}?token={token}"
     return await _send(
         to,
-        f"{CONFIG.product_name}: E-Mail-Adresse bestätigen",
-        f"""Hallo,
-
-bitte bestätige deine E-Mail-Adresse für {CONFIG.product_name}:
-
-{link}
-
-Der Link ist 24 Stunden gültig. Wenn du dich nicht registriert hast,
-ignoriere diese Nachricht einfach — es passiert dann nichts weiter.
-""",
+        i18n.translate(lang, "mail.verify.subject", product=CONFIG.product_name),
+        i18n.translate(lang, "mail.verify.body",
+                       product=CONFIG.product_name, link=link),
     )
 
 
-async def send_password_reset(to: str, token: str) -> bool:
-    link = f"{CONFIG.public_url}/passwort-neu?token={token}"
+async def send_password_reset(to: str, token: str, lang: str = i18n.DEFAULT_LANG) -> bool:
+    link = f"{CONFIG.public_url}{i18n.path_for('reset', lang)}?token={token}"
     return await _send(
         to,
-        f"{CONFIG.product_name}: Passwort zurücksetzen",
-        f"""Hallo,
-
-über diesen Link kannst du ein neues Passwort setzen:
-
-{link}
-
-Der Link ist 1 Stunde gültig und funktioniert nur einmal.
-Wenn du das nicht angefordert hast, ignoriere diese Nachricht —
-dein bisheriges Passwort bleibt unverändert gültig.
-""",
+        i18n.translate(lang, "mail.reset.subject", product=CONFIG.product_name),
+        i18n.translate(lang, "mail.reset.body",
+                       product=CONFIG.product_name, link=link),
     )

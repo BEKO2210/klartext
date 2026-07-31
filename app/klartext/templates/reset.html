@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Neues Passwort — {{ product }}{% endblock %}
-{% block description %}Neues Passwort für dein {{ product }}-Konto setzen.{% endblock %}
+{% block title %}{{ t('reset.title') }}{% endblock %}
+{% block description %}{{ t('reset.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
-  <h1>Neues Passwort setzen</h1>
+  <h1>{{ t('reset.h1') }}</h1>
 
   {% if errors %}
   <div class="notice notice-error" role="alert">
@@ -13,24 +13,24 @@
   {% endif %}
 
   {% if token %}
-  <form method="post" action="/passwort-neu" novalidate>
+  <form method="post" action="{{ path_for('reset') }}" novalidate>
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <input type="hidden" name="token" value="{{ token }}">
     <div class="field">
-      <label for="password">Neues Passwort</label>
+      <label for="password">{{ t('reset.password') }}</label>
       <input id="password" name="password" type="password" autocomplete="new-password" required>
-      <span class="hint">Mindestens 10 Zeichen.</span>
+      <span class="hint">{{ t('reset.password_hint') }}</span>
     </div>
     <div class="field">
-      <label for="password2">Neues Passwort wiederholen</label>
+      <label for="password2">{{ t('reset.password2') }}</label>
       <input id="password2" name="password2" type="password" autocomplete="new-password" required>
     </div>
-    <p class="smaller muted">Alle bestehenden Anmeldungen werden dabei beendet.</p>
-    <button class="btn btn-primary btn-block" type="submit">Passwort speichern</button>
+    <p class="smaller muted">{{ t('reset.sessions_note') }}</p>
+    <button class="btn btn-primary btn-block" type="submit">{{ t('reset.submit') }}</button>
   </form>
   {% else %}
-  <p>Der Link ist unvollständig oder abgelaufen.</p>
-  <a class="btn btn-secondary" href="/passwort-vergessen">Neuen Link anfordern</a>
+  <p>{{ t('reset.broken') }}</p>
+  <a class="btn btn-secondary" href="{{ path_for('forgot') }}">{{ t('reset.request_new') }}</a>
   {% endif %}
 </div>
 {% endblock %}

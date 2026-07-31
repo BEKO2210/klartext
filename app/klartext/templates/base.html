@@ -1,13 +1,22 @@
 <!doctype html>
-<html lang="de">
+<html lang="{{ html_lang }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>{% block title %}{{ product }} — Dokumente in sauberes Markdown{% endblock %}</title>
-<meta name="description" content="{% block description %}{{ product }} wandelt Dokumente und Bilder in sauberes Markdown und JSON um — kostenlos, komplett auf eigenem Server.{% endblock %}">
+<title>{% block title %}{{ t('meta.title') }}{% endblock %}</title>
+<meta name="description" content="{% block description %}{{ t('meta.description') }}{% endblock %}">
 <meta name="referrer" content="same-origin">
-<link rel="canonical" href="{{ public_url }}{{ request.url.path }}">
+<link rel="canonical" href="{{ canonical }}">
+{# Beide Sprachfassungen benennen einander. Ohne diese Angabe gelten /login und
+   /de/anmelden als konkurrierende Seiten statt als dieselbe Seite in zwei
+   Sprachen. x-default zeigt auf Englisch — das ist die Standardfassung. #}
+{% for alt in alternates %}
+<link rel="alternate" hreflang="{{ alt.lang }}" href="{{ alt.url }}">
+{% endfor %}
+{% if xdefault %}
+<link rel="alternate" hreflang="x-default" href="{{ xdefault }}">
+{% endif %}
 <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 <link rel="icon" href="{{ asset('icon-32.png') }}" sizes="32x32" type="image/png">
 <link rel="icon" href="{{ asset('icon-192.png') }}" sizes="192x192" type="image/png">
@@ -18,7 +27,7 @@
 <meta property="og:image" content="{{ public_url }}{{ asset('og.png') }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Klartext — aus Dokumenten wird sauberes Markdown">
+<meta property="og:image:alt" content="{{ t('og.image_alt') }}">
 <meta name="twitter:image" content="{{ public_url }}{{ asset('og.png') }}">
 <meta name="apple-mobile-web-app-title" content="Klartext">
 <meta name="application-name" content="Klartext">
@@ -28,44 +37,59 @@
 <link rel="stylesheet" href="{{ asset('ui.css') }}">
 <meta property="og:site_name" content="{{ product }}">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="de_DE">
-<meta property="og:url" content="{{ public_url }}{{ request.url.path }}">
+<meta property="og:locale" content="{{ og_locale }}">
+<meta property="og:url" content="{{ canonical }}">
 <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
 <meta property="og:description" content="{% block og_description %}{{ self.description() }}{% endblock %}">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+<a class="skip" href="#inhalt">{{ t('skip_to_content') }}</a>
 
 <header class="topbar">
-  <a class="brand" href="{% if user %}/app{% else %}/{% endif %}">
+  <a class="brand" href="{% if user %}{{ path_for('app') }}{% else %}{{ path_for('home') }}{% endif %}">
     <svg class="brand-mark" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
       <path d="M8 3h12l5 5v20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 7 28V4.5A1.5 1.5 0 0 1 8.5 3z"/>
       <path d="M11 11h6" opacity=".5"/><path d="M11 15h3.5" opacity=".5"/>
       <path d="M11 20h10"/><path d="M11 24h10"/>
     </svg>
-    <span>{{ product }}</span>
+    <span class="brand-wort">{{ product }}</span>
   </a>
 
   <div class="topbar-end">
+    {# Sprachumschalter als Zweiersegment: die aktuelle Sprache steht daneben,
+       sonst raet man beim Kuerzel, ob es den Ist- oder den Zielzustand meint.
+       Der Parameter merkt die Wahl, damit die Umleitung nach Browsersprache
+       sie nicht beim naechsten Aufruf wieder umwirft. #}
+    <div class="lang-pill" role="group" aria-label="{{ t('lang.aria') }}">
+      <span class="lang-ist" aria-current="true">{{ lang|upper }}</span>
+      <a class="lang-andere" href="{{ switch_url }}" rel="alternate"
+         hreflang="{{ other_lang }}" lang="{{ other_lang }}"
+         aria-label="{{ t('lang.switch_to_de') if other_lang == 'de' else t('lang.switch_to_en') }}"
+         >{{ other_lang|upper }}</a>
+    </div>
     {% if user %}
-      <form method="post" action="/abmelden" class="inline-form">
+      <form method="post" action="{{ path_for('logout') }}" class="inline-form">
         <input type="hidden" name="csrf" value="{{ csrf }}">
-        <button type="submit" class="btn btn-quiet btn-small">Abmelden</button>
+        <button type="submit" class="btn btn-quiet btn-small">{{ t('nav.logout') }}</button>
       </form>
     {% else %}
-      <a class="topbar-link" href="/anmelden">Anmelden</a>
-      <a class="btn btn-primary btn-small" href="/registrieren">Konto erstellen</a>
+      <a class="topbar-link" href="{{ path_for('login') }}">{{ t('nav.login') }}</a>
+      {# Am Handy die kurze Beschriftung: sonst passt die Zeile nicht in 412 px. #}
+      <a class="btn btn-primary btn-small" href="{{ path_for('register') }}">
+        <span class="nur-breit">{{ t('nav.create_account') }}</span>
+        <span class="nur-schmal">{{ t('nav.create_account_short') }}</span>
+      </a>
     {% endif %}
   </div>
 
   {% if user %}
-  <nav class="topnav" aria-label="Hauptnavigation">
-    <a href="/app"{% if request.url.path == '/app' %} aria-current="page"{% endif %}>Konvertieren</a>
-    <a href="/konto"{% if request.url.path == '/konto' %} aria-current="page"{% endif %}>Konto</a>
+  <nav class="topnav" aria-label="{{ t('nav.aria.main') }}">
+    <a href="{{ path_for('app') }}"{% if request.url.path == '/app' %} aria-current="page"{% endif %}>{{ t('nav.convert') }}</a>
+    <a href="{{ path_for('account') }}"{% if request.url.path == '/account' %} aria-current="page"{% endif %}>{{ t('nav.account') }}</a>
     {% if user.is_admin %}
-      <a href="/admin"{% if request.url.path == '/admin' %} aria-current="page"{% endif %}>Verwaltung</a>
+      <a href="{{ path_for('admin') }}"{% if request.url.path == '/admin' %} aria-current="page"{% endif %}>{{ t('nav.admin') }}</a>
     {% endif %}
   </nav>
   {% endif %}
@@ -76,13 +100,13 @@
 </main>
 
 <footer class="footer">
-  <nav aria-label="Rechtliches">
-    <a href="/impressum">Impressum</a>
-    <a href="/datenschutz">Datenschutz</a>
-    <a href="/nutzungsbedingungen">Nutzungsbedingungen</a>
-    <a href="/lizenzen">Open-Source-Lizenzen</a>
+  <nav aria-label="{{ t('footer.aria.legal') }}">
+    <a href="{{ path_for('imprint') }}">{{ t('footer.imprint') }}</a>
+    <a href="{{ path_for('privacy') }}">{{ t('footer.privacy') }}</a>
+    <a href="{{ path_for('terms') }}">{{ t('footer.terms') }}</a>
+    <a href="{{ path_for('licenses') }}">{{ t('footer.licenses') }}</a>
   </nav>
-  <p class="muted">Verarbeitung ausschließlich auf eigenem Server. Keine Weitergabe an KI-Dienste Dritter.</p>
+  <p class="muted">{{ t('footer.note') }}</p>
 </footer>
 
 {% if messung %}

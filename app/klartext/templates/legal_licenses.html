@@ -1,19 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Open-Source-Lizenzen — {{ product }}{% endblock %}
-{% block description %}Liste der eingesetzten Open-Source-Komponenten von {{ product }} mit Version, Lizenz und Urheberrechtsvermerk.{% endblock %}
+{% block title %}{{ t('licenses.title') }}{% endblock %}
+{% block description %}{{ t('licenses.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap stack prose-wide">
-  <h1>Open-Source-Lizenzen</h1>
-  <p class="small muted">
-    {{ product }} setzt freie Software ein. Nachfolgend die eingesetzten Komponenten mit
-    Version, Lizenz und Urheberrechtsvermerk. {{ product }} ist ein eigenständiger Dienst
-    und steht in keiner Verbindung zu den Urhebern dieser Komponenten.
-  </p>
+  <h1>{{ t('licenses.h1') }}</h1>
+  <p class="small muted">{{ t('licenses.intro') }}</p>
   {% if licenses_text %}
   <pre class="md-view md-view-full md-view-wrap">{{ licenses_text }}</pre>
   {% else %}
-  <p class="muted">Die Lizenzübersicht konnte nicht geladen werden.</p>
+  <p class="muted">{{ t('licenses.missing') }}</p>
   {% endif %}
 </div>
 {% endblock %}

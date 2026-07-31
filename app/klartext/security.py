@@ -54,12 +54,13 @@ def verify_password(stored_hash: str | None, password: str) -> tuple[bool, str |
 
 
 def password_problem(password: str) -> str | None:
+    """Gibt einen Textschluessel zurueck, damit die Meldung uebersetzbar bleibt."""
     if len(password) < MIN_PASSWORD_LEN:
-        return f"Das Passwort braucht mindestens {MIN_PASSWORD_LEN} Zeichen."
+        return "error.password_short"
     if len(password) > MAX_PASSWORD_LEN:
-        return "Das Passwort ist zu lang."
+        return "error.password_long"
     if password.strip() == "":
-        return "Das Passwort darf nicht nur aus Leerzeichen bestehen."
+        return "error.password_blank"
     return None
 
 

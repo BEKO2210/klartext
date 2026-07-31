@@ -92,14 +92,26 @@ code {
 /* ---------------------------------------------------------------- Kopf und Fuss */
 
 .topbar {
-  /* Am Handy zwei Zeilen: Marke und Abmelden oben, Navigation darunter.
-     Ab Tablet alles in einer Zeile. Ohne diese Trennung bricht der Kopf bei
-     vier Eintraegen (Admin-Konto) in drei Zeilen auseinander. */
+  /* Eine Zeile, auch am Handy: Marke links, Sprache und Zugang rechts. Der
+     Sprachumschalter ist dafuer auf ein Zweiersegment geschrumpft und der
+     Knopf traegt am Handy die kurze Beschriftung. Nur der angemeldete Bereich
+     haengt seine Navigation als flache Reiterzeile darunter. */
   display: flex; flex-wrap: wrap; align-items: center;
-  gap: 4px 12px; padding: 10px 14px;
+  gap: 6px; padding: 8px 14px; min-height: 56px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky; top: 0; z-index: 20;
+}
+
+/* Durchscheinender Kopf, sobald der Browser das kann. Ohne die Abfrage waere
+   der Kopf auf aelteren Geraeten halbtransparent und der Text darunter
+   sichtbar — lieber deckend als unlesbar. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .topbar {
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: saturate(150%) blur(12px);
+    backdrop-filter: saturate(150%) blur(12px);
+  }
 }
 
 .brand {
@@ -110,29 +122,64 @@ code {
 }
 .brand-mark { width: 26px; height: 26px; color: var(--primary); flex: none; }
 
-.topbar-end { order: 2; display: flex; align-items: center; gap: 4px; flex: none; }
+.topbar-end { order: 2; display: flex; align-items: center; gap: 6px; flex: none; }
 
 .topbar-link {
   display: inline-flex; align-items: center; min-height: 44px;
-  padding: 8px 12px; border-radius: var(--radius);
+  padding: 8px 10px; border-radius: var(--radius);
   color: var(--muted); text-decoration: none; font-size: 15px; font-weight: 500;
+  white-space: nowrap;
 }
 .topbar-link:hover { color: var(--text); background: var(--surface); }
+
+/* Sprachumschalter: aktuelle Sprache gesetzt, andere daneben zum Antippen. */
+.lang-pill {
+  display: inline-flex; align-items: center; flex: none;
+  padding: 3px; border: 1px solid transparent; border-radius: 999px;
+  /* Deutlich getoente Spur: auf weissem Grund waere sonst kaum zu sehen,
+     welche der beiden Sprachen gerade gilt. */
+  background: var(--surface-2);
+  font-size: 13px; font-weight: 650; letter-spacing: .03em; line-height: 1;
+}
+.lang-pill > * {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; min-height: 32px; padding: 0 9px; border-radius: 999px;
+}
+.lang-ist {
+  background: var(--bg); color: var(--text);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .14);
+}
+/* Im dunklen Farbschema traegt kein Schlagschatten. Dort zeigt eine feine
+   Kante, welche Sprache gerade gilt. */
+@media (prefers-color-scheme: dark) {
+  .lang-ist { box-shadow: inset 0 0 0 1px var(--border); }
+}
+.lang-andere { color: var(--muted); text-decoration: none; }
+.lang-andere:hover { color: var(--text); background: var(--surface-2); }
+
+/* Zwei Beschriftungen fuer denselben Knopf, je nach Platz. */
+.nur-schmal { display: none; }
+@media (max-width: 520px) {
+  .nur-breit { display: none; }
+  .nur-schmal { display: inline; }
+}
 
 .topnav {
   order: 3; flex-basis: 100%;
   display: flex; align-items: stretch; gap: 2px;
+  margin: 0 -14px -9px; padding: 0 14px;
+  border-top: 1px solid var(--border);
   flex-wrap: nowrap; overflow-x: auto;
   scrollbar-width: none; -ms-overflow-style: none;
 }
 .topnav::-webkit-scrollbar { display: none; }
 
 .topnav > a:not(.btn) {
-  padding: 9px 12px 8px;
+  padding: 8px 12px 7px;
   border-bottom: 2px solid transparent;
   color: var(--muted); text-decoration: none;
   font-size: 15px; font-weight: 500; white-space: nowrap;
-  min-height: 42px; display: inline-flex; align-items: center;
+  min-height: 40px; display: inline-flex; align-items: center;
 }
 .topnav > a:not(.btn):hover { color: var(--text); }
 .topnav > a:not(.btn)[aria-current="page"] {
@@ -141,16 +188,35 @@ code {
 }
 
 @media (min-width: 760px) {
-  .topbar { padding: 10px 24px; gap: 8px 16px; }
-  .topnav { order: 2; flex-basis: auto; margin-left: auto; }
+  .topbar { padding: 8px 24px; gap: 8px 16px; }
+  .topnav {
+    order: 2; flex-basis: auto; margin: 0 0 0 auto; padding: 0;
+    border-top: 0;
+  }
   .topbar-end { order: 3; margin-left: 8px; }
 }
 
 .inline-form { display: inline; margin: 0; }
 
+/* Sehr schmale Geraete: die Wortmarke weicht dem Zugang. Das Symbol bleibt und
+   fuehrt weiterhin zur Startseite; der Name bleibt fuer Screenreader lesbar,
+   nur eben nicht mehr sichtbar. */
+@media (max-width: 380px) {
+  .brand-wort {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .brand { gap: 0; }
+}
+
 @media (max-width: 420px) {
-  .topbar { padding: 10px 12px; gap: 8px; }
-  .topnav > a:not(.btn) { padding: 10px 8px; }
+  .topbar { padding: 8px 12px; gap: 5px; }
+  .brand { font-size: 17px; gap: 8px; }
+  .brand-mark { width: 24px; height: 24px; }
+  .topbar-link { padding: 8px 6px; font-size: 14.5px; }
+  .lang-pill > * { min-width: 34px; padding: 0 7px; }
+  .topnav { margin: 0 -12px -9px; padding: 0 12px; }
+  .topnav > a:not(.btn) { padding: 9px 8px 7px; }
   .topnav .btn-small { padding: 8px 12px; }
 }
 

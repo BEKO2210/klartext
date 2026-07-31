@@ -1,55 +1,55 @@
 {% extends "base.html" %}
-{% block title %}Kostenloses Konto erstellen — {{ product }}{% endblock %}
-{% block description %}Kostenloses Konto bei {{ product }} anlegen und Dokumente in Markdown und JSON umwandeln. Keine Tarife, keine Zahlung, keine gesperrten Funktionen.{% endblock %}
+{% block title %}{{ t('register.title') }}{% endblock %}
+{% block description %}{{ t('register.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap-sm">
-  <h1>Konto erstellen</h1>
-  <p class="muted small">
-    Kostenlos, ohne Tarife. Das Konto brauchen wir nur, damit die Nutzungsgrenzen
-    pro Person gelten statt sich alle Besucher eine gemeinsame Grenze zu teilen.
-  </p>
+  <h1>{{ t('register.h1') }}</h1>
+  <p class="muted small">{{ t('register.intro') }}</p>
 
   {% if errors %}
   <div class="notice notice-error" role="alert">
-    <strong>Bitte prüfe deine Eingaben:</strong>
+    <strong>{{ t('register.errors_intro') }}</strong>
     <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
   </div>
   {% endif %}
 
-  <form method="post" action="/registrieren" novalidate>
+  <form method="post" action="{{ path_for('register') }}" novalidate>
     <input type="hidden" name="csrf" value="{{ csrf }}">
 
     <div class="field">
-      <label for="email">E-Mail-Adresse</label>
+      <label for="email">{{ t('register.email') }}</label>
       <input id="email" name="email" type="email" autocomplete="email" required
              inputmode="email" value="{{ email|default('') }}">
     </div>
 
     <div class="field">
-      <label for="password">Passwort</label>
+      <label for="password">{{ t('register.password') }}</label>
       <input id="password" name="password" type="password" autocomplete="new-password" required>
-      <span class="hint">Mindestens 10 Zeichen. Länger ist besser als kompliziert.</span>
+      <span class="hint">{{ t('register.password_hint') }}</span>
     </div>
 
     <div class="field">
-      <label for="password2">Passwort wiederholen</label>
+      <label for="password2">{{ t('register.password2') }}</label>
       <input id="password2" name="password2" type="password" autocomplete="new-password" required>
     </div>
 
     <div class="field">
       <label class="check">
         <input type="checkbox" name="accept" value="ja" required>
-        <span>Ich habe die <a href="/nutzungsbedingungen">Nutzungsbedingungen</a> und die
-              <a href="/datenschutz">Datenschutzhinweise</a> gelesen.</span>
+        {# Die beiden Verweise stecken im Satz, weil die Wortstellung je Sprache
+           anders ist. Zusammengesetzt wird hier, nicht in der Textdatei. #}
+        {% set terms_link = '<a href="' ~ path_for('terms') ~ '">' ~ t('register.accept.terms') ~ '</a>' %}
+        {% set privacy_link = '<a href="' ~ path_for('privacy') ~ '">' ~ t('register.accept.privacy') ~ '</a>' %}
+        <span>{{ t('register.accept', terms=terms_link, privacy=privacy_link)|safe }}</span>
       </label>
     </div>
 
-    <button class="btn btn-primary btn-block" type="submit">Konto erstellen</button>
+    <button class="btn btn-primary btn-block" type="submit">{{ t('register.submit') }}</button>
   </form>
 
   <p class="small muted form-links">
-    Schon ein Konto? <a href="/anmelden">Hier anmelden</a>
+    {{ t('register.have_account') }} <a href="{{ path_for('login') }}">{{ t('register.sign_in') }}</a>
   </p>
 </div>
 {% endblock %}

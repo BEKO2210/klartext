@@ -2,8 +2,11 @@
 {% block title %}{{ job.name }} — {{ product }}{% endblock %}
 
 {% block content %}
+<div id="i18n-daten" hidden data-lang="{{ lang }}"
+     data-strings='{{ js_strings|tojson }}'></div>
+
 <div class="wrap stack">
-  <p class="small"><a href="/app">&larr; Zurück zur Übersicht</a></p>
+  <p class="small"><a href="{{ path_for('app') }}">{{ t('job.back') }}</a></p>
 
   <header>
     <h1 class="wrap-anywhere">{{ job.name }}</h1>
@@ -21,25 +24,23 @@
             <path d="M12 4.2 21 19.2H3L12 4.2Z"/><path d="M12 10v3.6"/><path d="M12 16.6h.01"/>
           {% endif %}
         </svg>
-        {% if job.status == 'done' %}Fertig
-        {% elif job.status == 'processing' %}Wird verarbeitet
-        {% elif job.status == 'queued' %}In Warteschlange
-        {% else %}Fehler{% endif %}
+        {% if job.status in ['done', 'processing', 'queued'] %}{{ t('job.status.' ~ job.status) }}
+        {% else %}{{ t('job.status.error') }}{% endif %}
       </span>
-      {% if job.pages %} · {{ job.pages }} Seite{{ 'n' if job.pages != 1 }}{% endif %}
-      {% if job.duration_ms %} · {{ ('%.1f'|format(job.duration_ms / 1000))|replace('.', ',') }} s{% endif %}
-      · wird gelöscht am {{ job.expires_at|zeit }} Uhr
+      {% if job.pages %} · {% if job.pages == 1 %}{{ t('job.pages', count=job.pages) }}{% else %}{{ t('job.pages_plural', count=job.pages) }}{% endif %}{% endif %}
+      {% if job.duration_ms %} · {{ t('job.seconds', value=('%.1f'|format(job.duration_ms / 1000))|replace('.', ',' if lang == 'de' else '.')) }}{% endif %}
+      · {{ t('job.expires', when=zeit(job.expires_at)) }}
     </p>
   </header>
 
   {% if job.note %}
     <div class="notice notice-warn">
-      <strong>Hinweis zur Vorlage.</strong> {{ job.note }}
+      <strong>{{ t('job.note.title') }}</strong> {{ job.note }}
       {% if job.funde %}
       <div class="table-scroll pruefliste">
         <table>
           <thead>
-            <tr><th>Seite</th><th>Zeile</th><th>Spalte</th><th>Gelesen als</th></tr>
+            <tr><th>{{ t('job.note.page') }}</th><th>{{ t('job.note.row') }}</th><th>{{ t('job.note.column') }}</th><th>{{ t('job.note.read_as') }}</th></tr>
           </thead>
           <tbody>
             {% for f in job.funde %}
@@ -61,40 +62,37 @@
     <div class="notice notice-error" role="alert">{{ job.error }}</div>
   {% elif job.status != 'done' %}
     <div class="notice">
-      Das Dokument ist noch in Arbeit. Diese Seite aktualisiert sich nicht von selbst —
-      <a href="/app">die Übersicht</a> zeigt den Fortschritt live.
+      {% set uebersicht = '<a href="' ~ path_for('app') ~ '">' ~ t('job.pending.link') ~ '</a>' %}
+      {{ t('job.pending', link=uebersicht)|safe }}
     </div>
   {% else %}
 
   <div class="job-cta">
-    <a class="btn btn-primary btn-block" href="/app/download/zip?ids={{ job.id }}">
-      Alles herunterladen{% if job.images %} — ZIP mit {{ job.images }} Bildern{% else %} (ZIP){% endif %}
+    <a class="btn btn-primary btn-block" href="{{ path_for('zip') }}?ids={{ job.id }}">
+      {% if job.images %}{{ t('job.download_all_images', count=job.images) }}{% else %}{{ t('job.download_all') }}{% endif %}
     </a>
     <div class="job-cta-row">
-      <a class="btn btn-secondary" href="/app/auftrag/{{ job.id }}/download/md">Markdown</a>
-      <a class="btn btn-secondary" href="/app/auftrag/{{ job.id }}/download/json">JSON</a>
-      <button class="btn btn-secondary" id="copy-button" type="button">Kopieren</button>
+      <a class="btn btn-secondary" href="/app/job/{{ job.id }}/download/md">Markdown</a>
+      <a class="btn btn-secondary" href="/app/job/{{ job.id }}/download/json">JSON</a>
+      <button class="btn btn-secondary" id="copy-button" type="button">{{ t('job.copy') }}</button>
     </div>
   </div>
-  <p class="smaller muted fineprint">
-    <strong>.md</strong> für Notizen und Texte, <strong>.json</strong> für eigene Programme.
-    Meistens reicht die Markdown-Datei.
-  </p>
+  <p class="smaller muted fineprint">{{ t('job.formats_note')|safe }}</p>
   <p class="smaller muted copy-status" id="copy-status" aria-live="polite"></p>
 
   {% if bilder %}
   <section>
-    <h2>Bilder aus dem Dokument</h2>
+    <h2>{{ t('job.images.h') }}</h2>
     <p class="small muted">
-      {{ bilder|length }} Abbildung{{ 'en' if bilder|length != 1 }} herausgelöst.
-      Im Markdown stehen Verweise darauf, im ZIP liegen sie als Dateien.
+      {% if bilder|length == 1 %}{{ t('job.images.count', count=bilder|length) }}
+      {% else %}{{ t('job.images.count_plural', count=bilder|length) }}{% endif %}
     </p>
     <ul class="bildgitter">
       {% for b in bilder %}
       <li>
-        <a href="/app/auftrag/{{ job.id }}/bild/{{ b.seq }}" target="_blank" rel="noopener">
-          <img src="/app/auftrag/{{ job.id }}/bild/{{ b.seq }}" loading="lazy"
-               alt="Bild {{ b.seq }} aus dem Dokument{% if b.page_no %}, Seite {{ b.page_no }}{% endif %}">
+        <a href="/app/job/{{ job.id }}/image/{{ b.seq }}" target="_blank" rel="noopener">
+          <img src="/app/job/{{ job.id }}/image/{{ b.seq }}" loading="lazy"
+               alt="{% if b.page_no %}{{ t('job.image.alt_page', seq=b.seq, page=b.page_no) }}{% else %}{{ t('job.image.alt', seq=b.seq) }}{% endif %}">
           <span class="bild-nr">{{ b.seq }}{% if b.page_no %} · S. {{ b.page_no }}{% endif %}</span>
         </a>
       </li>
@@ -104,21 +102,20 @@
   {% endif %}
 
   <section>
-    <h2>Vorschau</h2>
+    <h2>{{ t('job.preview.h') }}</h2>
     {% if markdown %}
-      <p class="small muted">Rohtext mit Markdown-Zeichen wie <code>#</code> und <code>|</code>.</p>
+      <p class="small muted">{{ t('job.preview.raw')|safe }}</p>
       <pre class="md-view" id="markdown-source">{{ markdown }}</pre>
     {% else %}
-      <p class="muted">Das Ergebnis ist nicht mehr verfügbar. Vermutlich wurde es bereits
-      automatisch gelöscht.</p>
+      <p class="muted">{{ t('job.preview.gone') }}</p>
     {% endif %}
   </section>
 
   {% endif %}
 
-  <form method="post" action="/app/auftrag/{{ job.id }}/loeschen">
+  <form method="post" action="/app/job/{{ job.id }}/delete">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <button class="btn btn-danger btn-small" type="submit">Auftrag jetzt löschen</button>
+    <button class="btn btn-danger btn-small" type="submit">{{ t('job.delete') }}</button>
   </form>
 </div>
 {% endblock %}

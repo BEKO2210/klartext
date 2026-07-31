@@ -1,13 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Konvertieren — {{ product }}{% endblock %}
+{% block title %}{{ t('dashboard.title') }}{% endblock %}
 
 {% block content %}
+{# Texte fuer app.js. Als Datenblock, nicht als Skript: die Inhaltsrichtlinie
+   erlaubt kein Inline-JavaScript. Einfache Anfuehrungszeichen, weil die
+   JSON-Ausgabe doppelte enthaelt. #}
+<div id="i18n-daten" hidden data-lang="{{ lang }}" data-login="{{ path_for('login') }}"
+     data-strings='{{ js_strings|tojson }}'></div>
+
 <div class="wrap stack">
 
   <section>
-    <h1>Neue Konvertierung</h1>
-    <p class="explainer">Datei hochladen, Klartext liest den Inhalt aus.</p>
-    <form id="upload-form" method="post" action="/app/upload" enctype="multipart/form-data">
+    <h1>{{ t('dashboard.h1') }}</h1>
+    <p class="explainer">{{ t('dashboard.explainer') }}</p>
+    <form id="upload-form" method="post" action="{{ path_for('upload') }}" enctype="multipart/form-data">
       <input type="hidden" name="csrf" value="{{ csrf }}">
 
       <div class="dropzone" id="dropzone">
@@ -17,17 +23,17 @@
           <path d="M7.6 8.2 12 3.8l4.4 4.4"/>
           <path d="M4 14.5v3.9A2.6 2.6 0 0 0 6.6 21h10.8a2.6 2.6 0 0 0 2.6-2.6v-3.9"/>
         </svg>
-        <p class="dz-title"><strong>Dateien hierher ziehen</strong></p>
-        <p class="small muted dz-or">oder</p>
+        <p class="dz-title"><strong>{{ t('dashboard.drop') }}</strong></p>
+        <p class="small muted dz-or">{{ t('dashboard.or') }}</p>
 
-        <label class="btn btn-secondary" for="file-input">Dateien auswählen</label>
+        <label class="btn btn-secondary" for="file-input">{{ t('dashboard.choose') }}</label>
         <input class="visually-hidden" id="file-input" name="files" type="file" multiple
                accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.webp,.bmp,.docx,.xlsx,.pptx,.html,.md">
 
         <p class="formats">
           {{ formats|join(' · ') }}<br>
-          max. {{ limits.max_file_size_mb }} MB · {{ limits.max_files_per_upload }} Dateien ·
-          {{ limits.max_pages }} Seiten
+          {{ t('dashboard.limits', mb=limits.max_file_size_mb,
+                files=limits.max_files_per_upload, pages=limits.max_pages) }}
         </p>
 
         <ul class="filelist" id="file-list" hidden></ul>
@@ -37,39 +43,39 @@
 
       <div class="btn-row form-actions">
         <button class="btn btn-primary" id="upload-button" type="submit" disabled>
-          Konvertierung starten
+          {{ t('dashboard.submit') }}
         </button>
-        <button class="btn btn-secondary" id="clear-button" type="button" hidden>Auswahl leeren</button>
+        <button class="btn btn-secondary" id="clear-button" type="button" hidden>{{ t('dashboard.clear') }}</button>
       </div>
     </form>
 
     <p class="smaller muted fineprint">
-      Löschung nach {{ limits.retention_hours }} Stunden. Verarbeitung nur auf diesem Server.
+      {{ t('dashboard.fineprint', hours=limits.retention_hours) }}
     </p>
   </section>
 
   <section class="card" id="auftraege">
     <div class="section-head">
-      <h2>Aufträge</h2>
+      <h2>{{ t('dashboard.jobs') }}</h2>
       <div class="btn-row">
-        <a class="btn btn-secondary btn-small" id="zip-button" href="#" hidden>Alles als ZIP</a>
+        <a class="btn btn-secondary btn-small" id="zip-button" href="#" hidden>{{ t('dashboard.zip') }}</a>
       </div>
     </div>
 
     <p class="smaller muted usage-line" id="usage-line">
-      Heute {{ usage.jobs_day }}/{{ limits.jobs_per_day }} Konvertierungen ·
-      {{ usage.pages_day }}/{{ limits.pages_per_day }} Seiten{% if usage.active or usage.queued %} ·
-      {{ usage.active }} in Arbeit, {{ usage.queued }} wartend{% endif %}
+      {{ t('dashboard.usage', jobs=usage.jobs_day, jobs_max=limits.jobs_per_day,
+            pages=usage.pages_day, pages_max=limits.pages_per_day) }}{% if usage.active or usage.queued %} ·
+      {{ t('dashboard.usage_active', active=usage.active, queued=usage.queued) }}{% endif %}
     </p>
 
     <ul class="joblist" id="job-list" aria-live="polite">
       {% if not jobs %}
       <li class="muted small empty" id="empty-state">
-        <p class="empty-lead">Noch nichts konvertiert. Lade oben eine Datei hoch — das Ergebnis erscheint hier.</p>
+        <p class="empty-lead">{{ t('dashboard.empty') }}</p>
         <ol class="empty-steps">
-          <li>Datei auswählen oder in das Feld oben ziehen.</li>
-          <li>Auf „Konvertierung starten" tippen.</li>
-          <li>Fertige Aufträge erscheinen hier mit Markdown- und JSON-Download.</li>
+          <li>{{ t('dashboard.empty.1') }}</li>
+          <li>{{ t('dashboard.empty.2') }}</li>
+          <li>{{ t('dashboard.empty.3') }}</li>
         </ol>
       </li>
       {% endif %}

@@ -1,93 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Nutzungsbedingungen — {{ product }}{% endblock %}
-{% block description %}Nutzungsbedingungen von {{ product }}: kostenlose Nutzung, faire Nutzungsgrenzen und Ergebnisqualität.{% endblock %}
+{% block title %}{{ t('terms.title') }}{% endblock %}
+{% block description %}{{ t('terms.description') }}{% endblock %}
 
 {% block content %}
 <div class="wrap stack prose">
-  <h1>Nutzungsbedingungen</h1>
+  <h1>{{ t('terms.h1') }}</h1>
+
+  {% if t('terms.legal_note') %}
+  {% set de_link = '<a href="/de/nutzungsbedingungen" hreflang="de">Nutzungsbedingungen</a>' %}
+  <p class="small muted">{{ t('terms.legal_note', link=de_link)|safe }}</p>
+  {% endif %}
 
   {% if not cfg.legal_operator %}
   <div class="notice notice-warn" role="alert">
-    <strong>Betreiber noch nicht konfiguriert.</strong> Siehe <a href="/impressum">Impressum</a>.
+    <strong>{{ t('terms.unconfigured') }}</strong>
+    {% set impressum = '<a href="' ~ path_for('imprint') ~ '">' ~ t('footer.imprint') ~ '</a>' %}
+    {{ t('terms.unconfigured.p', link=impressum)|safe }}
   </div>
   {% endif %}
 
   <section>
-    <h2>1. Gegenstand</h2>
-    <p class="small">
-      {{ product }} wandelt hochgeladene Dokumente und Bilder in Markdown und eine
-      strukturierte JSON-Darstellung um. Der Dienst ist kostenlos. Es gibt keine
-      kostenpflichtigen Funktionen, keine Tarife und kein Abonnement.
-    </p>
+    <h2>{{ t('terms.1.h') }}</h2>
+    <p class="small">{{ t('terms.1.p') }}</p>
   </section>
 
   <section>
-    <h2>2. Konto</h2>
-    <p class="small">
-      Für die Nutzung ist ein Konto erforderlich. Zugangsdaten sind geheim zu halten.
-      Ein Konto darf nicht an Dritte weitergegeben werden. Das Konto kann jederzeit selbst
-      gelöscht werden.
-    </p>
+    <h2>{{ t('terms.2.h') }}</h2>
+    <p class="small">{{ t('terms.2.p') }}</p>
   </section>
 
   <section>
-    <h2>3. Faire Nutzung</h2>
-    <p class="small">
-      Es gelten technische Grenzen zum Schutz des Servers: derzeit
-      {{ limits.max_file_size_mb }} MB je Datei, {{ limits.max_files_per_upload }} Dateien je
-      Upload, {{ limits.max_pages }} Seiten je Dokument, {{ limits.jobs_per_hour }} Konvertierungen
-      je Stunde und {{ limits.jobs_per_day }} je Tag. Diese Werte können zur Sicherung des
-      Betriebs angepasst werden. Automatisierte Massennutzung, Umgehungsversuche der Grenzen
-      und der Betrieb über mehrere Konten hinweg sind nicht gestattet.
-    </p>
+    <h2>{{ t('terms.3.h') }}</h2>
+    <p class="small">{{ t('terms.3.p', mb=limits.max_file_size_mb,
+                          files=limits.max_files_per_upload, pages=limits.max_pages,
+                          per_hour=limits.jobs_per_hour, per_day=limits.jobs_per_day) }}</p>
   </section>
 
   <section>
-    <h2>4. Inhalte</h2>
-    <p class="small">
-      Es dürfen nur Dateien hochgeladen werden, an denen die nötigen Rechte bestehen.
-      Rechtswidrige Inhalte sind untersagt. Verantwortlich für die hochgeladenen Inhalte
-      ist ausschließlich die hochladende Person.
-    </p>
+    <h2>{{ t('terms.4.h') }}</h2>
+    <p class="small">{{ t('terms.4.p') }}</p>
   </section>
 
   <section>
-    <h2>5. Verfügbarkeit und Datenverlust</h2>
-    <p class="small">
-      Der Dienst wird ohne Verfügbarkeitszusage bereitgestellt. Dateien und Ergebnisse
-      werden nach {{ limits.retention_hours }} Stunden automatisch gelöscht — der Dienst ist
-      <strong>kein Speicherort und kein Archiv</strong>. Ergebnisse sind selbst zu sichern.
-    </p>
+    <h2>{{ t('terms.5.h') }}</h2>
+    <p class="small">{{ t('terms.5.p', hours=limits.retention_hours)|safe }}</p>
   </section>
 
   <section>
-    <h2>6. Ergebnisqualität</h2>
-    <p class="small">
-      Die Umwandlung erfolgt automatisch. Ziel ist es, so wenig Information wie technisch
-      möglich zu verlieren: es wird nichts zusammengefasst, umformuliert oder
-      korrigiert. Eine fehlerfreie Erkennung — insbesondere bei gescannten Vorlagen,
-      Handschrift oder komplexen Tabellen — kann dennoch nicht zugesichert werden.
-      Markdown kann bestimmte Layoutmerkmale technisch nicht abbilden; die JSON-Ausgabe ist
-      strukturtreuer. Ergebnisse sind vor einer Weiterverwendung zu prüfen.
-    </p>
+    <h2>{{ t('terms.6.h') }}</h2>
+    <p class="small">{{ t('terms.6.p') }}</p>
   </section>
 
   <section>
-    <h2>7. Sperrung</h2>
-    <p class="small">
-      Konten, die den Betrieb gefährden oder gegen diese Bedingungen verstoßen, können
-      ohne Vorankündigung deaktiviert werden.
-    </p>
+    <h2>{{ t('terms.7.h') }}</h2>
+    <p class="small">{{ t('terms.7.p') }}</p>
   </section>
 
   <section>
-    <h2>8. Haftung</h2>
-    <p class="small">
-      Die Haftung richtet sich nach den gesetzlichen Vorschriften. Für einen kostenlos
-      bereitgestellten Dienst wird — soweit gesetzlich zulässig — nur bei Vorsatz und
-      grober Fahrlässigkeit gehaftet. Die Haftung für Schäden aus der Verletzung des
-      Lebens, des Körpers oder der Gesundheit bleibt unberührt.
-    </p>
+    <h2>{{ t('terms.8.h') }}</h2>
+    <p class="small">{{ t('terms.8.p') }}</p>
   </section>
 </div>
 {% endblock %}
