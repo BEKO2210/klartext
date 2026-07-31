@@ -233,23 +233,58 @@ async def _worker_loop(index: int, client: DoclingClient) -> None:
 # Jung genug, um noch zu einem laufenden Auftrag zu gehoeren: nicht anfassen.
 VERWAIST_AB_SEKUNDEN = 3600
 
+# Ab wann der Fund unglaubwuerdig wird: mehr als die Haelfte aller Dateien
+# verwaist, und das bei einer nennenswerten Menge.
+_VERWAIST_HOECHSTANTEIL = 0.5
+_VERWAIST_HARMLOS_BIS = 20
+
 
 async def _verwaiste_dateien_entfernen() -> None:
+    """Entfernt Dateien ohne Eintrag in der Datenbank.
+
+    Sicherheitsriegel: Zeigt ein Worker versehentlich auf eine andere Datenbank
+    — etwa eine Probeinstanz, der die echten Datenverzeichnisse gemountet
+    wurden — dann kennt diese Datenbank keine einzige Datei, und ohne Prüfung
+    würde hier der gesamte Bestand als verwaist gelöscht. Genau das ist am
+    31.07.2026 passiert. Deshalb wird der Fund erst auf Plausibilität geprüft
+    und im Zweifel gar nichts angefasst.
+    """
     bekannt: dict[str, set[str]] = {"source": set(), "result": set()}
     for row in await db.fetch("SELECT role, storage_key FROM files"):
         bekannt["source" if row["role"] == "source" else "result"].add(row["storage_key"])
     for row in await db.fetch("SELECT storage_key FROM job_images"):
         bekannt["result"].add(row["storage_key"])
 
-    entfernt = 0
+    kandidaten: list[tuple[str, str]] = []
+    gesamt = 0
     for kind in ("source", "result"):
         for key in storage.alle_schluessel(kind):
+            gesamt += 1
             if key in bekannt[kind]:
                 continue
             if storage.alter_sekunden(kind, key) < VERWAIST_AB_SEKUNDEN:
                 continue
-            storage.delete(kind, key)
-            entfernt += 1
+            kandidaten.append((kind, key))
+
+    if not kandidaten:
+        return
+
+    kennt_die_datenbank = bool(bekannt["source"] or bekannt["result"])
+    zu_viele = (len(kandidaten) > _VERWAIST_HARMLOS_BIS
+                and len(kandidaten) > gesamt * _VERWAIST_HOECHSTANTEIL)
+    if not kennt_die_datenbank or zu_viele:
+        log.error(
+            "Aufraeumen abgebrochen: %s von %s Dateien gelten als verwaist, die "
+            "Datenbank kennt %s. Das sieht nach der falschen Datenbank aus — es "
+            "wurde nichts geloescht.",
+            len(kandidaten), gesamt, len(bekannt["source"]) + len(bekannt["result"]),
+        )
+        return
+
+    entfernt = 0
+    for kind, key in kandidaten:
+        storage.delete(kind, key)
+        entfernt += 1
     if entfernt:
         log.info("Aufraeumen: %s verwaiste Dateien entfernt", entfernt)
 
