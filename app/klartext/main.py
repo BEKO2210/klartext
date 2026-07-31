@@ -978,10 +978,22 @@ async def upload(
     for entry in prepared:
         key = storage.new_key()
         storage.write("source", key, entry["data"])
-        job_id = await db.fetchval(
-            "INSERT INTO jobs(public_id, batch_id, user_id, original_name, mime_type, "
-            "                 size_bytes, page_count, expires_at, lang) "
-            "VALUES($1, $2, $3, $4, $5, $6, $7, now() + $8::interval, $9) RETURNING id",
+        # Auftrag und Quelldatei in einer einzigen Anweisung. Als zwei getrennte
+        # Anweisungen committet die erste sofort: der Auftrag steht dann auf
+        # 'queued' und ist fuer den Worker sichtbar, waehrend der Verweis auf die
+        # Quelldatei noch fehlt. Genau in diese Luecke ist am 31.07.2026 ein
+        # Worker gefahren — vier Millisekunden nach dem Anlegen — und hat den
+        # Auftrag mangels Quelldatei als fehlgeschlagen abgelegt.
+        await db.fetchval(
+            "WITH neuer_auftrag AS ("
+            "  INSERT INTO jobs(public_id, batch_id, user_id, original_name, mime_type, "
+            "                   size_bytes, page_count, expires_at, lang) "
+            "  VALUES($1, $2, $3, $4, $5, $6, $7, now() + $8::interval, $9) "
+            "  RETURNING id, user_id"
+            ") "
+            "INSERT INTO files(job_id, user_id, role, storage_key, size_bytes) "
+            "SELECT id, user_id, 'source', $10, $11 FROM neuer_auftrag "
+            "RETURNING job_id",
             uuid.uuid4(),
             batch_id,
             user_id,
@@ -991,12 +1003,6 @@ async def upload(
             entry["pages"],
             retention,
             lang,
-        )
-        await db.execute(
-            "INSERT INTO files(job_id, user_id, role, storage_key, size_bytes) "
-            "VALUES($1, $2, 'source', $3, $4)",
-            job_id,
-            user_id,
             key,
             len(entry["data"]),
         )

@@ -9,6 +9,7 @@ Es werden nie Dokumentinhalte protokolliert, auch keine Dateinamen.
 from __future__ import annotations
 
 import asyncio
+import datetime
 import json
 import logging
 import signal
@@ -22,6 +23,9 @@ log = logging.getLogger("klartext.worker")
 
 _stop = asyncio.Event()
 
+# So lange gilt ein Auftrag ohne Quelldatei als "gerade erst angelegt".
+_QUELLE_GEDULD_SEKUNDEN = 30
+
 
 async def _claim_job(con, max_active_per_user: int):
     """Reserviert genau einen wartenden Job.
@@ -33,7 +37,7 @@ async def _claim_job(con, max_active_per_user: int):
     async with con.transaction():
         row = await con.fetchrow(
             "SELECT j.id, j.user_id, j.original_name, j.mime_type, j.size_bytes, "
-            "       j.page_count, j.lang "
+            "       j.page_count, j.lang, j.created_at, j.attempts "
             "FROM jobs j WHERE j.status = 'queued' "
             "  AND (SELECT COUNT(*) FROM jobs a "
             "        WHERE a.user_id = j.user_id AND a.status = 'processing') < $1 "
@@ -67,6 +71,20 @@ async def _process(client: DoclingClient, job) -> None:
         "SELECT storage_key FROM files WHERE job_id = $1 AND role = 'source'", job_id
     )
     if source is None:
+        # Zweite Absicherung gegen den Wettlauf beim Anlegen: Seit dem Umbau
+        # entstehen Auftrag und Quelldatei in einer Anweisung, ein frischer
+        # Auftrag ohne Quelldatei kann also nur noch ein halb geschriebener
+        # Altbestand sein. Statt ihn wegzuwerfen, kommt er kurz zurueck in die
+        # Warteschlange — ein Auftrag, dessen Datei tatsaechlich fehlt, laeuft
+        # ueber die Versuchszaehlung ohnehin in den Fehler.
+        alter = (datetime.datetime.now(datetime.UTC) - job["created_at"]).total_seconds()
+        if alter < _QUELLE_GEDULD_SEKUNDEN and job["attempts"] < 3:
+            await db.execute(
+                "UPDATE jobs SET status = 'queued', started_at = NULL WHERE id = $1", job_id
+            )
+            log.info("Quelldatei noch nicht sichtbar, Job zurueck in die Warteschlange")
+            await asyncio.sleep(1)
+            return
         await _fail(job_id, "conversion_failed")
         return
 
