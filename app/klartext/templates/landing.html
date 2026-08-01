@@ -87,16 +87,39 @@
 </section>
 
 {# Laufband der tatsaechlich unterstuetzten Formate. Bewusst keine fremden
-   Firmenlogos: Klartext hat keine Sponsoren, und erfundene waeren gelogen. #}
+   Firmenlogos — die PDF-, Word- und Excel-Zeichen sind geschuetzte Marken.
+   Stattdessen selbst gezeichnete Dateisymbole: ein Blatt mit Eselsohr, darin
+   je Formatklasse ein eigener Glyph (Text, Bild, Tabelle, Folie, Code, #). #}
+{% macro dateiglyph(f) -%}
+<svg class="laufband-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+     aria-hidden="true" focusable="false">
+  <path d="M6 3h7l5 5v13H6z"/><path d="M13 3v5h5"/>
+  {%- if f in ('BMP', 'JPG', 'JPEG', 'PNG', 'TIF', 'TIFF', 'WEBP') -%}
+  <circle cx="9.9" cy="12.1" r="1.15"/>
+  <path d="M8.4 17.6l2.5-3 1.9 2.1 1.3-1.5 1.5 2.4"/>
+  {%- elif f == 'XLSX' -%}
+  <path d="M8.5 11.5h7v6h-7z"/><path d="M8.5 14.5h7M12 11.5v6"/>
+  {%- elif f == 'PPTX' -%}
+  <path d="M8.5 11.5h7v5h-7z"/><path d="M10.4 14.8v-1.4M12 14.8v-2.3M13.6 14.8v-1.8"/>
+  {%- elif f == 'HTML' -%}
+  <path d="M10.2 12.2 8.2 14.5l2 2.3M13.8 12.2l2 2.3-2 2.3"/>
+  {%- elif f == 'MD' -%}
+  <path d="M8.6 17v-4.6l1.9 2.1 1.9-2.1V17"/><path d="M14.7 12.4V17m0 0-1.3-1.5m1.3 1.5 1.3-1.5"/>
+  {%- else -%}
+  <path d="M9 12.6h6M9 15h6M9 17.4h3.8"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}
 <div class="laufband" role="group" aria-label="{{ t('landing.formats.aria') }}">
   <p class="laufband-titel">{{ t('landing.formats.title') }}</p>
   <div class="laufband-fenster">
     <div class="laufband-spur">
       <span class="laufband-satz">
-        {% for f in formats_kurz %}<span class="laufband-marke">{{ f }}</span>{% endfor %}
+        {% for f in formats_kurz %}<span class="laufband-marke">{{ dateiglyph(f) }}{{ f }}</span>{% endfor %}
       </span>
       <span class="laufband-satz" aria-hidden="true">
-        {% for f in formats_kurz %}<span class="laufband-marke">{{ f }}</span>{% endfor %}
+        {% for f in formats_kurz %}<span class="laufband-marke">{{ dateiglyph(f) }}{{ f }}</span>{% endfor %}
       </span>
     </div>
   </div>

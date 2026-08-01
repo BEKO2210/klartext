@@ -606,13 +606,18 @@ h1 {
 .laufband-satz { display: flex; gap: 10px; padding-right: 10px; }
 .laufband-marke {
   flex: none;
-  padding: 8px 15px;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px 8px 12px;
   border: 1px solid var(--border); border-radius: 999px;
   background: var(--bg);
+  box-shadow: var(--shadow-sm);
   font-size: 13px; font-weight: 600; letter-spacing: .03em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+/* Das Dateisymbol in Primärfarbe: hebt sich vom grauen Kürzel ab, ohne dass
+   elf bunte Marken nebeneinander stehen. */
+.laufband-symbol { width: 17px; height: 17px; color: var(--primary); flex: none; }
 @keyframes laufband {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(-50%, 0, 0); }
