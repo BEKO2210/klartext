@@ -305,10 +305,12 @@
     <h2 id="bench-heading">{{ t('landing.bench.h') }}</h2>
     <p class="small muted">{{ t('landing.bench.sub') }}</p>
     <div class="bench">
-      <div class="bench-zeile">
+      <div class="bench-zeile bench-sieger">
         <span class="bench-name">RapidOCR
           <em class="bench-aktiv">{{ t('landing.bench.active') }}</em></span>
-        <span class="bench-balken" aria-hidden="true"><i class="bench-98"></i></span>
+        {# Drei Energie-Blaeschen wandern durch den Siegerbalken — Bewegung
+           nur auf dem Gewinner, die Verlierer bleiben still. #}
+        <span class="bench-balken" aria-hidden="true"><i class="bench-98"><b></b><b></b><b></b></i></span>
         <span class="bench-wert">98&nbsp;% <small>· 44/45</small></span>
       </div>
       <div class="bench-zeile">
