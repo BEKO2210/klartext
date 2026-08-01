@@ -7,7 +7,8 @@
 **Dokumente, Scans und Fotos werden sauberes Markdown.**
 Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 
-[![Tests](https://img.shields.io/badge/Tests-59%2F59-15803D)](tests/e2e.py)
+[![Lizenz](https://img.shields.io/badge/Lizenz-AGPL--3.0-1E3A5F)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-72%2F72-15803D)](tests/e2e.py)
 [![Engine](https://img.shields.io/badge/Engine-Docling%20v1.28.0-1E3A5F)](THIRD_PARTY_LICENSES.md)
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
@@ -298,10 +299,19 @@ Name, Logo und Gestaltung sind eigenständig: [brand/BRAND.md](brand/BRAND.md).
 
 ## Lizenz dieses Projekts
 
-Noch nicht festgelegt. Ohne Lizenzdatei gilt das gesetzliche Urheberrecht: alle Rechte
-vorbehalten. Für ein privates Repository ist das der sichere Ausgangszustand. Soll der
-Code weitergegeben werden, gehört eine Lizenzdatei dazu — MIT wäre die naheliegende
-Wahl, weil auch die eingesetzten Fremdkomponenten unter MIT und Apache-2.0 stehen.
+**GNU AGPL-3.0** — siehe [LICENSE](LICENSE).
 
-Die Lizenzen der **verwendeten** Fremdkomponenten sind davon unberührt und vollständig
-in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) dokumentiert.
+Das heißt: Der Code darf frei genutzt, verändert und auch kommerziell betrieben
+werden. Wer eine veränderte Fassung betreibt und anderen über das Netz zugänglich
+macht, muss den Quelltext seiner Fassung ebenfalls unter AGPL-3.0 veröffentlichen.
+So bleibt jede Weiterentwicklung für alle offen.
+
+Beiträge (Pull Requests) gelten als unter AGPL-3.0 eingereicht.
+
+**Nicht Teil der Lizenz:** der Name „Klartext", Logo und Gestaltung
+([brand/BRAND.md](brand/BRAND.md)) sowie die Domain und die dort betriebene
+Instanz. Eigene Installationen bitte unter eigenem Namen betreiben.
+
+Die Lizenzen der **verwendeten** Fremdkomponenten (MIT, Apache-2.0 — mit AGPL
+vereinbar) sind vollständig in
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) dokumentiert.
