@@ -155,6 +155,34 @@ STRINGS: dict[str, str] = {
     "landing.bench.compare_link": "Und wie schlägt sich Klartext gegen pandoc & Co.?",
     "landing.io.md_cap": "zum Lesen und Weiterverwenden",
     "landing.io.json_cap": "volle Struktur für andere Programme",
+    # --------------------------------------------------------- KI-Beispiele
+    # Alle Zahlen real gemessen (Lauf vom 01.08.2026): tiktoken o200k auf dem
+    # tatsaechlichen Markdown-Ergebnis; Bildkosten nach der veroeffentlichten
+    # Anthropic-Formel. Original + Ergebnis liegen als Download daneben.
+    "landing.ki.h": "Gemacht für KI-Werkzeuge",
+    "landing.ki.sub": "Ein Scan ist teure Eingabe für ein Sprachmodell — sauberes "
+    "Markdown nicht. Zwei echte Konvertierungen, nachprüfbar bis ins Original:",
+    "landing.ki.vorher": "Vorher",
+    "landing.ki.nachher": "Nachher — Markdown",
+    "landing.ki.b1.name": "Fotografierte Rechnung",
+    "landing.ki.b1.alt": "Gescannte Beispielrechnung mit sechs Positionen und "
+    "Summenblock",
+    "landing.ki.b2.name": "Excel-Preisliste",
+    "landing.ki.b2.alt": "Beispiel-Preisliste als Tabellenblatt mit 13 Artikelzeilen",
+    "landing.ki.zeilen": "Zeilen",
+    "landing.ki.tokens": "Tokens statt Bildeingabe",
+    "landing.ki.eingabe": "KI-Eingabekosten",
+    "landing.ki.tokens_md": "Tokens als Markdown",
+    "landing.ki.tabelle": "Tabelle übernommen",
+    "landing.ki.pruefen": "Selbst prüfen:",
+    "landing.ki.original": "Original",
+    "landing.ki.method": "Echter Lauf über diesen Dienst, beide Dokumente zusammen "
+    "in 17 Sekunden. Tokens gezählt mit tiktoken (o200k) am tatsächlichen Ergebnis; "
+    "Bildkosten nach der Anthropic-Formel Breite × Höhe ÷ 750 nach Skalierung auf "
+    "1568 px — nach der GPT-4o-Formel wären es 1 105 Tokens (−48 %). "
+    "Beispieldokumente fiktiv. Und unverändert gilt: Die Umwandlung selbst läuft "
+    "ohne jeden KI-Anbieter.",
+
     "landing.io.in_label": "Eingabe",
     "landing.io.in_note": "Formate",
     "landing.io.out_label": "Ausgabe",

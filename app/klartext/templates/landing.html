@@ -326,6 +326,81 @@
       <a href="{{ path_for('compare') }}">{{ t('landing.bench.compare_link') }}</a></p>
   </section>
 
+  {# Zwei echte Konvertierungen mit gemessenen Token-Zahlen. Alle Werte stammen
+     aus einem realen Lauf ueber diesen Dienst; Original und Ergebnis liegen
+     als Download daneben — jeder kann nachpruefen. Beispieldokumente fiktiv. #}
+  <section class="card" aria-labelledby="ki-heading">
+    <h2 id="ki-heading">{{ t('landing.ki.h') }}</h2>
+    <p class="small muted">{{ t('landing.ki.sub') }}</p>
+
+    <div class="demo-gitter">
+      <article class="demo">
+        <header class="demo-kopf">
+          <h3>{{ t('landing.ki.b1.name') }}</h3>
+          <span class="demo-typ">PNG · 1240 × 1754</span>
+        </header>
+        <div class="demo-paar">
+          <figure class="demo-seite">
+            <figcaption>{{ t('landing.ki.vorher') }}</figcaption>
+            <img src="{{ asset('beispiel-rechnung.webp') }}" width="620" height="877"
+                 alt="{{ t('landing.ki.b1.alt') }}" loading="lazy" decoding="async">
+          </figure>
+          <figure class="demo-seite">
+            <figcaption class="demo-cap-md">{{ t('landing.ki.nachher') }}</figcaption>
+            <pre class="demo-code" aria-hidden="true">## Rechnung Nr. 2026-0847
+
+| Pos. | Artikel-Nr. | Bezeichnung        | Gesamt   |
+|------|-------------|--------------------|----------|
+|    1 | A-1001      | Kupferrohr 15 mm   | 201,60 € |
+|    2 | B-2010      | Dämmschale 20 mm   | 56,70 €  |
+|    5 | M-9001      | Monteurstunde      | 841,00 € |
+
+Rechnungsbetrag  1.555,57 €</pre>
+          </figure>
+        </div>
+        <ul class="demo-werte">
+          <li><strong>2 319 <span class="demo-zu">→</span> 577</strong><span>{{ t('landing.ki.tokens') }}</span></li>
+          <li class="demo-akzent"><strong>−75 %</strong><span>{{ t('landing.ki.eingabe') }}</span></li>
+        </ul>
+        <p class="demo-laden">{{ t('landing.ki.pruefen') }}
+          <a href="{{ asset('beispiel-rechnung.png') }}" download>{{ t('landing.ki.original') }}</a> ·
+          <a href="{{ asset('beispiel-rechnung.md') }}" download>Markdown</a></p>
+      </article>
+
+      <article class="demo">
+        <header class="demo-kopf">
+          <h3>{{ t('landing.ki.b2.name') }}</h3>
+          <span class="demo-typ">XLSX · 13 {{ t('landing.ki.zeilen') }}</span>
+        </header>
+        <div class="demo-paar">
+          <figure class="demo-seite">
+            <figcaption>{{ t('landing.ki.vorher') }}</figcaption>
+            <img src="{{ asset('beispiel-preisliste.webp') }}" width="620" height="233"
+                 alt="{{ t('landing.ki.b2.alt') }}" loading="lazy" decoding="async">
+          </figure>
+          <figure class="demo-seite">
+            <figcaption class="demo-cap-md">{{ t('landing.ki.nachher') }}</figcaption>
+            <pre class="demo-code" aria-hidden="true">| Artikel-Nr. | Bezeichnung        | Listenpreis |
+|-------------|--------------------|-------------|
+| A-1001      | Kupferrohr 15 mm   |        8.4  |
+| A-1002      | Kupferrohr 18 mm   |        9.95 |
+| B-2010      | Dämmschale 20 mm   |        3.15 |
+| D-4130      | Duschrinne 800 mm  |      149.0  |</pre>
+          </figure>
+        </div>
+        <ul class="demo-werte">
+          <li><strong>467</strong><span>{{ t('landing.ki.tokens_md') }}</span></li>
+          <li class="demo-akzent"><strong>1:1</strong><span>{{ t('landing.ki.tabelle') }}</span></li>
+        </ul>
+        <p class="demo-laden">{{ t('landing.ki.pruefen') }}
+          <a href="{{ asset('beispiel-preisliste.xlsx') }}" download>{{ t('landing.ki.original') }}</a> ·
+          <a href="{{ asset('beispiel-preisliste.md') }}" download>Markdown</a></p>
+      </article>
+    </div>
+
+    <p class="bench-fuss">{{ t('landing.ki.method') }}</p>
+  </section>
+
   {# Formate -> Strom -> zwei Ausgabedateien: die Geschichte der Sektion als
      Bild statt als Liste. Der Punktestrom ist reines CSS und rein dekorativ —
      die Information steht als echter Text in den beiden Ausgabekarten. #}

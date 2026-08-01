@@ -152,6 +152,34 @@ STRINGS: dict[str, str] = {
     "landing.bench.compare_link": "And how does Klartext compare to pandoc & co.?",
     "landing.io.md_cap": "to read and reuse",
     "landing.io.json_cap": "full structure for other programs",
+    # --------------------------------------------------------- AI examples
+    # All numbers measured for real (run of 2026-08-01): tiktoken o200k on the
+    # actual Markdown output; image cost per Anthropic's published formula.
+    # Original and result sit next to the claim as downloads.
+    "landing.ki.h": "Built for AI tools",
+    "landing.ki.sub": "A scan is expensive input for a language model — clean "
+    "Markdown isn't. Two real conversions, verifiable down to the original file:",
+    "landing.ki.vorher": "Before",
+    "landing.ki.nachher": "After — Markdown",
+    "landing.ki.b1.name": "Photographed invoice",
+    "landing.ki.b1.alt": "Scanned sample invoice with six line items and a totals "
+    "block",
+    "landing.ki.b2.name": "Excel price list",
+    "landing.ki.b2.alt": "Sample price list as a spreadsheet with 13 article rows",
+    "landing.ki.zeilen": "rows",
+    "landing.ki.tokens": "tokens instead of image input",
+    "landing.ki.eingabe": "AI input cost",
+    "landing.ki.tokens_md": "tokens as Markdown",
+    "landing.ki.tabelle": "table carried over",
+    "landing.ki.pruefen": "Verify yourself:",
+    "landing.ki.original": "Original",
+    "landing.ki.method": "Real run through this service, both documents together "
+    "in 17 seconds. Tokens counted with tiktoken (o200k) on the actual output; "
+    "image cost per Anthropic's formula width × height ÷ 750 after scaling to "
+    "1568 px — per the GPT-4o formula it would be 1,105 tokens (−48 %). Sample "
+    "documents are fictional. And as ever: the conversion itself runs without "
+    "any AI provider.",
+
     "landing.io.in_label": "Input",
     "landing.io.in_note": "formats",
     "landing.io.out_label": "Output",

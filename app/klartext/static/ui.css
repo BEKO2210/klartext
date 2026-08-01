@@ -397,6 +397,80 @@ h1 {
 .vgl-cta { margin-top: 18px; }
 .vgl-stand { font-size: 12.5px; line-height: 1.6; max-width: 72ch; }
 
+/* ---------------------------------------------------------------- KI-Beispiele */
+
+/* Zwei gespiegelte Beispielkarten in der Panelsprache der Eingabe/Ausgabe-
+   Sektion: gleiche Einfassung, gleiches Gewicht, Zahlen in der Kennzahl-Optik. */
+.demo-gitter { display: grid; gap: 16px; margin-top: 18px; }
+@media (min-width: 900px) { .demo-gitter { grid-template-columns: 1fr 1fr; } }
+
+.demo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 16px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.demo-kopf {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+.demo-kopf h3 { margin: 0; font-size: 15.5px; font-weight: 650; letter-spacing: -.01em; }
+.demo-typ {
+  font-size: 11.5px; color: var(--muted); font-weight: 550; letter-spacing: .04em;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+.demo-paar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+.demo-seite { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.demo-seite figcaption {
+  font-size: 10.5px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted);
+}
+.demo-seite .demo-cap-md { color: var(--accent); }
+.demo-seite img {
+  width: 100%; height: 148px; object-fit: cover; object-position: top;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg);
+}
+.demo-code {
+  margin: 0; flex: 1; height: 148px;
+  padding: 10px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  font: 400 10px/1.6 var(--mono);
+  color: var(--text);
+  overflow: hidden; white-space: pre;
+}
+
+.demo-werte {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.demo-werte li {
+  display: flex; flex-direction: column; gap: 1px; align-items: center;
+  text-align: center;
+  padding: 10px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: 10px;
+}
+.demo-werte strong {
+  font-size: 17px; font-weight: 700; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.demo-zu { color: var(--muted); font-weight: 400; }
+.demo-werte span {
+  font-size: 10.5px; color: var(--muted); font-weight: 550;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.demo-akzent { border-color: var(--accent); }
+.demo-akzent strong { color: var(--accent); }
+
+.demo-laden { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 519px) {
+  .demo-paar { grid-template-columns: 1fr; }
+  .demo-seite img, .demo-code { height: 132px; }
+}
+
 /* ---------------------------------------------------------------- Fußzeile */
 
 .footer { padding-top: 36px; }
