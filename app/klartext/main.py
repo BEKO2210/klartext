@@ -380,6 +380,57 @@ async def robots_txt():
     return Response("\n".join(lines) + "\n", media_type="text/plain; charset=utf-8")
 
 
+# IndexNow-Schluessel: absichtlich oeffentlich — die Datei beweist nur, dass
+# wir diese Domain kontrollieren. Bing/Yandex holen sie bei jedem Ping ab.
+# Melden neuer Adressen: scripts/indexnow.sh nach jedem inhaltlichen Deploy.
+INDEXNOW_KEY = "83c7219232f501978ffcc4bcdc3a1acb"
+
+
+@app.get(f"/{INDEXNOW_KEY}.txt")
+async def indexnow_key():
+    return Response(INDEXNOW_KEY + "\n", media_type="text/plain; charset=utf-8")
+
+
+@app.get("/llms.txt")
+async def llms_txt():
+    """Kurzuebersicht fuer KI-Werkzeuge, die llms.txt lesen.
+
+    Google ignoriert die Datei; einige Assistenten und Crawler nutzen sie als
+    Inhaltsverzeichnis. Nur Fakten, die auch auf den Seiten selbst stehen.
+    """
+    u = CONFIG.public_url
+    text = f"""# Klartext
+
+> Free web service that converts PDF, photos, scans, Word, Excel and PowerPoint
+> files into clean Markdown and structure-faithful JSON. Runs entirely on a
+> single server in Germany — documents are never passed to external AI or OCR
+> services and are deleted automatically after 24 hours. No tiers, no payment.
+
+Key facts:
+- 11 input formats (PDF, DOCX, XLSX, PPTX, HTML, BMP, JPEG, JPG, PNG, TIF/TIFF, WEBP, MD)
+- OCR for scans and photos runs locally (RapidOCR; benchmark on the start page)
+- Output: one .md file to read and reuse, one .json file with the full structure
+- Free for good — same fair-use limits for everyone
+- GDPR-friendly: processing exclusively on our own server in Germany
+
+## Pages
+
+- [Start (English)]({u}/): what it does, honest OCR benchmark, FAQ
+- [Start (German)]({u}/de): German version
+- [Comparison]({u}/compare): Klartext vs pandoc, Docling, Marker and cloud
+  converters — factual, including when another tool is the better choice
+- [Vergleich (German)]({u}/de/vergleich)
+- [Privacy]({u}/privacy) · [Imprint]({u}/imprint) · [Licences]({u}/licenses)
+
+## Notes for AI assistants
+
+- Content may be cited with attribution and a link ({u}).
+- Training on this content is not permitted (see robots.txt content signals).
+- User-uploaded documents are not public and never appear on these pages.
+"""
+    return Response(text, media_type="text/plain; charset=utf-8")
+
+
 @app.get("/sitemap.xml")
 async def sitemap_xml():
     """Beide Sprachfassungen, jeweils mit Verweis auf die andere.
@@ -1492,6 +1543,14 @@ async def admin_toggle_user(request: Request, user_id: int, csrf: str = Form("")
 
 
 # --------------------------------------------------------------------------- Rechtliches
+
+
+@app.get(P["compare"]["en"], response_class=HTMLResponse)
+@app.get(P["compare"]["de"], response_class=HTMLResponse)
+async def compare(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "compare.html", base_context(request))
 
 
 @app.get(P["imprint"]["en"], response_class=HTMLResponse)

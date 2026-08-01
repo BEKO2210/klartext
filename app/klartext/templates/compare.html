@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ t('compare.title') }}{% endblock %}
+{% block description %}{{ t('compare.description') }}{% endblock %}
+
+{% block content %}
+<div class="wrap stack-lg">
+
+  <section class="hero hero-schmal">
+    <h1>{{ t('compare.h1') }}</h1>
+    <p class="lead">{{ t('compare.lead') }}</p>
+  </section>
+
+  {# Jedes Werkzeug als eigene Karte: liest sich am Handy besser als eine
+     fuenfspaltige Tabelle, und jede Karte ist ein sauber zitierbarer Absatz.
+     Rechtlicher Rahmen (§ 6 UWG): nur nachpruefbare Eigenschaften laut
+     oeffentlicher Dokumentation, nichts Herabsetzendes, Stand-Datum und
+     Korrekturangebot stehen unten auf der Seite. #}
+  <section class="vergleich" aria-labelledby="vergleich-heading">
+    <h2 id="vergleich-heading" class="visually-hidden">{{ t('compare.list.aria') }}</h2>
+
+    {% for nr in ['1', '2', '3', '4', '5'] %}
+    <article class="card vgl-karte{% if nr == '1' %} vgl-karte-eigen{% endif %}">
+      <header class="vgl-kopf">
+        <h3>{{ t('compare.tool.' ~ nr ~ '.name') }}</h3>
+        {% if nr == '1' %}<span class="vgl-eigen-marke">{{ t('compare.ours') }}</span>{% endif %}
+      </header>
+      <p class="vgl-was">{{ t('compare.tool.' ~ nr ~ '.what') }}</p>
+      <dl class="vgl-fakten">
+        <div><dt>{{ t('compare.col.ocr') }}</dt><dd>{{ t('compare.tool.' ~ nr ~ '.ocr') }}</dd></div>
+        <div><dt>{{ t('compare.col.data') }}</dt><dd>{{ t('compare.tool.' ~ nr ~ '.data') }}</dd></div>
+        <div><dt>{{ t('compare.col.setup') }}</dt><dd>{{ t('compare.tool.' ~ nr ~ '.setup') }}</dd></div>
+        <div><dt>{{ t('compare.col.cost') }}</dt><dd>{{ t('compare.tool.' ~ nr ~ '.cost') }}</dd></div>
+      </dl>
+      <p class="vgl-fazit">{{ t('compare.tool.' ~ nr ~ '.verdict') }}</p>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section class="card" aria-labelledby="wann-heading">
+    <h2 id="wann-heading">{{ t('compare.when.h') }}</h2>
+    <ul class="usecases">
+      <li>{{ t('compare.when.1')|safe }}</li>
+      <li>{{ t('compare.when.2')|safe }}</li>
+      <li>{{ t('compare.when.3')|safe }}</li>
+      <li>{{ t('compare.when.4')|safe }}</li>
+    </ul>
+    <div class="btn-row vgl-cta">
+      <a class="btn btn-primary" href="{{ path_for('register') }}">{{ t('landing.cta.primary') }}</a>
+      <a class="btn btn-secondary" href="{{ path_for('home') }}">{{ t('compare.back') }}</a>
+    </div>
+  </section>
+
+  <p class="vgl-stand muted">{{ t('compare.disclaimer') }}</p>
+
+</div>
+{% endblock %}

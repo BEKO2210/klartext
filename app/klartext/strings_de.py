@@ -50,6 +50,101 @@ STRINGS: dict[str, str] = {
     "gesperrten Funktionen.",
     "landing.producthunt.alt": "Klartext — Dokumente und Scans werden zu sauberem "
     "Markdown und JSON. Vorgestellt auf Product Hunt.",
+    # ------------------------------------------------------------- Vergleich
+    # Rechtlicher Rahmen (§ 6 UWG, vergleichende Werbung): ausschliesslich
+    # nachpruefbare Eigenschaften laut oeffentlicher Dokumentation der Projekte,
+    # nichts Herabsetzendes, keine erfundenen Messwerte ueber fremde Werkzeuge.
+    # Der eigene OCR-Benchmark vergleicht nur Engines INNERHALB von Klartext
+    # und taucht hier bewusst nicht als Konkurrenzvergleich auf.
+    "compare.title": "{product} oder pandoc, Docling, Marker? Ein ehrlicher Vergleich",
+    "compare.description": "PDF und Scans in Markdown umwandeln: Klartext, pandoc, "
+    "Docling, Marker und Cloud-Konverter im sachlichen Vergleich — OCR, Datenschutz, "
+    "Einrichtung, Kosten.",
+    "compare.h1": "Klartext — oder etwas anderes?",
+    "compare.lead": "Es gibt mehrere gute Wege von PDF zu Markdown. Welcher passt, "
+    "hängt davon ab, wer du bist und wo deine Dokumente laufen dürfen. Hier der "
+    "sachliche Vergleich — auch mit den Fällen, in denen ein anderes Werkzeug die "
+    "bessere Wahl ist.",
+    "compare.list.aria": "Werkzeuge im Vergleich",
+    "compare.ours": "das hier",
+    "compare.col.ocr": "Scans & Fotos",
+    "compare.col.data": "Wo Dokumente landen",
+    "compare.col.setup": "Einrichtung",
+    "compare.col.cost": "Preis",
+
+    "compare.tool.1.name": "Klartext",
+    "compare.tool.1.what": "Webdienst: hochladen, Markdown und JSON herunterladen. "
+    "Gebaut auf der Open-Source-Bibliothek Docling.",
+    "compare.tool.1.ocr": "Ja — Texterkennung läuft mit (RapidOCR).",
+    "compare.tool.1.data": "Auf einem einzelnen Server in Deutschland; nach 24 Stunden "
+    "automatisch gelöscht. Keine Weitergabe an KI-Anbieter.",
+    "compare.tool.1.setup": "Keine. Browser genügt, auch am Handy.",
+    "compare.tool.1.cost": "Kostenlos, ohne Tarife.",
+    "compare.tool.1.verdict": "Für alle, die keine Software installieren wollen oder "
+    "dürfen — und für Dokumente, die keinen US-Server sehen sollen.",
+
+    "compare.tool.2.name": "Docling",
+    "compare.tool.2.what": "Open-Source-Bibliothek (IBM, MIT-Lizenz) zum Auslesen von "
+    "Dokumenten — genau die Technik, auf der Klartext aufbaut.",
+    "compare.tool.2.ocr": "Ja, mit wählbaren OCR-Engines.",
+    "compare.tool.2.data": "Wo du sie ausführst — dein Rechner, dein Server.",
+    "compare.tool.2.setup": "Python-Umgebung, Modelle werden beim ersten Lauf geladen.",
+    "compare.tool.2.cost": "Kostenlos (Open Source).",
+    "compare.tool.2.verdict": "Wer eine Bibliothek für die eigene Software sucht, ist "
+    "bei Docling direkt richtig — dafür braucht es Klartext nicht.",
+
+    "compare.tool.3.name": "pandoc",
+    "compare.tool.3.what": "Der Klassiker unter den Formatwandlern: übersetzt zwischen "
+    "Dutzenden Textformaten (DOCX, LaTeX, HTML, Markdown …).",
+    "compare.tool.3.ocr": "Nein — pandoc liest keine Scans oder Fotos, es arbeitet auf "
+    "bereits vorhandenem Text.",
+    "compare.tool.3.data": "Auf deinem Rechner.",
+    "compare.tool.3.setup": "Lokale Installation, Kommandozeile.",
+    "compare.tool.3.cost": "Kostenlos (Open Source).",
+    "compare.tool.3.verdict": "Für saubere Textdateien ohne Scans hervorragend — wer "
+    "DOCX nach Markdown will und die Kommandozeile mag, braucht nichts anderes.",
+
+    "compare.tool.4.name": "Marker",
+    "compare.tool.4.what": "Python-Bibliothek für PDF nach Markdown mit Fokus auf "
+    "wissenschaftliche Dokumente.",
+    "compare.tool.4.ocr": "Ja.",
+    "compare.tool.4.data": "Auf deinem Rechner; für flottes Arbeiten wird eine GPU "
+    "empfohlen.",
+    "compare.tool.4.setup": "Python-Umgebung plus Modell-Downloads.",
+    "compare.tool.4.cost": "Open Source; Lizenzbedingungen des Projekts beachten.",
+    "compare.tool.4.verdict": "Stark für Stapelverarbeitung auf eigener Hardware, wenn "
+    "Einrichtung und GPU kein Hindernis sind.",
+
+    "compare.tool.5.name": "Cloud-KI-Konverter",
+    "compare.tool.5.what": "Chat-Assistenten und Online-Konverter, bei denen das "
+    "Dokument zur Verarbeitung hochgeladen wird.",
+    "compare.tool.5.ocr": "Meist ja.",
+    "compare.tool.5.data": "Auf den Servern des jeweiligen Anbieters, häufig außerhalb "
+    "der EU; Speicherdauer je nach Anbieter und Einstellung.",
+    "compare.tool.5.setup": "Keine bis Konto-Anmeldung.",
+    "compare.tool.5.cost": "Teils kostenlos mit Grenzen, teils Abo.",
+    "compare.tool.5.verdict": "Bequem für Unkritisches. Für Verträge, Patientendaten "
+    "oder Mandantenunterlagen entscheidet die Frage, ob das Dokument den Anbieter "
+    "wechseln darf.",
+
+    "compare.when.h": "Kurz entschieden",
+    "compare.when.1": "<strong>Saubere DOCX/HTML ohne Scans, Kommandozeile ok?</strong> "
+    "pandoc.",
+    "compare.when.2": "<strong>Eigene Software bauen?</strong> Docling als Bibliothek.",
+    "compare.when.3": "<strong>Stapelverarbeitung auf eigener GPU?</strong> Marker "
+    "oder Docling.",
+    "compare.when.4": "<strong>Kein Installieren, Scans und Fotos dabei, Dokumente "
+    "sollen in Deutschland bleiben?</strong> Klartext.",
+    "compare.back": "Zur Startseite",
+    "compare.disclaimer": "Stand August 2026, Eigenschaften laut öffentlicher "
+    "Dokumentation der jeweiligen Projekte. Alle genannten Namen sind Marken ihrer "
+    "Inhaber; es bestehen keine Verbindungen zu den Projekten — Docling wird als "
+    "Grundlage von Klartext genutzt und ist unter Lizenzen genannt. Unser eigener "
+    "Genauigkeits-Benchmark misst ausschließlich OCR-Engines innerhalb von Klartext "
+    "und trifft keine Aussage über die hier genannten Werkzeuge. Etwas veraltet oder "
+    "falsch dargestellt? Eine Nachricht an die Adresse im Impressum genügt, wir "
+    "korrigieren.",
+
     "landing.bench.h": "Gemessen, nicht versprochen",
     "landing.bench.sub": "Drei Texterkennungen traten gegeneinander an. Eine Messung, "
     "ein Sieger — und der läuft hier im Betrieb.",
@@ -57,6 +152,7 @@ STRINGS: dict[str, str] = {
     "landing.bench.method": "Gemessen an 45 Pflichtangaben — Namen, Artikelnummern, "
     "Beträge, Umlaute, Gradzeichen — über vier Testscans, jede einzeln von Hand geprüft. "
     "Ein typisches Dokument ist in Sekunden umgewandelt, nicht in Minuten.",
+    "landing.bench.compare_link": "Und wie schlägt sich Klartext gegen pandoc & Co.?",
     "landing.showcase.aria": "Links ein gescanntes Dokument mit einer Tabelle, rechts das "
     "daraus erzeugte Markdown mit derselben Tabelle.",
     "landing.showcase.before": "Vorher — Scan oder Foto",

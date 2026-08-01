@@ -313,6 +313,50 @@ h1 {
   .bench-name .bench-aktiv { background: rgba(34, 197, 94, .16); }
 }
 
+/* ---------------------------------------------------------------- Vergleich */
+
+.hero-schmal { padding-bottom: 0; }
+.hero-schmal h1 { font-size: clamp(27px, 6vw, 42px); }
+
+.vergleich { display: grid; gap: 16px; }
+@media (min-width: 900px) { .vergleich { grid-template-columns: 1fr 1fr; } }
+
+/* Die eigene Karte zuerst und markiert — aber mit denselben Faktenfeldern
+   wie alle anderen. Der Unterschied ist die Kante, nicht die Behauptung. */
+.vgl-karte-eigen { border-color: var(--accent); }
+@media (min-width: 900px) { .vgl-karte-eigen { grid-column: 1 / -1; } }
+
+.vgl-kopf { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.vgl-kopf h3 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.014em; }
+.vgl-eigen-marke {
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--accent); background: rgba(21, 128, 61, .10);
+}
+@media (prefers-color-scheme: dark) {
+  .vgl-eigen-marke { background: rgba(34, 197, 94, .16); }
+}
+
+.vgl-was { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+
+.vgl-fakten { margin: 0; display: grid; gap: 8px; }
+@media (min-width: 560px) { .vgl-fakten { grid-template-columns: 1fr 1fr; gap: 10px 24px; } }
+.vgl-fakten > div {
+  display: grid; grid-template-columns: 118px 1fr; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 13.5px; line-height: 1.5;
+}
+.vgl-fakten dt { color: var(--muted); font-weight: 550; }
+.vgl-fakten dd { margin: 0; color: var(--text); }
+
+.vgl-fazit {
+  margin: 14px 0 0; font-size: 13.5px; line-height: 1.6;
+  color: var(--muted); font-style: italic;
+}
+
+.vgl-cta { margin-top: 18px; }
+.vgl-stand { font-size: 12.5px; line-height: 1.6; max-width: 72ch; }
+
 /* ---------------------------------------------------------------- Fußzeile */
 
 .footer { padding-top: 36px; }

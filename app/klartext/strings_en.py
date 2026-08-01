@@ -48,6 +48,100 @@ STRINGS: dict[str, str] = {
     "landing.hero_note": "Free for good. No tiers, no payment, no locked features.",
     "landing.producthunt.alt": "Klartext — turn documents and scans into clean Markdown "
     "and JSON. Featured on Product Hunt.",
+    # ------------------------------------------------------------- Comparison
+    # Legal frame (German § 6 UWG on comparative advertising): only verifiable
+    # properties from the projects' public documentation, nothing denigrating,
+    # no invented measurements about other tools. Our own OCR benchmark only
+    # compares engines INSIDE Klartext and deliberately does not appear here
+    # as a competitor comparison.
+    "compare.title": "{product} vs pandoc, Docling, Marker — an honest comparison",
+    "compare.description": "Converting PDF and scans to Markdown: Klartext, pandoc, "
+    "Docling, Marker and cloud converters compared on facts — OCR, privacy, setup, "
+    "cost.",
+    "compare.h1": "Klartext — or something else?",
+    "compare.lead": "There are several good ways from PDF to Markdown. The right one "
+    "depends on who you are and where your documents are allowed to travel. Here is "
+    "the factual comparison — including the cases where another tool is the better "
+    "choice.",
+    "compare.list.aria": "Tools compared",
+    "compare.ours": "this one",
+    "compare.col.ocr": "Scans & photos",
+    "compare.col.data": "Where documents go",
+    "compare.col.setup": "Setup",
+    "compare.col.cost": "Cost",
+
+    "compare.tool.1.name": "Klartext",
+    "compare.tool.1.what": "Web service: upload, download Markdown and JSON. Built on "
+    "the open-source library Docling.",
+    "compare.tool.1.ocr": "Yes — text recognition included (RapidOCR).",
+    "compare.tool.1.data": "On a single server in Germany; deleted automatically "
+    "after 24 hours. Never passed to AI providers.",
+    "compare.tool.1.setup": "None. A browser is enough, phone included.",
+    "compare.tool.1.cost": "Free, no tiers.",
+    "compare.tool.1.verdict": "For everyone who can't or won't install software — and "
+    "for documents that must not see a US server.",
+
+    "compare.tool.2.name": "Docling",
+    "compare.tool.2.what": "Open-source document parsing library (IBM, MIT licence) — "
+    "the very technology Klartext is built on.",
+    "compare.tool.2.ocr": "Yes, with selectable OCR engines.",
+    "compare.tool.2.data": "Wherever you run it — your machine, your server.",
+    "compare.tool.2.setup": "Python environment; models download on first run.",
+    "compare.tool.2.cost": "Free (open source).",
+    "compare.tool.2.verdict": "If you need a library for your own software, go "
+    "straight to Docling — you don't need Klartext for that.",
+
+    "compare.tool.3.name": "pandoc",
+    "compare.tool.3.what": "The classic universal converter: translates between "
+    "dozens of text formats (DOCX, LaTeX, HTML, Markdown …).",
+    "compare.tool.3.ocr": "No — pandoc does not read scans or photos; it works on "
+    "text that already exists as text.",
+    "compare.tool.3.data": "On your machine.",
+    "compare.tool.3.setup": "Local install, command line.",
+    "compare.tool.3.cost": "Free (open source).",
+    "compare.tool.3.verdict": "Excellent for clean text files without scans — if you "
+    "want DOCX to Markdown and like the command line, you need nothing else.",
+
+    "compare.tool.4.name": "Marker",
+    "compare.tool.4.what": "Python library for PDF to Markdown with a focus on "
+    "scientific documents.",
+    "compare.tool.4.ocr": "Yes.",
+    "compare.tool.4.data": "On your machine; a GPU is recommended for speed.",
+    "compare.tool.4.setup": "Python environment plus model downloads.",
+    "compare.tool.4.cost": "Open source; check the project's licence terms.",
+    "compare.tool.4.verdict": "Strong for batch processing on your own hardware, if "
+    "setup and GPU are no obstacle.",
+
+    "compare.tool.5.name": "Cloud AI converters",
+    "compare.tool.5.what": "Chat assistants and online converters where the document "
+    "is uploaded for processing.",
+    "compare.tool.5.ocr": "Usually yes.",
+    "compare.tool.5.data": "On the provider's servers, often outside the EU; "
+    "retention depends on provider and settings.",
+    "compare.tool.5.setup": "None to account sign-up.",
+    "compare.tool.5.cost": "Partly free with limits, partly subscription.",
+    "compare.tool.5.verdict": "Convenient for the uncritical. For contracts, patient "
+    "records or client files, the deciding question is whether the document may "
+    "change hands at all.",
+
+    "compare.when.h": "Decide in one glance",
+    "compare.when.1": "<strong>Clean DOCX/HTML, no scans, command line is fine?</strong> "
+    "pandoc.",
+    "compare.when.2": "<strong>Building your own software?</strong> Docling as a "
+    "library.",
+    "compare.when.3": "<strong>Batch processing on your own GPU?</strong> Marker or "
+    "Docling.",
+    "compare.when.4": "<strong>No installing, scans and photos involved, documents "
+    "must stay in Germany?</strong> Klartext.",
+    "compare.back": "Back to the start page",
+    "compare.disclaimer": "As of August 2026, properties according to the public "
+    "documentation of the respective projects. All names are trademarks of their "
+    "owners; there is no affiliation — Docling is used as the foundation of Klartext "
+    "and credited under licences. Our own accuracy benchmark measures OCR engines "
+    "inside Klartext only and makes no claim about the tools listed here. Something "
+    "outdated or misrepresented? A message to the address in the imprint is enough — "
+    "we will correct it.",
+
     "landing.bench.h": "Measured, not promised",
     "landing.bench.sub": "Three OCR engines competed for the job. One measurement, "
     "one winner — and that winner is what runs here.",
@@ -55,6 +149,7 @@ STRINGS: dict[str, str] = {
     "landing.bench.method": "Measured on 45 required fields — names, item numbers, "
     "amounts, umlauts, degree signs — across four test scans, each checked by hand. "
     "A typical document converts in seconds, not minutes.",
+    "landing.bench.compare_link": "And how does Klartext compare to pandoc & co.?",
     "landing.showcase.aria": "On the left a scanned document with a table, on the right "
     "the Markdown produced from it with the same table.",
     "landing.showcase.before": "Before — scan or photo",

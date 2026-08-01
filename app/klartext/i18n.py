@@ -39,6 +39,7 @@ PATHS: dict[str, dict[str, str]] = {
     "verify":       {"en": "/verify",             "de": "/de/verify"},
     "forgot":       {"en": "/forgot-password",    "de": "/de/passwort-vergessen"},
     "reset":        {"en": "/new-password",       "de": "/de/passwort-neu"},
+    "compare":      {"en": "/compare",            "de": "/de/vergleich"},
     "imprint":      {"en": "/imprint",            "de": "/de/impressum"},
     "privacy":      {"en": "/privacy",            "de": "/de/datenschutz"},
     "terms":        {"en": "/terms",              "de": "/de/nutzungsbedingungen"},
@@ -64,7 +65,7 @@ APP_PATHS: dict[str, str] = {
 # Sie bleiben erreichbar und verlinkt, lenken aber kein Crawl-Budget mehr
 # von den inhaltstragenden Seiten ab.
 SITEMAP_KEYS = (
-    "home", "imprint", "privacy", "terms", "licenses",
+    "home", "compare", "imprint", "privacy", "terms", "licenses",
 )
 
 # Alte deutsche Adressen -> neue Adresse. Wird in der Middleware ausgewertet,
