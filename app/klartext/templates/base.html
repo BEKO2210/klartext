@@ -66,12 +66,22 @@
        sonst raet man beim Kuerzel, ob es den Ist- oder den Zielzustand meint.
        Der Parameter merkt die Wahl, damit die Umleitung nach Browsersprache
        sie nicht beim naechsten Aufruf wieder umwirft. #}
-    <div class="lang-pill" role="group" aria-label="{{ t('lang.aria') }}">
-      <span class="lang-ist" aria-current="true">{{ lang|upper }}</span>
+    {# Feste Reihenfolge EN | DE wie bei einem echten Schalter: nicht die
+       Beschriftungen tauschen die Plaetze, sondern der Knopf wechselt die
+       Seite. Ueber View Transitions gleitet er sogar ueber den Seitenwechsel
+       hinweg (Browser ohne Unterstuetzung springen einfach — auch richtig). #}
+    <div class="lang-pill{% if lang == 'de' %} lang-pill-de{% endif %}"
+         role="group" aria-label="{{ t('lang.aria') }}">
+      <span class="lang-knopf" aria-hidden="true"></span>
+      {% if lang == 'en' %}
+      <span class="lang-ist" aria-current="true">EN</span>
       <a class="lang-andere" href="{{ switch_url }}" rel="alternate"
-         hreflang="{{ other_lang }}" lang="{{ other_lang }}"
-         aria-label="{{ t('lang.switch_to_de') if other_lang == 'de' else t('lang.switch_to_en') }}"
-         >{{ other_lang|upper }}</a>
+         hreflang="de" lang="de" aria-label="{{ t('lang.switch_to_de') }}">DE</a>
+      {% else %}
+      <a class="lang-andere" href="{{ switch_url }}" rel="alternate"
+         hreflang="en" lang="en" aria-label="{{ t('lang.switch_to_en') }}">EN</a>
+      <span class="lang-ist" aria-current="true">DE</span>
+      {% endif %}
     </div>
     {% if user %}
       <form method="post" action="{{ path_for('logout') }}" class="inline-form">
