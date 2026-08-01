@@ -370,6 +370,11 @@ async def robots_txt():
     lines = [
         "User-agent: *",
         "Allow: /",
+        # Der Zaehlaufruf der Reichweitenmessung ist ausdruecklich erlaubt:
+        # sonst meldet die Search Console beim Rendern "durch robots.txt
+        # blockiert". Plausible verwirft Bot-Aufrufe am User-Agent, die
+        # Statistik bleibt davon sauber. Die spezifischere Regel gewinnt.
+        "Allow: /api/event",
         "Disallow: /app",
         "Disallow: /account",
         "Disallow: /admin",
