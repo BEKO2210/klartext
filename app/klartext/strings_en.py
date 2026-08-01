@@ -33,9 +33,9 @@ STRINGS: dict[str, str] = {
     "lang.to_en": "English",
 
     # --------------------------------------------------------------- Landing
-    "landing.title": "{product} — PDF, scan & photo to Markdown, free",
-    "landing.description": "Turn PDF, scans, photos, Word or Excel into clean Markdown "
-    "and JSON. Free, no tiers, text recognition runs locally on the server.",
+    "landing.title": "{product} — Convert PDF, Scan & Photo to Markdown — Free OCR",
+    "landing.description": "Convert PDF, scans, photos, Word or Excel into clean Markdown "
+    "and JSON. Free, no tiers — OCR runs on our own server, no AI providers, GDPR-friendly.",
     "landing.schema.description": "Turns PDFs, photos, scans, Word, Excel and PowerPoint "
     "files into clean Markdown and structure-faithful JSON. Processed exclusively on our "
     "own server, never passed to external AI or OCR services.",
@@ -46,6 +46,15 @@ STRINGS: dict[str, str] = {
     "landing.cta.primary": "Create a free account",
     "landing.cta.secondary": "Sign in",
     "landing.hero_note": "Free for good. No tiers, no payment, no locked features.",
+    "landing.producthunt.alt": "Klartext — turn documents and scans into clean Markdown "
+    "and JSON. Featured on Product Hunt.",
+    "landing.bench.h": "Measured, not promised",
+    "landing.bench.sub": "Three OCR engines competed for the job. One measurement, "
+    "one winner — and that winner is what runs here.",
+    "landing.bench.active": "runs here",
+    "landing.bench.method": "Measured on 45 required fields — names, item numbers, "
+    "amounts, umlauts, degree signs — across four test scans, each checked by hand. "
+    "A typical document converts in seconds, not minutes.",
     "landing.showcase.aria": "On the left a scanned document with a table, on the right "
     "the Markdown produced from it with the same table.",
     "landing.showcase.before": "Before — scan or photo",

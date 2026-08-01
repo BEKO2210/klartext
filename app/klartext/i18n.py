@@ -60,8 +60,11 @@ APP_PATHS: dict[str, str] = {
 }
 
 # Nur diese Seiten gehoeren in die Sitemap; alles andere braucht eine Anmeldung.
+# Bewusst ohne login/register/forgot: duenne Funktionsseiten ohne Suchwert.
+# Sie bleiben erreichbar und verlinkt, lenken aber kein Crawl-Budget mehr
+# von den inhaltstragenden Seiten ab.
 SITEMAP_KEYS = (
-    "home", "register", "login", "forgot", "imprint", "privacy", "terms", "licenses",
+    "home", "imprint", "privacy", "terms", "licenses",
 )
 
 # Alte deutsche Adressen -> neue Adresse. Wird in der Middleware ausgewertet,

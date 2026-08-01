@@ -65,7 +65,24 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
-app.mount("/static", StaticFiles(directory="klartext/static"), name="static")
+class _StaticMitLangemCache(StaticFiles):
+    """Statische Dateien ein Jahr cachebar machen.
+
+    Jede Referenz traegt eine Inhalts-Kennung (?v=<hash>, siehe asset() in
+    web_helpers). Eine geaenderte Datei bekommt eine neue Adresse — die alte
+    darf also unbegrenzt im Cache liegen. Ohne diesen Header gilt der
+    Cloudflare-Standard von vier Stunden, und jeder Besucher laedt die
+    unveraenderten Dateien alle vier Stunden neu.
+    """
+
+    async def get_response(self, path, scope):
+        antwort = await super().get_response(path, scope)
+        if antwort.status_code == 200:
+            antwort.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return antwort
+
+
+app.mount("/static", _StaticMitLangemCache(directory="klartext/static"), name="static")
 
 
 # --------------------------------------------------------------------------- Middleware

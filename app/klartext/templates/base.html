@@ -29,10 +29,14 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ t('og.image_alt') }}">
 <meta name="twitter:image" content="{{ public_url }}{{ asset('og.png') }}">
+<meta name="twitter:image:alt" content="{{ t('og.image_alt') }}">
 <meta name="apple-mobile-web-app-title" content="Klartext">
 <meta name="application-name" content="Klartext">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)">
+{# crossorigin ist bei Font-Preload auch fuer die eigene Domain Pflicht —
+   ohne das Attribut laedt der Browser die Datei doppelt. #}
+<link rel="preload" href="{{ asset('InterVariable.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('app.css') }}">
 <link rel="stylesheet" href="{{ asset('ui.css') }}">
 <meta property="og:site_name" content="{{ product }}">

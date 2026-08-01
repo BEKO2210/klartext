@@ -157,10 +157,13 @@ Anwendungscode.
 
 ## 5. Schriften und Symbole
 
-- **Schriften:** keine. Es wird ausschließlich der Systemschriftstapel des jeweiligen
-  Geräts verwendet (`system-ui`, San Francisco, Segoe UI, Roboto). Es werden keine
-  Schriftdateien ausgeliefert und keine Schrift-CDNs eingebunden — damit entstehen
-  weder Lizenz- noch Datenschutzfragen.
+- **Schriften:** **Inter Variable** v4.1 (Rasmus Andersson), SIL Open Font License 1.1,
+  https://github.com/rsms/inter — selbst gehostet als `app/klartext/static/InterVariable.woff2`
+  (auf Latein + Umlaute beschnitten, 96 KB). Die OFL erlaubt Einbettung und Ausliefern
+  der Schrift; Verkauf der Schriftdatei allein wäre untersagt, findet nicht statt.
+  Kein Schrift-CDN — die Datei kommt von der eigenen Domain, es entstehen keine
+  Datenschutzfragen. Rückfallstapel bleibt der Systemschriftstapel
+  (`system-ui`, San Francisco, Segoe UI, Roboto).
 - **Symbole:** alle SVG-Symbole in der Oberfläche sind für dieses Projekt selbst
   gezeichnet. Es wird kein fremdes Icon-Set ausgeliefert.
 - **Logo:** eigenständig gezeichnet (siehe `brand/BRAND.md`). Kein fremdes Logo, keine

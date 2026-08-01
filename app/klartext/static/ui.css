@@ -1,6 +1,37 @@
 /* Klartext — Gestaltungsebene über app.css.
    Bewusst als eigene Datei: app.css wird parallel an anderer Stelle gepflegt.
-   Enthält keine neuen Farben, nur die vorhandenen Token aus app.css. */
+   Enthält keine neuen Farben, nur die vorhandenen Token aus app.css —
+   plus Schrift und Schatten-Stufen, die es dort nicht gibt. */
+
+/* ---------------------------------------------------------------- Schrift */
+
+/* Selbst gehostet (CSP erlaubt nur 'self'). Grund: system-ui ist nur auf
+   macOS und neuem Windows eine variable Schrift — auf Android und Linux
+   runden die fein abgestuften Gewichte (550/620/680) auf 500/600/700 und
+   die Typografie verliert genau die Nuancen, die sie tragen soll.
+   Inter Variable, auf Latein + Umlaute beschnitten, 96 KB, SIL-OFL. */
+@font-face {
+  font-family: "InterVariable";
+  src: url("InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --font: "InterVariable", system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+
+  /* Drei Schatten-Stufen statt einem Einheitsschatten: je wichtiger das
+     Element, desto höher darf es liegen. Lichtrichtung überall von oben. */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05);
+  --shadow-md: 0 1px 2px rgba(15, 23, 42, .05), 0 8px 24px -8px rgba(15, 23, 42, .10);
+  --shadow-lg: 0 2px 4px rgba(15, 23, 42, .05), 0 16px 40px -12px rgba(15, 23, 42, .14);
+}
+
+/* `.band` zieht sich mit 50vw über die volle Breite — 100vw schließt aber die
+   Scrollbar ein, also war die Seite auf Desktops mit klassischer Scrollbar
+   ~15px breiter als das Fenster. clip statt hidden: kein Scroll-Container. */
+html { overflow-x: clip; }
 
 /* ---------------------------------------------------------------- Rhythmus */
 
@@ -38,50 +69,88 @@ h1 {
 .hero { padding: 40px 16px 8px; }
 @media (min-width: 760px) { .hero { padding: 72px 24px 16px; } }
 
+/* Feiner Markenverlauf hinter dem Hero — kaum sichtbar, aber die Seite
+   beginnt nicht mehr auf sterilem Weiß. Reines CSS, keine Bilddatei. */
+.hero {
+  background: radial-gradient(56rem 26rem at 50% -8rem, rgba(21, 128, 61, .06), transparent 70%);
+}
+@media (prefers-color-scheme: dark) {
+  .hero { background: radial-gradient(56rem 26rem at 50% -8rem, rgba(34, 197, 94, .08), transparent 70%); }
+}
+
 .eyebrow {
   font-size: 12.5px;
   letter-spacing: .005em;
   padding: 7px 13px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   background: var(--bg);
 }
 
-.hero .btn-row { justify-content: center; margin-top: 26px; }
+.hero .btn-row { justify-content: center; margin-top: 24px; }
 .hero .btn-row .btn { padding: 13px 22px; font-size: 15.5px; }
-.hero-note { margin-top: 14px; }
+.hero-note { margin-top: 16px; }
+
+/* Product-Hunt-Abzeichen: bewusst zurueckhaltend. Es steht unter dem Hinweis
+   zur Kostenlosigkeit, leicht abgesetzt, und draengt sich erst beim Darueber-
+   fahren nach vorn. */
+.producthunt { margin-top: 24px; line-height: 0; }
+.producthunt a {
+  display: inline-block;
+  opacity: .72;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.producthunt a:hover,
+.producthunt a:focus-visible { opacity: 1; transform: translateY(-1px); }
+.producthunt img { width: 186px; height: auto; }
+@media (min-width: 720px) { .producthunt img { width: 218px; } }
+@media (prefers-reduced-motion: reduce) { .producthunt a { transition: none; } }
 
 /* ---------------------------------------------------------------- Vorher/Nachher */
 
 .showcase { max-width: 1000px; margin-top: 40px; }
-@media (min-width: 760px) { .showcase { align-items: stretch; gap: 20px; } }
+@media (min-width: 760px) {
+  .showcase { align-items: stretch; gap: 20px; }
+  /* stretch gilt den Karten (gleiche Höhe) — der Pfeil hat feste Höhe, fiel
+     dadurch auf `start` zurück und klebte 111px zu hoch am oberen Rand. */
+  .showcase-arrow { align-self: center; }
+}
 
 .showcase-card {
   padding: 16px;
   border-radius: 16px;
   display: flex; flex-direction: column;
+  box-shadow: var(--shadow-md);
 }
 .showcase-card > :last-child { flex: 1; }
 .showcase-card figcaption {
   font-size: 11px; letter-spacing: .09em;
 }
+/* Das Ergebnis-Label in Markengrün: der Blick landet auf dem, was der
+   Dienst liefert — nicht auf dem, was er bekommt. */
+.showcase-card:last-of-type figcaption { color: var(--accent); }
 
-/* Pfeil als eigenständiges Element statt als loses Zeichen zwischen den Karten. */
+/* Pfeil als Markenmoment: gefüllter grüner Kreis am Produkt-Kern der Seite. */
 .showcase-arrow {
   width: 38px; height: 38px; margin: 0 auto;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  box-shadow: var(--shadow);
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-md);
   flex: none;
 }
 .showcase-arrow svg { width: 18px; height: 18px; }
+
+/* Angedeutetes Dokument und Code-Fenster auf denselben Radius wie überall. */
+.paper, .showcase .code { border-radius: 10px; }
+.paper .mini-table { border-radius: 6px; }
 
 /* ---------------------------------------------------------------- Karten */
 
 .card {
   border-radius: 16px;
   padding: 22px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 .feature { display: flex; flex-direction: column; }
@@ -174,10 +243,75 @@ h1 {
 
 /* ---------------------------------------------------------------- Tabelle */
 
-.band table th, .band table td { padding: 12px 0; }
-.band table th[scope="row"] { font-weight: 500; color: var(--text); font-size: 14.5px; }
-.band table td.num { font-weight: 600; font-variant-numeric: tabular-nums; }
-.band table tr:last-child th, .band table tr:last-child td { border-bottom: 0; }
+/* Auch .card: die Limits-Tabelle steckt in einer Karte, nicht in einem Band —
+   ohne diese Selektoren rendert sie mit den grauen App-Voreinstellungen. */
+.band table th, .band table td,
+.card table th, .card table td { padding: 12px 0; }
+.band table th[scope="row"],
+.card table th[scope="row"] { font-weight: 500; color: var(--text); font-size: 14.5px; }
+.band table td.num,
+.card table td.num { font-weight: 600; font-variant-numeric: tabular-nums; }
+.band table tr:last-child th, .band table tr:last-child td,
+.card table tr:last-child th, .card table tr:last-child td { border-bottom: 0; }
+
+/* ---------------------------------------------------------------- Übergänge */
+
+/* Einheitlich weich: dieselbe Kurve wie bei den Knöpfen, statt hartem Umschalten. */
+.topbar-link, .lang-andere, .faq-pfeil {
+  transition: color .18s ease, background-color .18s ease;
+}
+.btn {
+  transition: background-color .18s ease, border-color .18s ease,
+              color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -4px rgba(21, 128, 61, .35);
+}
+
+/* ---------------------------------------------------------------- Messwerte */
+
+/* Der OCR-Vergleich aus dem README, sichtbar gemacht. Nur echte Zahlen:
+   45 einzeln geprüfte Pflichtangaben über vier Testscans. Balkenbreiten als
+   Klassen, weil die CSP keine Inline-Styles erlaubt. */
+.bench { display: grid; gap: 14px; margin-top: 18px; }
+.bench-zeile {
+  display: grid; grid-template-columns: minmax(88px, 150px) 1fr auto;
+  align-items: center; gap: 12px 16px;
+}
+.bench-name { font-size: 14.5px; font-weight: 550; color: var(--text); }
+.bench-name .bench-aktiv {
+  display: inline-block; margin-left: 8px; padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px; font-weight: 650; font-style: normal;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--accent); background: rgba(21, 128, 61, .10);
+}
+.bench-balken {
+  height: 8px; border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.bench-balken i { display: block; height: 100%; border-radius: inherit; }
+/* Ein Akzent, der Rest zurückhaltend: der Blick soll auf dem liegen, was läuft. */
+.bench-98 { width: 98%; background: var(--accent); }
+.bench-76 { width: 76%; background: var(--border); }
+.bench-42 { width: 42%; background: var(--border); }
+.bench-wert {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bench-wert small { color: var(--muted); font-weight: 500; font-size: 12px; }
+.bench-fuss { margin: 16px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+@media (max-width: 519px) {
+  .bench-zeile { grid-template-columns: 1fr auto; }
+  .bench-balken { grid-column: 1 / -1; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .bench-name .bench-aktiv { background: rgba(34, 197, 94, .16); }
+}
 
 /* ---------------------------------------------------------------- Fußzeile */
 
@@ -188,7 +322,7 @@ h1 {
 @media (max-width: 759px) {
   .showcase { margin-top: 28px; gap: 8px; }
   .showcase-card { padding: 13px; }
-  .showcase .code { font-size: 10.5px; line-height: 1.55; }
+  .showcase .code { font-size: 11px; line-height: 1.55; }
   .paper { padding: 11px; gap: 7px; }
   .showcase-arrow { width: 32px; height: 32px; }
   .hero .lead { font-size: 16px; }
@@ -207,7 +341,7 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px 18px 18px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 .karte h3 { font-size: 16px; font-weight: 620; margin: 14px 0 6px; letter-spacing: -.012em; }
 .karte p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); max-width: none; }
@@ -238,7 +372,7 @@ h1 {
 .fall-symbol {
   display: inline-flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; flex: none;
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--surface-2);
   color: var(--primary);
 }
@@ -266,7 +400,7 @@ h1 {
   color: var(--muted);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 6px;
   padding: 5px 9px;
 }
 .ausgabe-zeile { margin: 0; }
@@ -279,7 +413,7 @@ h1 {
   .karte { padding: 11px 12px 13px; }
   .karte-bild { max-height: 56px; }
   .karte h3 { font-size: 14.5px; margin-top: 9px; }
-  .karte p { font-size: 12.8px; line-height: 1.5; }
+  .karte p { font-size: 13px; line-height: 1.55; }
 }
 
 /* ---------------------------------------------------------------- Tabellen am Handy */
@@ -369,7 +503,7 @@ h1 {
  * enthaelt denselben Satz zweimal und wird um genau die halbe Breite
  * verschoben — dadurch schliesst der Umlauf ohne sichtbaren Sprung.
  */
-.laufband { margin: 30px 0 6px; text-align: center; }
+.laufband { margin: 40px 0 0; text-align: center; }
 .laufband-titel {
   margin: 0 0 12px;
   font-size: 12px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
@@ -407,7 +541,7 @@ h1 {
   display: grid; grid-template-columns: repeat(2, 1fr);
   gap: 14px 10px;
   padding: 22px 16px;
-  border: 1px solid var(--border); border-radius: var(--radius-l);
+  border: 1px solid var(--border); border-radius: 16px;
   background: var(--surface);
   text-align: center;
 }
@@ -417,9 +551,15 @@ h1 {
   letter-spacing: -.02em; color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.kennzahlen span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.kennzahlen span {
+  font-size: 11.5px; color: var(--muted); line-height: 1.35;
+  letter-spacing: .06em; text-transform: uppercase; font-weight: 550;
+}
 @media (min-width: 620px) {
   .kennzahlen { grid-template-columns: repeat(4, 1fr); padding: 26px 20px; }
+  /* Feine Trennlinien zwischen den vier Werten — die Box wirkt gesetzt
+     statt wie vier lose Zahlen auf grauer Fläche. */
+  .kennzahlen > div + div { border-left: 1px solid var(--border); }
 }
 
 /* ---------------------------------------------------------------- Auftritt */
@@ -430,7 +570,7 @@ h1 {
 .auftritt {
   opacity: 0;
   transform: translate3d(0, 14px, 0);
-  transition: opacity .5s ease-out, transform .5s ease-out;
+  transition: opacity .4s ease-out, transform .4s ease-out;
 }
 .auftritt-fertig { opacity: 1; transform: none; }
 

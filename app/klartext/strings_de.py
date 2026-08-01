@@ -33,9 +33,9 @@ STRINGS: dict[str, str] = {
     "lang.to_en": "English",
 
     # --------------------------------------------------------------- Landing
-    "landing.title": "{product} — PDF, Scan & Foto in Markdown, kostenlos",
-    "landing.description": "PDF, Scan, Foto, Word oder Excel in sauberes Markdown und JSON "
-    "umwandeln. Kostenlos, ohne Konto-Tarife, Texterkennung lokal auf dem Server.",
+    "landing.title": "{product} — PDF, Scan & Foto in Markdown umwandeln — kostenlos",
+    "landing.description": "PDF, Scans, Fotos, Word oder Excel kostenlos in Markdown und "
+    "JSON umwandeln. OCR läuft lokal auf eigenem Server — ohne KI-Anbieter, DSGVO-freundlich.",
     "landing.schema.description": "Wandelt PDF, Fotos, Scans, Word-, Excel- und "
     "PowerPoint-Dateien in sauberes Markdown und strukturtreues JSON um. Verarbeitung "
     "ausschließlich auf einem eigenen Server, ohne Weitergabe an externe KI- oder "
@@ -48,6 +48,15 @@ STRINGS: dict[str, str] = {
     "landing.cta.secondary": "Anmelden",
     "landing.hero_note": "Dauerhaft kostenlos. Keine Tarife, keine Zahlung, keine "
     "gesperrten Funktionen.",
+    "landing.producthunt.alt": "Klartext — Dokumente und Scans werden zu sauberem "
+    "Markdown und JSON. Vorgestellt auf Product Hunt.",
+    "landing.bench.h": "Gemessen, nicht versprochen",
+    "landing.bench.sub": "Drei Texterkennungen traten gegeneinander an. Eine Messung, "
+    "ein Sieger — und der läuft hier im Betrieb.",
+    "landing.bench.active": "läuft hier",
+    "landing.bench.method": "Gemessen an 45 Pflichtangaben — Namen, Artikelnummern, "
+    "Beträge, Umlaute, Gradzeichen — über vier Testscans, jede einzeln von Hand geprüft. "
+    "Ein typisches Dokument ist in Sekunden umgewandelt, nicht in Minuten.",
     "landing.showcase.aria": "Links ein gescanntes Dokument mit einer Tabelle, rechts das "
     "daraus erzeugte Markdown mit derselben Tabelle.",
     "landing.showcase.before": "Vorher — Scan oder Foto",
