@@ -288,6 +288,41 @@ _PUNKT_ZAHL = re.compile(r"\d\.\d{2}\b")
 _DOPPELPUNKT_ZAHL = re.compile(r"(?<=[A-Za-zÄÖÜäöüß]):(?=\d)")
 _WAEHRUNG_KLEBT = re.compile(r"(?<=[A-Za-zÄÖÜäöüß0-9])(?=[€$£])")
 
+# Seitenzahl-Kopfzeilen, die Docling mitten in den ueber den Umbruch
+# zusammengefuegten Absatz klebt ("... bestehe daher der SEITE 2 VON 4
+# begruendete Verdacht ..."). Die Wiederholungs-Erkennung fasst sie nicht,
+# weil sich die Zahl je Seite aendert. Selbstpruefend: entfernt wird nur,
+# wenn mehrere Treffer dieselbe Gesamtzahl nennen — ein einzelnes echtes
+# "siehe Seite 2 von 4" im Fliesstext bleibt stehen.
+_SEITENZAHL = re.compile(
+    r"(?:SEITE|Seite|PAGE|Page)\s+(\d{1,3})\s+(?:VON|von|OF|of)\s+(\d{1,3})\b")
+
+# Blocksatz-Artefakt: "Pruef - oder Ermittlungsbefugnisse" — der Bindestrich
+# gehoert ans Wort. Nur vor Bindewoertern, sonst koennte ein echter
+# Gedankenstrich getroffen werden.
+_BINDESTRICH_FREI = re.compile(
+    r"(?<=[A-Za-zÄÖÜäöüß]) - (?=(?:oder|und|bzw\.?|sowie|or|and)\b)")
+
+# Docling ersetzt deutsche Anfuehrungszeichen durch gerade Apostrophe.
+# Rueckweg nur fuer erkennbar deutsche Dokumente und nur fuer sauber
+# gepaarte, kurze Zitate ohne inneren Apostroph.
+_ERSATZ_ZITAT = re.compile(r"(?<=[\s(>])'([^'\n]{2,240}?)'(?=[\s.,;:!?)])")
+_UMLAUTE = re.compile(r"[äöüßÄÖÜ]")
+
+
+def _seitenzahlen_entfernen(text: str) -> tuple[str, int]:
+    treffer = _SEITENZAHL.findall(text)
+    gesamt: Counter[str] = Counter(g for _, g in treffer)
+    if not gesamt:
+        return text, 0
+    haeufigste, anzahl = gesamt.most_common(1)[0]
+    if anzahl < 2:
+        return text, 0
+    neu = _SEITENZAHL.sub(
+        lambda m: "" if m.group(2) == haeufigste else m.group(0), text)
+    neu = re.sub(r"(?<=[a-zäöüß]) +(?=[A-ZÄÖÜ])", " ", neu)
+    return re.sub(r"[ \t]{2,}", " ", neu), anzahl
+
 
 def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
     """Zieht rein mechanische Schreibfehler der Texterkennung gerade.
@@ -319,6 +354,32 @@ def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
     aenderungen += n
     text, n = _WAEHRUNG_KLEBT.subn(" ", text)
     aenderungen += n
+
+    # In den Fliesstext geklebte Seitenzahl-Kopfzeilen ("SEITE 2 VON 4").
+    text, n = _seitenzahlen_entfernen(text)
+    aenderungen += n
+
+    # Blocksatz-Doppelleerzeichen — nur ausserhalb von Tabellen und
+    # eingerueckten Bloecken, dort tragen Leerzeichen Bedeutung.
+    zeilen = []
+    for zeile in text.split("\n"):
+        if "|" not in zeile and not zeile.startswith(("    ", "\t")):
+            neu = re.sub(r"(?<=\S)[ ]{2,}(?=\S)", " ", zeile)
+            if neu != zeile:
+                aenderungen += 1
+                zeile = neu
+        zeilen.append(zeile)
+    text = "\n".join(zeilen)
+
+    # "Pruef - oder" -> "Pruef- oder" (Blocksatz-Artefakt vor Bindewoertern).
+    text, n = _BINDESTRICH_FREI.subn("- ", text)
+    aenderungen += n
+
+    # Deutsche Anfuehrungszeichen zurueckholen — nur bei erkennbar deutschem
+    # Text (Umlautdichte) und nur fuer sauber gepaarte kurze Zitate.
+    if len(_UMLAUTE.findall(text)) >= 5:
+        text, n = _ERSATZ_ZITAT.subn("„\\1“", text)
+        aenderungen += n
 
     def zurueck(treffer):
         return schutz[int(treffer.group(1))]
