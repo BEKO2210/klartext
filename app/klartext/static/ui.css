@@ -12,7 +12,10 @@
    Inter Variable, auf Latein + Umlaute beschnitten, 96 KB, SIL-OFL. */
 @font-face {
   font-family: "InterVariable";
-  src: url("InterVariable.woff2") format("woff2");
+  /* Feste Versionskennung, identisch mit dem Preload in base.html: nur bei
+     exakt gleicher Adresse nutzt der Browser den Preload statt doppelt zu
+     laden. Bei einem Schriftwechsel an beiden Stellen erhoehen. */
+  src: url("InterVariable.woff2?v=41") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;

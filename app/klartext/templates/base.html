@@ -34,9 +34,11 @@
 <meta name="application-name" content="Klartext">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)">
-{# crossorigin ist bei Font-Preload auch fuer die eigene Domain Pflicht —
-   ohne das Attribut laedt der Browser die Datei doppelt. #}
-<link rel="preload" href="{{ asset('InterVariable.woff2') }}" as="font" type="font/woff2" crossorigin>
+{# crossorigin ist bei Font-Preload auch fuer die eigene Domain Pflicht.
+   Adresse woertlich identisch mit dem @font-face in ui.css (feste Kennung
+   ?v=41) — asset() haengte einen Inhalts-Hash an, das CSS fragte aber ohne,
+   und der Browser lud die Schrift doppelt ("preloaded but not used"). #}
+<link rel="preload" href="/static/InterVariable.woff2?v=41" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('app.css') }}">
 <link rel="stylesheet" href="{{ asset('ui.css') }}">
 <meta property="og:site_name" content="{{ product }}">
