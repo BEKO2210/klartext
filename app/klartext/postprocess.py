@@ -310,6 +310,33 @@ _ERSATZ_ZITAT = re.compile(r"(?<=[\s(>])'([^'\n]{2,240}?)'(?=[\s.,;:!?)])")
 _UMLAUTE = re.compile(r"[äöüßÄÖÜ]")
 
 
+# Docling laesst vereinzelt HTML-Entitaeten im Markdown zurueck ("&amp;" statt
+# "&"). Nur die haeufigen benannten, und &amp; bewusst zuletzt: so bleibt ein
+# doppelt kodiertes "&amp;lt;" korrekt als "&lt;" erhalten.
+_ENTITAETEN = (("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'),
+               ("&#39;", "'"), ("&#x27;", "'"), ("&amp;", "&"))
+_ZAUN = re.compile(r"```.*?```", re.S)
+
+
+def _entitaeten_aufloesen(text: str) -> tuple[str, int]:
+    """Loest HTML-Entitaeten auf — ausser in eingezaeunten Codebloecken,
+    dort koennte ein Autor sie woertlich gemeint haben."""
+    schutz: list[str] = []
+
+    def merken(m):
+        schutz.append(m.group(0))
+        return f"\x01{len(schutz) - 1}\x01"
+
+    text = _ZAUN.sub(merken, text)
+    n = 0
+    for ent, ersatz in _ENTITAETEN:
+        if ent in text:
+            n += text.count(ent)
+            text = text.replace(ent, ersatz)
+    text = re.sub(r"\x01(\d+)\x01", lambda m: schutz[int(m.group(1))], text)
+    return text, n
+
+
 def _seitenzahlen_entfernen(text: str) -> tuple[str, int]:
     treffer = _SEITENZAHL.findall(text)
     gesamt: Counter[str] = Counter(g for _, g in treffer)
@@ -357,6 +384,10 @@ def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
 
     # In den Fliesstext geklebte Seitenzahl-Kopfzeilen ("SEITE 2 VON 4").
     text, n = _seitenzahlen_entfernen(text)
+    aenderungen += n
+
+    # Zurueckgelassene HTML-Entitaeten ("&amp;" statt "&").
+    text, n = _entitaeten_aufloesen(text)
     aenderungen += n
 
     # Blocksatz-Doppelleerzeichen — nur ausserhalb von Tabellen und

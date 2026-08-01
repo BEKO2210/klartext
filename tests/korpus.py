@@ -22,6 +22,11 @@ import sys
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
+import e2e  # noqa: E402
+# e2e liest beim Import sys.argv[1] als Basis-URL — bei diesem Skript steht
+# dort aber der Ordner. Basis explizit setzen (argv[2] oder Standard).
+e2e.BASE = (sys.argv[2] if len(sys.argv) > 2
+            else "https://klartext.it-handwerk-stuttgart.de").rstrip("/")
 from e2e import Client, login, psql  # noqa: E402
 
 MIME = {
@@ -63,6 +68,7 @@ def main() -> int:
         print("Keine unterstuetzten Dateien in", ordner)
         return 2
 
+    alle_namen = [p.name for p in dateien]
     konto = psql("SELECT email_norm FROM users WHERE email_norm LIKE 'klartext-demo-%' "
                  "ORDER BY created_at DESC LIMIT 1")
     if not konto:
@@ -74,10 +80,35 @@ def main() -> int:
     login(c, konto)
     csrf = c.csrf("/app")
 
-    # Hochladen in Fuenferpaketen (Upload-Grenze des Dienstes).
+    import json as _json
+
+    def offene_jobs() -> tuple[int, list[dict]]:
+        status, _, body = c.get("/api/jobs", headers={"Accept": "application/json"})
+        if status != 200:
+            return 99, []
+        jobs = _json.loads(body)["jobs"]
+        return sum(1 for j in jobs if j["status"] in ("queued", "processing")), jobs
+
+    # Bereits fertige Dateien nicht erneut hochladen — so laesst sich ein
+    # abgebrochener Lauf einfach fortsetzen.
+    _, vorhandene = offene_jobs()
+    fertig_namen = {j["name"] for j in vorhandene if j["status"] == "done"}
+    dateien = [p for p in dateien if p.name not in fertig_namen]
+    if fertig_namen:
+        print(f"  {len(fertig_namen)} bereits fertig, werden uebersprungen")
+
+    # Hochladen in Fuenferpaketen (Upload-Grenze des Dienstes). Der Dienst
+    # deckelt die Warteschlange je Konto — vor jedem Paket warten, bis die
+    # eigene Schlange fast leer ist, sonst regnet es 429er.
     abgelehnt: list[tuple[str, str]] = []
     hochgeladen: list[str] = []
     for i in range(0, len(dateien), 5):
+        frist_paket = time.time() + 60 * 20
+        while time.time() < frist_paket:
+            offen, _ = offene_jobs()
+            if offen <= 3:
+                break
+            time.sleep(8)
         paket = dateien[i:i + 5]
         teile = [("files", p.name, p.read_bytes(), MIME[p.suffix.lower()]) for p in paket]
         status, _, body = c.post_multipart("/app/upload", {"csrf": csrf}, teile)
@@ -98,7 +129,6 @@ def main() -> int:
     # Warten, bis nichts mehr in Arbeit ist.
     print("Warte auf Verarbeitung …")
     frist = time.time() + 60 * 45
-    import json as _json
     jobs: list[dict] = []
     while time.time() < frist:
         status, _, body = c.get("/api/jobs", headers={"Accept": "application/json"})
@@ -116,7 +146,10 @@ def main() -> int:
     zeilen_fehler: list[str] = []
     zeilen_auffaellig: list[str] = []
     zeilen_sauber: list[str] = []
-    for name in hochgeladen:
+    abgelehnt_namen = {a for a, _ in abgelehnt}
+    for name in alle_namen:
+        if name in abgelehnt_namen:
+            continue
         j = je_name.get(name)
         if j is None:
             zeilen_fehler.append(f"| {name} | — | nicht in der Auftragsliste |")
