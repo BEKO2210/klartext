@@ -329,28 +329,43 @@
   {# Formate -> Strom -> zwei Ausgabedateien: die Geschichte der Sektion als
      Bild statt als Liste. Der Punktestrom ist reines CSS und rein dekorativ —
      die Information steht als echter Text in den beiden Ausgabekarten. #}
+  {# Zwei gespiegelte Panels — Eingabe und Ausgabe — mit gleichem Gewicht,
+     dazwischen der gruene Kern, durch den der Punktestrom fliesst. Der Kern
+     traegt denselben Pfeil wie der Hero-Showcase: eine Formensprache.
+     formats_kurz statt formats: JPEG/JPG und TIF/TIFF meinen denselben Typ —
+     die vollstaendige Liste steht weiterhin in den FAQ. #}
   <section class="card">
     <h2>{{ t('landing.io.h') }}</h2>
-    <p class="small muted">{{ t('landing.io.sub') }}</p>
     <div class="io-fluss">
-      <ul class="io-formate">
-        {% for f in formats %}<li class="io-marke">{{ dateiglyph(f) }}{{ f }}</li>{% endfor %}
-      </ul>
+      <div class="io-feld">
+        <p class="io-feld-titel">{{ t('landing.io.in_label') }}
+          <span>{{ formats_kurz|length }} {{ t('landing.io.in_note') }}</span></p>
+        <ul class="io-formate">
+          {% for f in formats_kurz %}<li class="io-marke">{{ dateiglyph(f) }}{{ f }}</li>{% endfor %}
+        </ul>
+      </div>
       <div class="io-strom" aria-hidden="true">
         <i></i><i></i><i></i>
-        <svg class="io-spitze" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
-             focusable="false"><path d="m9 6 6 6-6 6"/></svg>
+        <span class="io-kern">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M4 12h15"/><path d="m13.5 6.5 6 5.5-6 5.5"/>
+          </svg>
+        </span>
       </div>
-      <div class="io-ausgaben">
-        <p class="io-datei io-datei-md">
-          <span class="io-ext">.md</span>
-          <span class="io-erklaerung">{{ t('landing.io.md_cap') }}</span>
-        </p>
-        <p class="io-datei">
-          <span class="io-ext">.json</span>
-          <span class="io-erklaerung">{{ t('landing.io.json_cap') }}</span>
-        </p>
+      <div class="io-feld">
+        <p class="io-feld-titel">{{ t('landing.io.out_label') }}
+          <span>{{ t('landing.io.out_note') }}</span></p>
+        <div class="io-ausgaben">
+          <p class="io-datei io-datei-md">
+            <span class="io-ext">.md</span>
+            <span class="io-erklaerung">{{ t('landing.io.md_cap') }}</span>
+          </p>
+          <p class="io-datei">
+            <span class="io-ext">.json</span>
+            <span class="io-erklaerung">{{ t('landing.io.json_cap') }}</span>
+          </p>
+        </div>
       </div>
     </div>
   </section>

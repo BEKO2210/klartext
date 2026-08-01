@@ -474,20 +474,39 @@ h1 {
   .karten { gap: 10px; }
 }
 
-/* Formate -> Strom -> Ausgabe: die Sektion als Bild. Am Handy gestapelt,
-   der Strom dreht sich dann senkrecht. */
-.io-fluss {
-  display: grid; gap: 18px; margin-top: 16px;
-  align-items: center; justify-items: center;
-}
+/* Eingabe-Panel -> Kern -> Ausgabe-Panel. Zwei gespiegelte, gleich schwere
+   Felder geben den Inhalten Einfassung; der gruene Kern in der Mitte ist der
+   Produkt-Moment, durch den der Punktestrom laeuft. Am Handy dieselbe
+   Geometrie senkrecht, alles auf einer Mittelachse. */
+.io-fluss { display: grid; gap: 12px; margin-top: 18px; }
 @media (min-width: 760px) {
-  .io-fluss { grid-template-columns: 1fr auto 236px; gap: 22px; }
+  /* Spiegelsymmetrie: beide Panels exakt gleich breit, Kern fix in der Mitte. */
+  .io-fluss { grid-template-columns: 1fr 128px 1fr; gap: 0; align-items: stretch; }
+}
+
+.io-feld {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 16px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.io-feld-titel {
+  margin: 0; display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--text);
+}
+.io-feld-titel span {
+  font-weight: 550; letter-spacing: .04em; color: var(--muted);
+  text-transform: none; font-size: 12px;
 }
 
 .io-formate {
   list-style: none; margin: 0; padding: 0;
-  display: flex; flex-wrap: wrap; gap: 6px;
-  justify-self: stretch;
+  display: flex; flex-wrap: wrap; gap: 7px;
+  justify-content: center; align-content: center;
+  flex: 1;
 }
 .io-marke {
   display: inline-flex; align-items: center; gap: 6px;
@@ -496,45 +515,72 @@ h1 {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 4px 9px 4px 7px;
+  padding: 5px 10px 5px 8px;
 }
 .io-marke .laufband-symbol { width: 15px; height: 15px; }
 
-/* Punktestrom: drei Lichter wandern von den Formaten zu den Ergebnissen.
-   Nur transform und opacity — laeuft auf dem Kompositor, kostet nichts. */
-.io-strom { position: relative; width: 96px; height: 24px; color: var(--accent); }
+/* Der Strom: Linie durch die Mitte, drei leuchtende Punkte wandern hindurch,
+   der Kern liegt darueber. Nur transform/opacity — Kompositor, kein Layout. */
+.io-strom { position: relative; align-self: center; width: 100%; height: 96px; }
 .io-strom::before {
-  content: ""; position: absolute; left: 0; right: 14px; top: 50%;
+  content: ""; position: absolute; left: -1px; right: -1px; top: 50%;
   height: 2px; margin-top: -1px;
-  background: var(--border); border-radius: 1px;
+  background: var(--border);
 }
 .io-strom i {
-  position: absolute; left: 0; top: 50%;
+  position: absolute; left: 4px; top: 50%;
   width: 7px; height: 7px; margin-top: -3.5px;
   border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 8px rgba(21, 128, 61, .45);
   opacity: 0;
   animation: io-fliessen 2.6s linear infinite;
+  z-index: 1;
 }
 .io-strom i:nth-child(2) { animation-delay: .85s; }
 .io-strom i:nth-child(3) { animation-delay: 1.7s; }
-.io-spitze {
-  position: absolute; right: -2px; top: 50%;
-  width: 17px; height: 17px; margin-top: -8.5px;
-}
 @keyframes io-fliessen {
-  0%   { transform: translateX(0);    opacity: 0; }
-  18%  { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { transform: translateX(76px); opacity: 0; }
+  0%   { transform: translateX(0);     opacity: 0; }
+  16%  { opacity: 1; }
+  84%  { opacity: 1; }
+  100% { transform: translateX(112px); opacity: 0; }
 }
-/* Am Handy fliesst der Strom nach unten. */
+.io-kern {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  box-shadow: var(--shadow-md);
+  z-index: 2;
+}
+.io-kern svg { width: 20px; height: 20px; }
+
+/* Handy: dieselbe Geometrie senkrecht — echte vertikale Box, nichts gedreht. */
 @media (max-width: 759px) {
-  .io-strom { transform: rotate(90deg); margin: 8px 0; }
+  .io-strom { width: 46px; height: 92px; justify-self: center; }
+  .io-strom::before {
+    left: 50%; right: auto; top: -13px; bottom: -13px;
+    width: 2px; height: auto; margin: 0 0 0 -1px;
+  }
+  .io-strom i {
+    left: 50%; top: -6px;
+    margin: 0 0 0 -3.5px;
+    animation-name: io-fliessen-senkrecht;
+  }
+  .io-kern svg { transform: rotate(90deg); }
+}
+@keyframes io-fliessen-senkrecht {
+  0%   { transform: translateY(0);     opacity: 0; }
+  16%  { opacity: 1; }
+  84%  { opacity: 1; }
+  100% { transform: translateY(104px); opacity: 0; }
 }
 
-.io-ausgaben { display: grid; gap: 10px; justify-self: stretch; }
+/* Ausgabekarten fuellen ihr Panel in gleicher Hoehe — Spiegel zum Eingabefeld. */
+.io-ausgaben { display: grid; gap: 10px; grid-auto-rows: 1fr; flex: 1; }
 .io-datei {
-  margin: 0; display: flex; flex-direction: column; gap: 1px;
+  margin: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px;
   padding: 12px 16px;
   border: 1px solid var(--border); border-radius: 10px;
   background: var(--bg);
@@ -545,9 +591,11 @@ h1 {
 .io-datei-md .io-ext { color: var(--accent); }
 .io-erklaerung { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 
+@media (prefers-color-scheme: dark) {
+  .io-strom i { box-shadow: 0 0 8px rgba(34, 197, 94, .5); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .io-strom i { animation: none; opacity: 1; transform: translateX(38px); }
-  .io-strom i:nth-child(2), .io-strom i:nth-child(3) { display: none; }
+  .io-strom i { animation: none; opacity: 0; }
 }
 
 /* Zwei Karten nebeneinander schon am Handy — einzeln gestapelt wird

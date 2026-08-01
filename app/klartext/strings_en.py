@@ -152,6 +152,10 @@ STRINGS: dict[str, str] = {
     "landing.bench.compare_link": "And how does Klartext compare to pandoc & co.?",
     "landing.io.md_cap": "to read and reuse",
     "landing.io.json_cap": "full structure for other programs",
+    "landing.io.in_label": "Input",
+    "landing.io.in_note": "formats",
+    "landing.io.out_label": "Output",
+    "landing.io.out_note": "always two files",
     "landing.showcase.aria": "On the left a scanned document with a table, on the right "
     "the Markdown produced from it with the same table.",
     "landing.showcase.before": "Before — scan or photo",

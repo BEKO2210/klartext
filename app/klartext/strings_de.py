@@ -155,6 +155,10 @@ STRINGS: dict[str, str] = {
     "landing.bench.compare_link": "Und wie schlägt sich Klartext gegen pandoc & Co.?",
     "landing.io.md_cap": "zum Lesen und Weiterverwenden",
     "landing.io.json_cap": "volle Struktur für andere Programme",
+    "landing.io.in_label": "Eingabe",
+    "landing.io.in_note": "Formate",
+    "landing.io.out_label": "Ausgabe",
+    "landing.io.out_note": "immer zwei Dateien",
     "landing.showcase.aria": "Links ein gescanntes Dokument mit einer Tabelle, rechts das "
     "daraus erzeugte Markdown mit derselben Tabelle.",
     "landing.showcase.before": "Vorher — Scan oder Foto",
