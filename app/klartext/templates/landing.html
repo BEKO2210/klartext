@@ -326,13 +326,33 @@
       <a href="{{ path_for('compare') }}">{{ t('landing.bench.compare_link') }}</a></p>
   </section>
 
+  {# Formate -> Strom -> zwei Ausgabedateien: die Geschichte der Sektion als
+     Bild statt als Liste. Der Punktestrom ist reines CSS und rein dekorativ —
+     die Information steht als echter Text in den beiden Ausgabekarten. #}
   <section class="card">
     <h2>{{ t('landing.io.h') }}</h2>
     <p class="small muted">{{ t('landing.io.sub') }}</p>
-    <ul class="formatliste">
-      {% for f in formats %}<li>{{ f }}</li>{% endfor %}
-    </ul>
-    <p class="small muted ausgabe-zeile">{{ t('landing.io.note')|safe }}</p>
+    <div class="io-fluss">
+      <ul class="io-formate">
+        {% for f in formats %}<li class="io-marke">{{ dateiglyph(f) }}{{ f }}</li>{% endfor %}
+      </ul>
+      <div class="io-strom" aria-hidden="true">
+        <i></i><i></i><i></i>
+        <svg class="io-spitze" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+             focusable="false"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div class="io-ausgaben">
+        <p class="io-datei io-datei-md">
+          <span class="io-ext">.md</span>
+          <span class="io-erklaerung">{{ t('landing.io.md_cap') }}</span>
+        </p>
+        <p class="io-datei">
+          <span class="io-ext">.json</span>
+          <span class="io-erklaerung">{{ t('landing.io.json_cap') }}</span>
+        </p>
+      </div>
+    </div>
   </section>
 
   <section class="card">

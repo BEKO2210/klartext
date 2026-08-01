@@ -150,6 +150,8 @@ STRINGS: dict[str, str] = {
     "amounts, umlauts, degree signs — across four test scans, each checked by hand. "
     "A typical document converts in seconds, not minutes.",
     "landing.bench.compare_link": "And how does Klartext compare to pandoc & co.?",
+    "landing.io.md_cap": "to read and reuse",
+    "landing.io.json_cap": "full structure for other programs",
     "landing.showcase.aria": "On the left a scanned document with a table, on the right "
     "the Markdown produced from it with the same table.",
     "landing.showcase.before": "Before — scan or photo",
