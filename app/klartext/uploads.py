@@ -62,16 +62,28 @@ def check(filename: str, data: bytes) -> tuple[str, str]:
     return mime, label
 
 
-def pdf_page_count(data: bytes) -> int | None:
-    """Seitenzahl einer PDF. None, wenn sie sich nicht lesen lässt."""
+def pdf_page_count(data: bytes) -> tuple[int | None, str]:
+    """Seitenzahl einer PDF, mit Grund bei Misserfolg.
+
+    Rückgabe (Seiten, "ok") — oder (None, "encrypted") bzw. (None, "unreadable"):
+    eine abgeschnittene Datei ist nicht dasselbe wie eine verschlüsselte, und die
+    Fehlermeldung soll das Richtige sagen.
+    """
     try:
         reader = PdfReader(io.BytesIO(data), strict=False)
-        if reader.is_encrypted:
-            # Verschlüsselte PDFs können wir nicht zuverlässig zählen.
-            try:
-                reader.decrypt("")
-            except Exception:  # noqa: BLE001
-                return None
-        return len(reader.pages)
     except Exception:  # noqa: BLE001
-        return None
+        return None, "unreadable"
+    if reader.is_encrypted:
+        # decrypt("") wirft nicht, es meldet einen Status — 0 heisst: leeres
+        # Passwort reicht nicht. Und selbst nach gemeldetem Erfolg kann das
+        # Blaettern scheitern; auch dann ist die Verschluesselung die Ursache.
+        try:
+            if int(reader.decrypt("")) == 0:
+                return None, "encrypted"
+            return len(reader.pages), "ok"
+        except Exception:  # noqa: BLE001
+            return None, "encrypted"
+    try:
+        return len(reader.pages), "ok"
+    except Exception:  # noqa: BLE001
+        return None, "unreadable"

@@ -365,11 +365,17 @@ def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
         schutz.append(treffer.group(0))
         return f"\x00{len(schutz) - 1}\x00"
 
-    text = _ADRESSE.sub(merken, markdown)
+    aenderungen = 0
+
+    # Entitaeten VOR dem Adress-Schutz aufloesen: ein "&amp;" steckt gern
+    # mitten in einer Wikipedia-URL, und die Schutzmaske wuerde es sonst
+    # am Ersetzen vorbeischleusen.
+    text, n = _entitaeten_aufloesen(markdown)
+    aenderungen += n
+
+    text = _ADRESSE.sub(merken, text)
     text = _DATUM.sub(merken, text)
     text = _UHRZEIT.sub(merken, text)
-
-    aenderungen = 0
 
     # Dezimaltrennzeichen nur angleichen, wenn das Dokument erkennbar deutsch
     # formatiert ist — sonst waere es geraten statt hergeleitet.
@@ -384,10 +390,6 @@ def schreibweisen_glaetten(markdown: str) -> tuple[str, int]:
 
     # In den Fliesstext geklebte Seitenzahl-Kopfzeilen ("SEITE 2 VON 4").
     text, n = _seitenzahlen_entfernen(text)
-    aenderungen += n
-
-    # Zurueckgelassene HTML-Entitaeten ("&amp;" statt "&").
-    text, n = _entitaeten_aufloesen(text)
     aenderungen += n
 
     # Blocksatz-Doppelleerzeichen — nur ausserhalb von Tabellen und

@@ -730,6 +730,8 @@ Alle Preise zzgl. MwSt.""",
     "error.unsupported": "Dieses Dokument konnte nicht verarbeitet werden.",
     "error.no_files": "Es wurde keine Datei ausgewählt.",
     "error.encrypted_pdf": "Diese PDF ist passwortgeschützt und kann nicht gelesen werden.",
+    "error.unreadable_pdf": "Diese Datei ließ sich nicht als PDF lesen — sie ist "
+    "möglicherweise beschädigt oder unvollständig.",
     "error.generic": "Es ist ein Fehler aufgetreten. Bitte versuche es noch einmal.",
     "error.rate_limited": "Zu viele Anfragen. Bitte kurz warten.",
     "error.upload_too_large": "Der Upload ist zu groß.",

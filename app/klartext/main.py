@@ -1026,9 +1026,10 @@ async def upload(
 
             pages = 1
             if mime == "application/pdf":
-                counted = uploads.pdf_page_count(data)
+                counted, grund = uploads.pdf_page_count(data)
                 if counted is None:
-                    ablehnen(item.filename, 400, "encrypted_pdf")
+                    ablehnen(item.filename, 400,
+                             "encrypted_pdf" if grund == "encrypted" else "unreadable_pdf")
                     continue
                 if counted > limits["max_pages"]:
                     ablehnen(item.filename, 400, "too_many_pages",

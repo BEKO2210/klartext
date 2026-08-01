@@ -693,6 +693,8 @@ All prices exclude VAT.""",
     "error.unsupported": "This document could not be processed.",
     "error.no_files": "No file was selected.",
     "error.encrypted_pdf": "This PDF is password protected and cannot be read.",
+    "error.unreadable_pdf": "This file could not be read as a PDF — it may be "
+    "damaged or incomplete.",
     "error.generic": "Something went wrong. Please try again.",
     "error.rate_limited": "Too many requests. Please wait a moment.",
     "error.upload_too_large": "The upload is too large.",
