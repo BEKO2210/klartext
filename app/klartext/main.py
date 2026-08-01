@@ -391,6 +391,22 @@ async def indexnow_key():
     return Response(INDEXNOW_KEY + "\n", media_type="text/plain; charset=utf-8")
 
 
+@app.get("/BingSiteAuth.xml")
+async def bing_site_auth():
+    """Inhaberschafts-Nachweis fuer Bing Webmaster Tools (Belkis' Konto).
+
+    Der Wert ist oeffentlich gedacht — er beweist nur, dass der Kontoinhaber
+    diese Domain kontrolliert. ChatGPT und Copilot antworten aus dem
+    Bing-Index; die Anmeldung dort ist der Weg hinein.
+    """
+    return Response(
+        '<?xml version="1.0"?>\n<users>\n'
+        "\t<user>9EE5BAA098BF9E682F3870DECA601973</user>\n"
+        "</users>\n",
+        media_type="text/xml; charset=utf-8",
+    )
+
+
 @app.get("/llms.txt")
 async def llms_txt():
     """Kurzuebersicht fuer KI-Werkzeuge, die llms.txt lesen.
