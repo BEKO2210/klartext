@@ -146,18 +146,43 @@ Umgang damit gehört in den FAQ-Text, nicht in eine Regel.
 
 Alle Punkte müssen erfüllt sein, keiner ist verhandelbar:
 
-* [ ] Messlatte des Pakets erreicht, offline gemessen
-* [ ] Keine Kennzahl schlechter als in `bench/verlauf.jsonl` (Toleranz 0,005)
-* [ ] `python3 tests/layout_test.py` bestanden, neue Regeln durch neue
-      Prüfungen abgedeckt
-* [ ] `python3 tests/e2e.py` vollständig bestanden (73/73)
-* [ ] Korpuslauf über `tests/fixtures` ohne neue Befunde
-* [ ] Auftragsseite und betroffene Seiten bei 412 px gemessen
-* [ ] CHANGELOG-Eintrag geschrieben, Version gesetzt, ARCHITECTURE ergänzt
-* [ ] Belkis hat zugestimmt
+* [x] Messlatte des Pakets erreicht, offline gemessen
+* [x] Keine Kennzahl schlechter als in `bench/verlauf.jsonl` (Toleranz 0,005)
+* [x] `python3 tests/layout_test.py` bestanden, neue Regeln durch neue
+      Prüfungen abgedeckt (33 Prüfungen)
+* [x] `python3 tests/e2e.py` vollständig bestanden (73/73)
+* [x] Korpuslauf über `tests/fixtures` ohne neue Befunde
+* [x] Auftragsseite und betroffene Seiten bei 412 px gemessen
+* [x] CHANGELOG-Eintrag geschrieben, Version gesetzt, ARCHITECTURE ergänzt
+* [x] Belkis hat zugestimmt (02.08.2026, mit Sicherung und Rollback-Auflage)
 
 Erst danach: `docker compose build`, `up -d`, vollständiger Messlauf gegen
 live, Ergebnis in `bench/verlauf.jsonl`.
+
+## Freigabeprotokoll 1.3.0 — 02.08.2026
+
+Vorher gesichert: `backups/rollback-1.2.0/` (docker-compose.yml, .env,
+Containerstand). Rollback-Weg: dortige Compose-Datei zurückkopieren,
+`docker compose up -d --force-recreate web worker` — Abbild 1.2.0 liegt lokal.
+Deploy 20:59 UTC, keine Code-Änderung während der Prüfungen.
+
+| Prüfung | Ergebnis | Laufzeit |
+|---|---|---|
+| e2e gegen live | 73/73 bestanden | 1 m 12 s |
+| Korpuslauf (11 Fixtures, frische Namen) | 10 sauber, 0 auffällig, 0 Fehler, 1 gewollt abgelehnt (101 Seiten) | 47 s |
+| 412 px (Landing, Auftragsseite, Übersicht) | scrollWidth 412 = kein Querlauf, Verbund-Hinweis sichtbar, 0 Konsolenfehler | — |
+| Messlauf über den Dienst (24 Aufträge) | deckungsgleich mit Offline-Prognose, keine Kennzahl gefallen | 3 m 05 s |
+
+Mittelwerte live (Eintrag in `bench/verlauf.jsonl`):
+
+    digital  Text 0,991 · Überschr. 1,000 · Listen 1,000 ·
+             Tab-Struktur 0,987 · Tab-Inhalt 0,964 · Reihenfolge 1,000
+    scan     Text 0,954 · Überschr. 0,423 · Listen 0,781 ·
+             Tab-Struktur 0,993 · Tab-Inhalt 0,897 · Reihenfolge 1,000
+
+Kein Rollback nötig. Danach Landing-Texte an den neuen Stand angepasst
+(Umwandlungskarte PDF, FAQ 12, README) und mit demselben Abbild-Tag neu
+ausgerollt; Sichtprüfung DE und EN auf der live laufenden Seite bestanden.
 
 ## Nicht-Ziele
 

@@ -58,10 +58,13 @@ HTML, MD**.
 
 Ausgabe je Dokument: `originalname.md` und `originalname.json`.
 
-Markdown kann bestimmte Layoutmerkmale technisch nicht abbilden — mehrspaltige
-Seiten, beliebig verbundene Tabellenzellen, exakte Positionen. Die JSON-Ausgabe ist
-deshalb die strukturtreuere Variante. Ein pixelgenaues Abbild des Originals ist
-Markdown nicht und kann es auch nicht sein; das wird in der Oberfläche auch so gesagt.
+Markdown kann bestimmte Layoutmerkmale nicht direkt abbilden. Klartext arbeitet
+dagegen an: verbundene Tabellenzellen bleiben als HTML-Tabelle erhalten,
+zweispaltige Seiten werden in Lesereihenfolge gebracht, Überschriftenebenen aus
+Nummer oder Schriftgröße wiederhergestellt. Exakte Positionen bildet Markdown
+nicht ab — die JSON-Ausgabe bleibt die strukturtreuere Variante. Ein
+pixelgenaues Abbild des Originals ist Markdown nicht und kann es auch nicht
+sein; das wird in der Oberfläche auch so gesagt.
 
 ## Texterkennung
 
@@ -243,11 +246,15 @@ weiterhin jede Fundstelle.
 ## Grenzen, die bleiben
 
 Eine PDF beschreibt, wie etwas aussieht, nicht wie es aufgebaut ist. Kapitel,
-Tabellen und Lesereihenfolge müssen erschlossen werden. Auf mehrspaltigen oder
-grafiklastigen Seiten stimmt die Reihenfolge deshalb nicht immer, und
-Tabellenzellen können falsch zugeordnet werden. Das ist eine Grenze des
-Layout-Modells, keine Einstellungssache. Eine verlustfreie 1:1-Umwandlung
-beliebiger PDFs leistet kein Werkzeug.
+Tabellen und Lesereihenfolge müssen erschlossen werden. Zweispaltiger Fließtext
+wird inzwischen in Lesereihenfolge gebracht; auf grafiklastigen oder unruhig
+gesetzten Seiten kann die Reihenfolge weiterhin abweichen, und Tabellenzellen
+können falsch zugeordnet werden — bei mehrstufigen Tabellenköpfen setzt das
+Tabellenmodell Kopfzellen gelegentlich um eine Spalte versetzt. Das ist eine
+Grenze des Layout-Modells, keine Einstellungssache. Auf Scans gehen Kreuzchen
+in Formularen verloren (die Texterkennung liest sie nicht zuverlässig), und
+Überschriftenebenen ohne Nummern bleiben dort flach, statt geraten zu werden.
+Eine verlustfreie 1:1-Umwandlung beliebiger PDFs leistet kein Werkzeug.
 
 ## Verlustarm heißt hier
 

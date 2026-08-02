@@ -234,9 +234,9 @@ Alle Preise zzgl. MwSt.""",
     "landing.conv.h": "Die wichtigsten Umwandlungen",
     "landing.conv.sub": "Was dabei erhalten bleibt und was nicht.",
     "landing.conv.1.h": "PDF in Markdown",
-    "landing.conv.1.p": "Rechnungen, Verträge, Handbücher. Überschriften, Absätze und "
-    "Tabellen werden übernommen. Bei mehrspaltigem Layout kann die Reihenfolge "
-    "durcheinandergeraten.",
+    "landing.conv.1.p": "Rechnungen, Verträge, Handbücher. Überschriften mit ihren "
+    "Ebenen, Absätze und Tabellen werden übernommen; bei zweispaltigem Satz wird die "
+    "Lesereihenfolge aus der Seitenlage zurückgewonnen.",
     "landing.conv.2.h": "Foto in Text",
     "landing.conv.2.p": "Ein abfotografiertes Dokument wird zu kopierbarem Text. Ein "
     "gerades, scharfes Foto liefert das beste Ergebnis.",
@@ -315,11 +315,13 @@ Alle Preise zzgl. MwSt.""",
     "Spaltenverbünden wie in der Vorlage. Jeder gängige Editor zeigt das richtig an. "
     "Tabellen ohne Verbünde bleiben im gewohnten Markdown-Raster, und in der JSON-Datei "
     "steht die vollständige Zellstruktur ohnehin.",
-    "landing.faq.12.q": "Bleiben die Nummern der Überschriften erhalten?",
-    "landing.faq.12.a": "Ja, Zeichen für Zeichen. Aus der Nummer wird zusätzlich die "
-    "Gliederungstiefe abgeleitet: „1“ ist eine Hauptüberschrift, „1.1“ steht eine Ebene "
-    "darunter, „1.1.1“ noch eine. Ohne diesen Schritt stünde jede Überschrift auf "
-    "derselben Stufe.",
+    "landing.faq.12.q": "Bleiben die Ebenen der Überschriften erhalten?",
+    "landing.faq.12.a": "Ja. Trägt eine Überschrift eine Nummer, bleibt sie Zeichen für "
+    "Zeichen stehen und nennt die Ebene selbst: „1“ ist eine Hauptüberschrift, „1.1“ "
+    "steht eine Ebene darunter. Ohne Nummern kommt die Ebene aus der Schriftgröße der "
+    "Vorlage — aber nur, wenn die Größen sich klar unterscheiden. Bei Scans und Fotos "
+    "ist die gemessene Schriftgröße zu unzuverlässig; dort bleiben die Ebenen flach, "
+    "statt geraten zu werden.",
 
     # ----------------------------------------------------------------- Login
     "login.title": "Anmelden — {product}",

@@ -1,6 +1,6 @@
 # Messbericht
 
-Erhoben am 02.08.2026 20:25 · Stand `090465a` · Dienst offline (gesicherte Docling-Rohdaten)
+Erhoben am 02.08.2026 21:06 · Stand `8d48f71` · Dienst https://klartext.it-handwerk-stuttgart.de
 
 Alle Werte von 0 bis 1, größer ist besser. `—` heißt: im Dokument kommt diese Eigenschaft nicht vor.
 

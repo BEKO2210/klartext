@@ -230,8 +230,9 @@ All prices exclude VAT.""",
     "landing.conv.h": "The conversions that matter",
     "landing.conv.sub": "What survives the trip, and what doesn't.",
     "landing.conv.1.h": "PDF to Markdown",
-    "landing.conv.1.p": "Invoices, contracts, manuals. Headings, paragraphs and tables "
-    "carry over. With multi-column layouts the reading order can get scrambled.",
+    "landing.conv.1.p": "Invoices, contracts, manuals. Headings with their levels, "
+    "paragraphs and tables carry over; on two-column pages the reading order is "
+    "recovered from the position on the page.",
     "landing.conv.2.h": "Photo to text",
     "landing.conv.2.p": "A photographed document becomes text you can copy. A straight, "
     "sharp photo gives the best result.",
@@ -302,10 +303,12 @@ All prices exclude VAT.""",
     "row and column spans as in the source. Every common editor renders that correctly. "
     "Tables without merged cells stay in the familiar Markdown grid, and the JSON file "
     "carries the full cell structure either way.",
-    "landing.faq.12.q": "Are heading numbers preserved?",
-    "landing.faq.12.a": "Yes, character for character. The number is also used to restore "
-    "the outline depth: \"1\" becomes a top-level heading, \"1.1\" sits one level below, "
-    "\"1.1.1\" one more. Without that step every heading would end up on the same level.",
+    "landing.faq.12.q": "Are heading levels preserved?",
+    "landing.faq.12.a": "Yes. A numbered heading keeps its number character for character, "
+    "and the number names the level: \"1\" is a top-level heading, \"1.1\" sits one level "
+    "below. Without numbers the level comes from the font size in the source — but only "
+    "when the sizes separate clearly. On scans and photos the measured size is too "
+    "unreliable; there the levels stay flat instead of being guessed.",
 
     # ----------------------------------------------------------------- Login
     "login.title": "Sign in — {product}",

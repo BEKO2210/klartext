@@ -3,15 +3,21 @@
 Was wann veröffentlicht wurde. Die Versionsnummer ist zugleich der Tag des
 Docker-Images (`klartext-app:<Version>`), das auf dem Server läuft.
 
-**Aktuell live: 1.2.0** (seit 02.08.2026)
+**Aktuell live: 1.3.0** (seit 02.08.2026)
 
 ---
 
-## 1.3.0 — vorbereitet, noch nicht live
+## 1.3.0 — 02.08.2026
 
 Zwei Lücken, die der neue Messstand beziffert hat: Überschriften ohne
 Gliederungsnummer landeten alle auf derselben Ebene, und bei zweispaltigem Satz
 stand die rechte Spalte hinter allem anderen.
+
+Freigabe am 02.08.2026 nach vollständigem Prüflauf gegen die live laufende
+1.3.0: e2e 73/73 (1 m 12 s), Korpuslauf über elf Fixtures ohne Befund (47 s),
+Landing/Auftragsseite/Übersicht bei 412 px ohne Querlauf und ohne
+Konsolenfehler, vollständiger Messlauf über den Dienst (3 m 05 s) —
+deckungsgleich mit der Offline-Prognose, keine Kennzahl gefallen.
 
 ### Neu
 
