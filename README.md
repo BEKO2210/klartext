@@ -13,7 +13,7 @@ Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
 [![Status](https://img.shields.io/badge/Status-im%20Betrieb-15803D)](https://klartext.it-handwerk-stuttgart.de)
-[![Live](https://img.shields.io/badge/Live-v1.3.0-1E3A5F)](CHANGELOG.md)
+[![Live](https://img.shields.io/badge/Live-v1.4.0-1E3A5F)](CHANGELOG.md)
 [![Sprachen](https://img.shields.io/badge/Sprachen-English%20%C2%B7%20Deutsch-15803D)](CHANGELOG.md)
 
 [Live ansehen](https://klartext.it-handwerk-stuttgart.de) ·
@@ -68,9 +68,16 @@ sein; das wird in der Oberfläche auch so gesagt.
 
 ## Texterkennung
 
-Für Fotos und Scans läuft **RapidOCR**. Ausgewählt nach einer Messung über vier
-Testbilder mit 45 einzeln geprüften Pflichtangaben (Namen, Straßen, Artikelnummern,
-Beträge, Umlaute, Gradzeichen):
+Für Fotos und Scans läuft **RapidOCR mit PP-OCRv6-medium-Modellen** — vollständig
+lokal, CPU-only. Der Schritt von den small- auf die medium-Modelle (1.4.0) brachte
+am Messstand über zwölf gescannte Prüfdokumente: Listen 0,781 → 0,861,
+Tabelleninhalt 0,897 → 0,935, Überschriften 0,423 → 0,479. Vor allem sitzen die
+Leerzeichen („mitgenommen werden" statt „mitgenommenwerden"), und das leere
+Kontrollkästchen ☐ wird gelesen; das angekreuzte ☒ geht weiterhin verloren.
+
+RapidOCR selbst wurde nach einer Messung über vier Testbilder mit 45 einzeln
+geprüften Pflichtangaben ausgewählt (Namen, Straßen, Artikelnummern, Beträge,
+Umlaute, Gradzeichen):
 
 | Engine | Treffer | Quote |
 |---|---|---|

@@ -184,6 +184,48 @@ Kein Rollback nötig. Danach Landing-Texte an den neuen Stand angepasst
 (Umwandlungskarte PDF, FAQ 12, README) und mit demselben Abbild-Tag neu
 ausgerollt; Sichtprüfung DE und EN auf der live laufenden Seite bestanden.
 
+## Paket E — bessere Engine-Modelle ohne neue Hardware (03.08.2026)
+
+Auftrag: Scans müssen besser werden, ohne Hardwarekauf, ohne externe Dienste.
+GPU (Quadro M2000M, Maxwell 2015, 4 GB) ist für moderne Inferenz-Stacks zu alt
+und thermisch riskant — CPU-Weg mit besseren Modellen.
+
+Zwei Kandidaten über den A/B-Mechanismus des Messstands
+(`bench/offline.py --kandidat …`, eigene Rohdaten je Kandidat):
+
+**PP-OCRv6 medium statt small (Texterkennung) — angenommen, live in 1.4.0.**
+Scan-Mittel: Text 0,954 → 0,963 · Überschriften 0,423 → 0,479 · Listen
+0,781 → 0,861 · Tab-Inhalt 0,897 → 0,935 · Struktur −0,002 (Toleranz).
+Qualitativ: Wortabstände korrekt, IBAN-Gruppen erhalten, ☐ wird gelesen.
+Kosten: Scans deutlich langsamer (Modelle ~20× größer), e2e 1 → 7 Minuten.
+
+**TableFormer v2 (Tabellenmodell) — abgelehnt.** Digitale Differenzen sind der
+reine Modell-Effekt: mehrstufiger Kopf 0,817 → 0,917, aber Rechnung mit
+Zeilenverbünden 1,000 → 0,537 und Staffelpreisliste 0,941 → 0,807. Gewinnt
+eins, verliert zwei. Gewichte bleiben als Kandidat gemountet — bei einer
+neueren Docling-Fassung neu messen.
+
+Technische Stolperfalle, dokumentiert für später: `DOCLING_SERVE_CUSTOM_OCR_PRESETS`
+scheitert in docling-serve 1.28 an der Policy-Prüfung (sie kennt nur
+Factory-Namen). Ausweg: `DOCLING_SERVE_ALLOW_CUSTOM_OCR_CONFIG=true` und die
+Konfiguration je Anfrage über `ocr_custom_config`.
+
+### Freigabeprotokoll 1.4.0 — 03.08.2026
+
+| Prüfung | Ergebnis | Laufzeit |
+|---|---|---|
+| e2e gegen live | 73/73 bestanden | 7 m 13 s (OCR-Aufträge langsamer) |
+| Korpuslauf (11 Fixtures, frische Namen) | 10 sauber, 0 auffällig, 0 Fehler | 5 m 09 s |
+| 412 px | entfällt — keine Änderung an der Oberfläche | — |
+| layout_test im Container | 33/33 | — |
+| Messlauf über den Dienst (24 Aufträge) | Zahl für Zahl deckungsgleich mit der Offline-Prognose | 23 m 43 s |
+
+Scan-Mittel live: Text 0,963 · Überschriften 0,479 · Listen 0,861 ·
+Tab-Struktur 0,991 · Tab-Inhalt 0,935 · Reihenfolge 1,000. Digital
+unverändert gegenüber 1.3.0. Keine Kennzahl außerhalb der Toleranz gefallen
+(Tab-Struktur Scan −0,002). Kein Rollback nötig; Rückweg wäre das Entfernen
+der beiden OCR-Umgebungswerte aus der Compose-Datei plus Neustart.
+
 ## Nicht-Ziele
 
 * **Kein Sprachmodell** zum Aufräumen der Ausgabe. Bricht das Kernversprechen.

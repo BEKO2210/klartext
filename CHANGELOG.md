@@ -3,7 +3,62 @@
 Was wann veröffentlicht wurde. Die Versionsnummer ist zugleich der Tag des
 Docker-Images (`klartext-app:<Version>`), das auf dem Server läuft.
 
-**Aktuell live: 1.3.0** (seit 02.08.2026)
+**Aktuell live: 1.4.0** (seit 03.08.2026)
+
+---
+
+## 1.4.0 — 03.08.2026
+
+Bessere Texterkennung auf Scans — ohne neue Hardware, ohne externe Dienste.
+Zwei Engine-Kandidaten wurden am Messstand geprüft; einer wurde übernommen,
+einer abgelehnt.
+
+### Geändert
+
+* **Texterkennung läuft jetzt mit PP-OCRv6 medium statt small** (RapidOCR,
+  weiterhin vollständig lokal und CPU-only). Die medium-Modelle (133 MB)
+  liegen als Volume im Docling-Container; die Konfiguration geht je Anfrage
+  mit, weil die Preset-Registrierung von docling-serve 1.28 eigene Presets
+  nicht durch die Policy-Prüfung lässt.
+
+### Gemessen (Scans, zwölf Prüfdokumente, offline)
+
+| Kennzahl | small (1.3.0) | medium (1.4.0) |
+|---|---|---|
+| Text | 0,954 | **0,963** |
+| Überschriften | 0,423 | **0,479** |
+| Listen | 0,781 | **0,861** |
+| Tab-Struktur | 0,993 | 0,991 |
+| Tab-Inhalt | 0,897 | **0,935** |
+| Reihenfolge | 1,000 | 1,000 |
+
+Qualitativ: Leerzeichen sitzen („§ 2 Leistungsumfang" statt
+„§2 Leistungsumfang", „mitgenommen werden" statt „mitgenommenwerden"),
+IBAN-Gruppen bleiben getrennt, das leere Kontrollkästchen ☐ wird jetzt
+gelesen. Das angekreuzte ☒ geht weiterhin verloren. Digitale Vorlagen sind
+unverändert — dort läuft keine Texterkennung.
+
+Preis: Scans brauchen länger (medium-Modelle sind ~20-mal größer als small).
+Der e2e-Lauf stieg von 1 auf 7 Minuten, weil er viele Bildkonvertierungen
+enthält; für einzelne Aufträge bleibt die Wartezeit im Rahmen.
+
+### Geprüft und abgelehnt
+
+* **TableFormer v2** (Tabellenmodell): behebt den mehrstufigen Kopf
+  (Tab-Inhalt 0,817 → 0,917), zerlegt dafür die Rechnung mit
+  Zeilenverbünden (1,000 → 0,537) und die Staffelpreisliste (0,941 → 0,807).
+  Gewinnt ein Dokument, verliert zwei — bleibt aus. Die Gewichte liegen
+  weiter als Kandidat im Container (`ocr/tableformer-v2/`), messbar über
+  `bench/offline.py --kandidat tabelle-v2`.
+
+### Technisch
+
+* `bench/offline.py` kennt Engine-Kandidaten (`--kandidat ocr-mittel |
+  tabelle-v2 | beides`), jeder mit eigenem Rohdaten-Ordner.
+* Client: `OCR_CUSTOM_PRESETS` (JSON) definiert eigene Engine-Konfigurationen;
+  trägt `OCR_ENGINE` einen dieser Namen, geht die Konfiguration je Anfrage an
+  die Engine. `TABLE_PRESET` wählt optional das Tabellenmodell.
+* Modellgewichte liegen nicht im Git (`ocr/LADEN.md` beschreibt den Download).
 
 ---
 

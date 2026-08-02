@@ -38,6 +38,12 @@ services:
       DOCLING_SERVE_ALLOWED_SOURCE_TYPES: '["file"]' # kein URL-Import (SSRF-Schutz)
       DOCLING_SERVE_ALLOWED_TARGET_TYPES: '["inbody"]'
       DOCLING_SERVE_CORS_ORIGINS: '[]'
+      # Erlaubt dem Web-/Worker-Client, die OCR-Konfiguration je Anfrage zu
+      # setzen (PP-OCRv6 medium statt small). Der eingebaute Preset-Weg
+      # (DOCLING_SERVE_CUSTOM_OCR_PRESETS) scheitert an der Policy-Pruefung von
+      # docling-serve 1.28: sie kennt nur die Factory-Namen, keine eigenen
+      # Presets. Der Zugriff bleibt intern — die API ist nie oeffentlich.
+      DOCLING_SERVE_ALLOW_CUSTOM_OCR_CONFIG: "true"
       # --- Modelle: liegen fertig im Image unter /opt/app-root/src/.cache/docling/models
       #     (layout-heron, docling-models/TableFormer, EasyOcr, RapidOcr, FigureClassifier).
       #     Kein Download zur Laufzeit, kein Netzwerkzugriff noetig.
@@ -61,6 +67,11 @@ services:
     volumes:
       # Deutsches Tesseract-Sprachpaket (Apache-2.0), read-only eingehaengt
       - ./ocr/tessdata/deu.traineddata:/usr/share/tesseract/tessdata/deu.traineddata:ro
+      # Kandidaten fuer den Messstand, beide read-only und nur per Preset aktiv:
+      # PP-OCRv6-medium-Modelle und die TableFormer-v2-Gewichte (das Abbild
+      # laeuft mit HF_HUB_OFFLINE=1 und kann sie nicht selbst laden).
+      - ./ocr/rapidocr-v6:/modelle/rapidocr-v6:ro
+      - ./ocr/tableformer-v2:/opt/app-root/src/.cache/docling/models/docling-project--TableFormerV2:ro
       - klartext-docling-scratch:/scratch
     networks:
       - klartext-internal
@@ -81,13 +92,18 @@ services:
     build:
       context: .
       dockerfile: app/Dockerfile
-    image: klartext-app:1.3.0
+    image: klartext-app:1.4.0
     container_name: klartext-web
     restart: unless-stopped
     command: ["uvicorn", "klartext.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--no-server-header"]
     env_file: [.env]
     environment:
       KLARTEXT_ROLE: web
+      # Texterkennung: PP-OCRv6 medium statt small. Am Messstand belegt
+      # (Scans: Text +0,009, Überschriften +0,056, Listen +0,080,
+      # Tabelleninhalt +0,038). Kein Geheimnis, deshalb hier statt in .env.
+      OCR_ENGINE: rapidocr-mittel
+      OCR_CUSTOM_PRESETS: '{"rapidocr-mittel": {"kind": "rapidocr", "lang": ["de", "en"], "backend": "onnxruntime", "det_model_path": "/modelle/rapidocr-v6/PP-OCRv6_det_medium.onnx", "rec_model_path": "/modelle/rapidocr-v6/PP-OCRv6_rec_medium.onnx"}}'
     volumes:
       - ./data/uploads:/data/uploads
       - ./data/results:/data/results
@@ -120,13 +136,18 @@ services:
     build:
       context: .
       dockerfile: app/Dockerfile
-    image: klartext-app:1.3.0
+    image: klartext-app:1.4.0
     container_name: klartext-worker
     restart: unless-stopped
     command: ["python", "-m", "klartext.worker"]
     env_file: [.env]
     environment:
       KLARTEXT_ROLE: worker
+      # Texterkennung: PP-OCRv6 medium statt small. Am Messstand belegt
+      # (Scans: Text +0,009, Überschriften +0,056, Listen +0,080,
+      # Tabelleninhalt +0,038). Kein Geheimnis, deshalb hier statt in .env.
+      OCR_ENGINE: rapidocr-mittel
+      OCR_CUSTOM_PRESETS: '{"rapidocr-mittel": {"kind": "rapidocr", "lang": ["de", "en"], "backend": "onnxruntime", "det_model_path": "/modelle/rapidocr-v6/PP-OCRv6_det_medium.onnx", "rec_model_path": "/modelle/rapidocr-v6/PP-OCRv6_rec_medium.onnx"}}'
     volumes:
       - ./data/uploads:/data/uploads
       - ./data/results:/data/results

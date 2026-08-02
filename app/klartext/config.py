@@ -67,6 +67,15 @@ class Config:
     # Markdown-Raster, in dem Docling jede ueberdeckte Stelle mit demselben Text
     # fuellt. Die JSON-Ausgabe enthaelt die Verbuende in beiden Faellen.
     merged_tables: str = _s("MERGED_TABLES", "html").strip().lower()
+    # Tabellenmodell-Preset der Engine. Leer = eingebauter Standard (TableFormer
+    # v1 im accurate-Modus). "tableformer_v2" schaltet auf das v2-Modell um —
+    # erst umstellen, wenn der Messstand den Kandidaten bestaetigt hat.
+    table_preset: str = _s("TABLE_PRESET", "").strip()
+    # Eigene OCR-Konfigurationen: Name -> vollstaendige Engine-Konfiguration
+    # (JSON, gleiche Felder wie docling RapidOcrOptions samt "kind"). Traegt
+    # OCR_ENGINE einen dieser Namen, schickt der Client die Konfiguration je
+    # Anfrage mit — docling-serve 1.28 laesst eigene Presets sonst nicht durch.
+    ocr_custom_presets_json: str = _s("OCR_CUSTOM_PRESETS", "")
 
     # --- Speicher ---
     upload_dir: str = _s("UPLOAD_DIR", "/data/uploads")

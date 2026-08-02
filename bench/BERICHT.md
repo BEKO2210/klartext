@@ -1,6 +1,6 @@
 # Messbericht
 
-Erhoben am 02.08.2026 21:06 · Stand `8d48f71` · Dienst https://klartext.it-handwerk-stuttgart.de
+Erhoben am 02.08.2026 23:19 · Stand `0758d71` · Dienst https://klartext.it-handwerk-stuttgart.de
 
 Alle Werte von 0 bis 1, größer ist besser. `—` heißt: im Dokument kommt diese Eigenschaft nicht vor.
 
@@ -26,19 +26,19 @@ Alle Werte von 0 bis 1, größer ist besser. `—` heißt: im Dokument kommt die
 
 | Dokument | Text | Überschr. | Listen | Tab-Struktur | Tab-Inhalt | Reihenfolge |
 |---|---|---|---|---|---|---|
-| 01-gliederung | 0.885 | 0.833 | 0.833 | — | — | 1.000 |
-| 02-rechnung | 0.958 | 0.250 | 1.000 | 1.000 | 1.000 | — |
-| 03-formular | 0.945 | 0.167 | 0.000 | 1.000 | 0.917 | — |
-| 04-laborbefund | 0.969 | 0.250 | 1.000 | 1.000 | 0.844 | — |
-| 05-vertrag | 0.966 | 0.143 | 1.000 | — | — | 1.000 |
-| 06-zweispaltig | 0.979 | 1.000 | 1.000 | — | — | 1.000 |
-| 07-tabelle-umbruch | 0.997 | 1.000 | 1.000 | 1.000 | 0.976 | — |
-| 08-seitenelemente | 0.937 | 0.105 | 0.000 | 1.000 | 0.750 | 1.000 |
-| 09-preisliste | 0.953 | 0.500 | 1.000 | 1.000 | 0.952 | — |
-| 10-protokoll | 0.909 | 0.167 | 0.538 | 1.000 | 1.000 | — |
-| 11-zeichensatz | 0.960 | 0.167 | 1.000 | 1.000 | 0.905 | — |
-| 12-mehrstufiger-kopf | 0.983 | 0.500 | 1.000 | 0.933 | 0.733 | — |
-| **Mittel** | 0.954 | 0.423 | 0.781 | 0.993 | 0.897 | 1.000 |
+| 01-gliederung | 0.952 | 1.000 | 1.000 | — | — | 1.000 |
+| 02-rechnung | 1.000 | 0.250 | 1.000 | 1.000 | 1.000 | 1.000 |
+| 03-formular | 0.947 | 0.167 | 0.333 | 1.000 | 0.917 | — |
+| 04-laborbefund | 0.979 | 0.250 | 1.000 | 1.000 | 0.889 | 1.000 |
+| 05-vertrag | 0.936 | 0.143 | 1.000 | — | — | 1.000 |
+| 06-zweispaltig | 1.000 | 0.500 | 1.000 | — | — | 1.000 |
+| 07-tabelle-umbruch | 0.999 | 1.000 | 1.000 | 1.000 | 0.984 | — |
+| 08-seitenelemente | 0.897 | 0.105 | 0.000 | 1.000 | 1.000 | 1.000 |
+| 09-preisliste | 0.994 | 1.000 | 1.000 | 1.000 | 0.952 | — |
+| 10-protokoll | 0.940 | 0.167 | 1.000 | 1.000 | 1.000 | — |
+| 11-zeichensatz | 0.937 | 0.167 | 1.000 | 1.000 | 1.000 | 1.000 |
+| 12-mehrstufiger-kopf | 0.976 | 1.000 | 1.000 | 0.915 | 0.678 | — |
+| **Mittel** | 0.963 | 0.479 | 0.861 | 0.991 | 0.935 | 1.000 |
 
 ## Wie das gemessen wird
 

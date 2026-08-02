@@ -6,6 +6,7 @@ gesendet — keine URLs, damit Docling nie für uns ins Netz greift.
 
 from __future__ import annotations
 
+import json
 import logging
 
 import httpx
@@ -13,6 +14,23 @@ import httpx
 from .config import CONFIG
 
 log = logging.getLogger("klartext.docling")
+
+
+def _custom_presets() -> dict[str, dict]:
+    """Eigene OCR-Konfigurationen aus der Umgebung, defensiv gelesen."""
+    if not CONFIG.ocr_custom_presets_json.strip():
+        return {}
+    try:
+        daten = json.loads(CONFIG.ocr_custom_presets_json)
+    except ValueError:
+        log.error("OCR_CUSTOM_PRESETS ist kein gueltiges JSON — wird ignoriert.")
+        return {}
+    if not isinstance(daten, dict):
+        return {}
+    return {k: v for k, v in daten.items() if isinstance(v, dict) and v.get("kind")}
+
+
+_CUSTOM_PRESETS = _custom_presets()
 
 
 class ConversionError(Exception):
@@ -59,7 +77,6 @@ class DoclingClient:
             "table_cell_matching": "true",
             "do_ocr": "true",
             "force_ocr": "false",
-            "ocr_preset": engine or CONFIG.ocr_engine,
             "pdf_backend": "docling_parse",
             "pipeline": "standard",
             # Bilder werden eingebettet geliefert und danach von uns als eigene
@@ -79,9 +96,24 @@ class DoclingClient:
             "page_range": ["1", str(max_pages)],
             "md_page_break_placeholder": "<!-- seitenumbruch -->",
         }
+        # Entweder ein eingebauter Preset-Name (rapidocr, tesseract, ...) oder
+        # eine eigene Konfiguration aus OCR_CUSTOM_PRESETS — dann geht die
+        # vollstaendige Engine-Konfiguration je Anfrage mit.
+        gewaehlt = engine or CONFIG.ocr_engine
+        eigene = _CUSTOM_PRESETS.get(gewaehlt)
+        if eigene is not None:
+            form["ocr_preset"] = "auto"
+            form["ocr_custom_config"] = json.dumps(eigene)
+        else:
+            form["ocr_preset"] = gewaehlt
+
         langs = [l.strip() for l in CONFIG.ocr_lang.split(",") if l.strip()]
         if langs:
             form["ocr_lang"] = langs
+        # Tabellenmodell nur benennen, wenn ausdruecklich eines gewaehlt ist —
+        # sonst gilt der eingebaute Standard (v1 accurate ueber table_mode).
+        if CONFIG.table_preset:
+            form["table_structure_preset"] = CONFIG.table_preset
 
         try:
             resp = await self._client.post(

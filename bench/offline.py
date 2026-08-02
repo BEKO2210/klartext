@@ -40,21 +40,40 @@ DOKUMENTE = HIER / "dokumente"
 GOLD = HIER / "gold"
 ROHDATEN = HIER / "rohdaten"
 
+# Engine-Kandidaten fuer den A/B-Vergleich. Jeder Kandidat hat einen eigenen
+# Rohdaten-Ordner, weil sich mit der Engine das Rohergebnis aendert. "standard"
+# ist der Live-Zustand und liegt aus historischen Gruenden direkt in rohdaten/.
+_OCR_MITTEL = '{"rapidocr-mittel": {"kind": "rapidocr", "lang": ["de", "en"], "backend": "onnxruntime", "det_model_path": "/modelle/rapidocr-v6/PP-OCRv6_det_medium.onnx", "rec_model_path": "/modelle/rapidocr-v6/PP-OCRv6_rec_medium.onnx"}}'
+KANDIDATEN: dict[str, dict[str, str]] = {
+    "standard": {},
+    "ocr-mittel": {"OCR_ENGINE": "rapidocr-mittel", "OCR_CUSTOM_PRESETS": _OCR_MITTEL},
+    "tabelle-v2": {"TABLE_PRESET": "tableformer_v2"},
+    "beides": {"OCR_ENGINE": "rapidocr-mittel", "OCR_CUSTOM_PRESETS": _OCR_MITTEL,
+               "TABLE_PRESET": "tableformer_v2"},
+}
+
+
+def _rohdaten_ordner(kandidat: str) -> pathlib.Path:
+    return ROHDATEN if kandidat == "standard" else HIER / f"rohdaten-{kandidat}"
+
 # Gerechnet wird in einem Wegwerfcontainer aus dem gebauten Abbild, mit dem
 # Quellstand aus dem Arbeitsverzeichnis darübergelegt. Damit läuft der Code, an
 # dem gerade gearbeitet wird — ohne die laufenden Container anzufassen.
 #
 # Bewusst ohne jedes Datenverzeichnis: ein Probecontainer, der die echten
 # Datenordner sieht, hat hier schon einmal Nutzerdateien gelöscht.
-ABBILD = "klartext-app:1.3.0"
+ABBILD = "klartext-app:1.4.0"
 NETZ = "klartext-internal"
 QUELLSTAND = HIER.parent / "app" / "klartext"
 
 
-def _lauf(skript: str, eingabe: str, mit_netz: bool, frist: int) -> subprocess.CompletedProcess:
+def _lauf(skript: str, eingabe: str, mit_netz: bool, frist: int,
+          umgebung: dict[str, str] | None = None) -> subprocess.CompletedProcess:
     befehl = ["docker", "run", "--rm", "-i",
               "-v", f"{QUELLSTAND}:/app/klartext:ro",
               "-e", "PYTHONDONTWRITEBYTECODE=1"]
+    for name, wert in (umgebung or {}).items():
+        befehl += ["-e", f"{name}={wert}"]
     if mit_netz:
         umgebung = _docling_umgebung()
         befehl += ["--network", NETZ]
@@ -120,20 +139,22 @@ for zeile in sys.stdin:
 """
 
 
-def rohdaten_holen(muster: str) -> None:
+def rohdaten_holen(muster: str, kandidat: str = "standard") -> None:
     """Schickt jede Prüfdatei einmal durch Docling und sichert das Rohergebnis."""
     dateien = sorted(p for p in DOKUMENTE.glob("*.pdf") if muster in p.name)
     if not dateien:
         print("Keine Dokumente — erst bench/bauen.py laufen lassen.")
         raise SystemExit(2)
 
-    ROHDATEN.mkdir(exist_ok=True)
+    ordner = _rohdaten_ordner(kandidat)
+    ordner.mkdir(exist_ok=True)
     # In Paketen, damit ein Fehler nicht die ganze Sammlung kostet.
     for start in range(0, len(dateien), 3):
         paket = dateien[start:start + 3]
         eingabe = json.dumps({p.name: base64.b64encode(p.read_bytes()).decode()
                               for p in paket})
-        lauf = _lauf(_ROHDATEN_SKRIPT, eingabe, mit_netz=True, frist=1800)
+        lauf = _lauf(_ROHDATEN_SKRIPT, eingabe, mit_netz=True, frist=1800,
+                     umgebung=KANDIDATEN[kandidat])
         if lauf.returncode != 0:
             print(lauf.stderr.strip()[-2000:])
             raise SystemExit("Docling-Aufruf fehlgeschlagen.")
@@ -141,7 +162,7 @@ def rohdaten_holen(muster: str) -> None:
             if not zeile.startswith("@@"):
                 continue
             satz = json.loads(zeile[2:])
-            ziel = ROHDATEN / f"{pathlib.Path(satz['name']).stem}.json"
+            ziel = ordner / f"{pathlib.Path(satz['name']).stem}.json"
             ziel.write_text(json.dumps(satz, ensure_ascii=False), encoding="utf-8")
             print(f"  gesichert: {ziel.name} ({len(satz['markdown'])} Zeichen Markdown)")
 
@@ -175,14 +196,18 @@ def main() -> int:
     zerleger.add_argument("--nur", default="")
     zerleger.add_argument("--eintragen", action="store_true",
                           help="Ergebnis in verlauf.jsonl aufnehmen (sonst nur anzeigen)")
+    zerleger.add_argument("--kandidat", default="standard", choices=sorted(KANDIDATEN),
+                          help="Engine-Kandidat (eigener Rohdaten-Ordner je Kandidat)")
     argumente = zerleger.parse_args()
 
     if argumente.rohdaten:
-        rohdaten_holen(argumente.nur)
+        rohdaten_holen(argumente.nur, argumente.kandidat)
         return 0
 
-    if not ROHDATEN.is_dir() or not any(ROHDATEN.glob("*.json")):
-        print("Keine Rohdaten — erst `python3 bench/offline.py --rohdaten` laufen lassen.")
+    ordner = _rohdaten_ordner(argumente.kandidat)
+    if not ordner.is_dir() or not any(ordner.glob("*.json")):
+        print(f"Keine Rohdaten fuer '{argumente.kandidat}' — erst "
+              f"`python3 bench/offline.py --rohdaten --kandidat {argumente.kandidat}`.")
         return 2
 
     varianten = (["digital", "scan"] if argumente.variante == "beide"
@@ -190,7 +215,7 @@ def main() -> int:
     laeufe: dict[str, list[dict]] = {}
 
     for variante in varianten:
-        quellen = sorted(p for p in ROHDATEN.glob("*.json")
+        quellen = sorted(p for p in ordner.glob("*.json")
                          if argumente.nur in p.name
                          and (variante == "scan") == p.stem.endswith("-scan"))
         if not quellen:
@@ -222,7 +247,8 @@ def main() -> int:
     commit = subprocess.run(["git", "-C", str(HIER.parent), "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True).stdout.strip() or "unbekannt"
     kopf = {"zeitpunkt": datetime.datetime.now().strftime("%d.%m.%Y %H:%M"),
-            "commit": commit, "basis": "offline (gesicherte Docling-Rohdaten)"}
+            "commit": commit,
+            "basis": f"offline (gesicherte Docling-Rohdaten, Kandidat {argumente.kandidat})"}
 
     print()
     for variante, saetze in laeufe.items():

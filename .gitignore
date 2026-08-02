@@ -23,3 +23,8 @@ __pycache__/
 # Messstand: die gebauten Prüfdateien entstehen aus den Quellen neu
 bench/dokumente/
 bench/rohdaten/
+bench/rohdaten-*/
+
+# Grosse Modellgewichte, per Skript ladbar (siehe ocr/LADEN.md)
+ocr/rapidocr-v6/*.onnx
+ocr/tableformer-v2/model.safetensors
