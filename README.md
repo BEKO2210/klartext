@@ -13,7 +13,7 @@ Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
 [![Status](https://img.shields.io/badge/Status-im%20Betrieb-15803D)](https://klartext.it-handwerk-stuttgart.de)
-[![Live](https://img.shields.io/badge/Live-v1.1.2-1E3A5F)](CHANGELOG.md)
+[![Live](https://img.shields.io/badge/Live-v1.2.0-1E3A5F)](CHANGELOG.md)
 [![Sprachen](https://img.shields.io/badge/Sprachen-English%20%C2%B7%20Deutsch-15803D)](CHANGELOG.md)
 
 [Live ansehen](https://klartext.it-handwerk-stuttgart.de) ·
@@ -202,6 +202,24 @@ Scan. Die Bildmaße stammen aus den Kopfdaten, die Bilddaten selbst werden nie
 entpackt: Bilddecoder auf fremde Uploads anzuwenden wäre eine unnötig große
 Angriffsfläche.
 
+**Verbundene Zellen** kann Markdown nicht ausdrücken. Docling füllt stattdessen
+jede überdeckte Rasterstelle mit demselben Text: aus einer Zelle „Zwischensumme"
+über vier Spalten werden vier gleiche Zellen, aus einer zweizeiligen Kopfzelle
+zwei — genau das macht Rechnungen und Formulare unbrauchbar. Tabellen mit
+Verbünden schreibt Klartext deshalb als **HTML-Tabelle** mit `rowspan` und
+`colspan` in die Markdown-Datei; jeder gängige Betrachter stellt das dar.
+Tabellen ohne Verbünde bleiben im gewohnten Markdown-Raster. Die JSON-Ausgabe
+enthält die Zellstruktur in beiden Fällen vollständig. Abschaltbar mit
+`MERGED_TABLES=raster`.
+
+**Die Gliederung** erkennt das Layoutmodell nur als „hier steht eine
+Überschrift", nicht als Ebene — `1`, `1.1` und `1.1.1` kämen alle als `##`
+heraus. Die Ebene wird aus der Nummer der Vorlage hergeleitet, die Nummer selbst
+bleibt Zeichen für Zeichen stehen. Unterlisten, die dabei flach geworden sind,
+werden eingerückt, wenn ein lückenloser Buchstabenblock zwischen zwei
+Zifferpunkten steht. Beides prüft sich selbst und lässt das Dokument in Ruhe,
+sobald die Belege nicht reichen.
+
 **Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
 in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie
 noch auf einer eigenen Zeile. Im Markdown werden sie einmal aufgeführt statt auf
@@ -271,6 +289,7 @@ Rollback: [DEPLOYMENT.md](DEPLOYMENT.md).
 ```bash
 python3 tests/e2e.py                   # gegen die öffentliche Adresse
 python3 tests/e2e.py http://127.0.0.1:8160
+python3 tests/layout_test.py           # Layouttreue, ohne Netz und Datenbank
 ```
 
 Der Test legt eigene Konten an, konvertiert die Dateien aus `tests/fixtures`, prüft

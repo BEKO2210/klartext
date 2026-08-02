@@ -102,6 +102,31 @@ Damit gibt es keine Zusammenfassung, keine Umformulierung und keine erfundenen I
 Seitenstruktur nachvollziehbar bleibt. Die JSON-Ausgabe enthält die vollständige
 `DoclingDocument`-Struktur mit Seiten, Blöcken, Bounding-Boxen und Tabellenzellen.
 
+## Layouttreue (`layout.py`)
+
+Drei Dinge gibt die Vorlage her, die auf dem Weg nach Markdown verloren gehen.
+Sie werden im Worker vor bzw. nach den Textregeln wiederhergestellt — immer nur
+im Markdown, die JSON-Ausgabe wird nicht angefasst.
+
+| Verlust | Was passiert | Regel |
+|---|---|---|
+| Gliederungstiefe | Das Layoutmodell erkennt Überschriften, aber keine Ebenen: `1`, `1.1` und `1.1.1` kommen alle als `##` heraus | Ebene aus der Nummer der Vorlage herleiten (`1` → `##`, `1.1` → `###`). Der Text bleibt Zeichen für Zeichen stehen |
+| Verbundene Zellen | Markdown kennt kein `rowspan`; Docling füllt jede überdeckte Rasterstelle mit demselben Text — aus einer Zelle über vier Spalten werden vier gleiche Zellen | Tabellen **mit** Verbund werden als HTML-Tabelle (`rowspan`/`colspan`, `thead`/`tbody`) ins Markdown geschrieben. Tabellen ohne Verbund bleiben im Markdown-Raster |
+| Verschachtelte Listen | Eine Unterliste („a., b.") landet auf der Ebene der Hauptliste | Einrücken, wenn ein lückenloser Buchstabenblock zwischen zwei Zifferpunkten steht |
+
+Jede Regel prüft sich selbst und lässt das Dokument unverändert, sobald die
+Belege nicht reichen: Überschriften nur ab drei nummerierten Treffern, bei nur
+einer vorhandenen Ebene und mit Elternprüfung (`1.1` braucht ein `1`); Tabellen
+nur, wenn die Kopfzeile des Markdown-Blocks Zelle für Zelle zur Tabelle in der
+Struktur passt. Zellentext wird beim HTML-Bau maskiert (`&`, `<`, `>`).
+
+`MERGED_TABLES=raster` schaltet den HTML-Weg ab und lässt alle Tabellen im
+flachen Markdown-Raster. Die Verbünde stehen in beiden Fällen vollständig in der
+JSON-Ausgabe (`row_span`, `col_span`, `start_row_offset_idx` …).
+
+Geprüft wird das deterministisch gegen nachgebaute Docling-Strukturen:
+`python3 tests/layout_test.py` (läuft auch in `tests/e2e.py` als Prüfung 43c).
+
 ## Sprachen
 
 Englisch ist die Standardfassung und liegt auf den blanken Pfaden, Deutsch unter

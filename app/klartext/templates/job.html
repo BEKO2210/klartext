@@ -78,6 +78,12 @@
     </div>
   </div>
   <p class="smaller muted fineprint">{{ t('job.formats_note')|safe }}</p>
+  {% if job.merged_tables %}
+  <p class="smaller muted fineprint">
+    {% if job.merged_tables == 1 %}{{ t('job.merged_note', count=job.merged_tables) }}
+    {% else %}{{ t('job.merged_note_plural', count=job.merged_tables) }}{% endif %}
+  </p>
+  {% endif %}
   <p class="smaller muted copy-status" id="copy-status" aria-live="polite"></p>
 
   {% if bilder %}

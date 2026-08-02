@@ -239,8 +239,9 @@ All prices exclude VAT.""",
     "landing.conv.3.p": "Headings, paragraphs, lists and tables arrive structured. "
     "Comments, footnotes and text boxes are lost.",
     "landing.conv.4.h": "Excel to Markdown",
-    "landing.conv.4.p": "Every sheet becomes a Markdown table with a header row. Cell "
-    "formats, formulas and charts are not carried over.",
+    "landing.conv.4.p": "Every sheet becomes a Markdown table with a header row; merged "
+    "cells are kept as an HTML table. Cell formats, formulas and charts are not carried "
+    "over.",
     "landing.conv.5.h": "Scan to text",
     "landing.conv.5.p": "Even an old, yellowed letter becomes searchable. Poor scan "
     "quality or handwriting lowers recognition.",
@@ -295,6 +296,16 @@ All prices exclude VAT.""",
     "landing.faq.10.q": "Why do I need an account?",
     "landing.faq.10.a": "Registration is free and makes the fair-use limits apply per "
     "person, instead of all visitors sharing one common limit.",
+    "landing.faq.11.q": "What happens to merged cells in tables?",
+    "landing.faq.11.a": "Markdown has no way to express a merged cell. Tables that contain "
+    "one are therefore written as an HTML table inside the Markdown file — with the same "
+    "row and column spans as in the source. Every common editor renders that correctly. "
+    "Tables without merged cells stay in the familiar Markdown grid, and the JSON file "
+    "carries the full cell structure either way.",
+    "landing.faq.12.q": "Are heading numbers preserved?",
+    "landing.faq.12.a": "Yes, character for character. The number is also used to restore "
+    "the outline depth: \"1\" becomes a top-level heading, \"1.1\" sits one level below, "
+    "\"1.1.1\" one more. Without that step every heading would end up on the same level.",
 
     # ----------------------------------------------------------------- Login
     "login.title": "Sign in — {product}",
@@ -436,6 +447,11 @@ All prices exclude VAT.""",
     "job.copy": "Copy",
     "job.formats_note": "<strong>.md</strong> for notes and text, <strong>.json</strong> "
     "for your own programs. The Markdown file is usually enough.",
+    "job.merged_note": "One table has merged cells and is therefore written as an HTML "
+    "table inside the Markdown file — the Markdown grid cannot express a merged cell.",
+    "job.merged_note_plural": "{count} tables have merged cells and are therefore written "
+    "as HTML tables inside the Markdown file — the Markdown grid cannot express a merged "
+    "cell.",
     "job.images.h": "Images from the document",
     "job.images.count": "{count} image extracted. The Markdown links to it, the ZIP "
     "contains it as a file.",

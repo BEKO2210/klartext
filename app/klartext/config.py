@@ -62,6 +62,11 @@ class Config:
     ocr_engine: str = _s("OCR_ENGINE", "rapidocr")
     ocr_lang: str = _s("OCR_LANG", "deu,eng")
     table_mode: str = _s("TABLE_MODE", "accurate")
+    # Tabellen mit verbundenen Zellen: "html" schreibt sie als HTML-Tabelle ins
+    # Markdown und behaelt damit rowspan/colspan. "raster" bleibt beim flachen
+    # Markdown-Raster, in dem Docling jede ueberdeckte Stelle mit demselben Text
+    # fuellt. Die JSON-Ausgabe enthaelt die Verbuende in beiden Faellen.
+    merged_tables: str = _s("MERGED_TABLES", "html").strip().lower()
 
     # --- Speicher ---
     upload_dir: str = _s("UPLOAD_DIR", "/data/uploads")

@@ -244,8 +244,9 @@ Alle Preise zzgl. MwSt.""",
     "landing.conv.3.p": "Überschriften, Absätze, Listen und Tabellen kommen strukturiert "
     "an. Kommentare, Fußnoten und Textfelder bleiben auf der Strecke.",
     "landing.conv.4.h": "Excel in Markdown",
-    "landing.conv.4.p": "Jede Tabelle wird zur Markdown-Tabelle mit Kopfzeile. "
-    "Zellformate, Formeln und Diagramme werden nicht übertragen.",
+    "landing.conv.4.p": "Jede Tabelle wird zur Markdown-Tabelle mit Kopfzeile, "
+    "verbundene Zellen bleiben als HTML-Tabelle erhalten. Zellformate, Formeln und "
+    "Diagramme werden nicht übertragen.",
     "landing.conv.5.h": "Scan in Text",
     "landing.conv.5.p": "Auch ein altes, vergilbtes Schreiben wird durchsuchbar. Bei "
     "schlechter Scanqualität oder Handschrift sinkt die Erkennung.",
@@ -308,6 +309,17 @@ Alle Preise zzgl. MwSt.""",
     "landing.faq.10.a": "Die Registrierung ist kostenlos und sorgt dafür, dass die "
     "Fair-Use-Grenzen pro Person gelten, statt sich alle Besucher eine gemeinsame Grenze "
     "zu teilen.",
+    "landing.faq.11.q": "Was passiert mit verbundenen Zellen in Tabellen?",
+    "landing.faq.11.a": "Markdown kennt keine verbundenen Zellen. Tabellen mit Verbünden "
+    "stehen deshalb als HTML-Tabelle in der Markdown-Datei — mit denselben Zeilen- und "
+    "Spaltenverbünden wie in der Vorlage. Jeder gängige Editor zeigt das richtig an. "
+    "Tabellen ohne Verbünde bleiben im gewohnten Markdown-Raster, und in der JSON-Datei "
+    "steht die vollständige Zellstruktur ohnehin.",
+    "landing.faq.12.q": "Bleiben die Nummern der Überschriften erhalten?",
+    "landing.faq.12.a": "Ja, Zeichen für Zeichen. Aus der Nummer wird zusätzlich die "
+    "Gliederungstiefe abgeleitet: „1“ ist eine Hauptüberschrift, „1.1“ steht eine Ebene "
+    "darunter, „1.1.1“ noch eine. Ohne diesen Schritt stünde jede Überschrift auf "
+    "derselben Stufe.",
 
     # ----------------------------------------------------------------- Login
     "login.title": "Anmelden — {product}",
@@ -457,6 +469,12 @@ Alle Preise zzgl. MwSt.""",
     "job.copy": "Kopieren",
     "job.formats_note": "<strong>.md</strong> für Notizen und Texte, "
     "<strong>.json</strong> für eigene Programme. Meistens reicht die Markdown-Datei.",
+    "job.merged_note": "Eine Tabelle hat verbundene Zellen und steht deshalb als "
+    "HTML-Tabelle in der Markdown-Datei — das Markdown-Raster kann Verbünde nicht "
+    "abbilden.",
+    "job.merged_note_plural": "{count} Tabellen haben verbundene Zellen und stehen "
+    "deshalb als HTML-Tabellen in der Markdown-Datei — das Markdown-Raster kann "
+    "Verbünde nicht abbilden.",
     "job.images.h": "Bilder aus dem Dokument",
     "job.images.count": "{count} Abbildung herausgelöst. Im Markdown steht ein Verweis "
     "darauf, im ZIP liegt sie als Datei.",

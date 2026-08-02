@@ -258,8 +258,10 @@ def seitenelemente_zusammenfassen(markdown: str, elemente: list[str],
             rest = " ".join(woerter[:anzahl])
             if len(rest) < 10:
                 continue
+            # Zellenende ist im Markdown-Raster ein "|", in einer als HTML
+            # erhaltenen Tabelle ein "</td>".
             gekuerzt = re.sub(
-                r"[ \t]*©?[ \t]*" + re.escape(rest) + r"[ \t]*(?=\||\n|$)",
+                r"[ \t]*©?[ \t]*" + re.escape(rest) + r"[ \t]*(?=\||</t[dh]>|\n|$)",
                 " ", gekuerzt)
     gekuerzt = re.sub(r"[ \t]{2,}", " ", gekuerzt)
     gekuerzt = re.sub(r" +\|", " |", gekuerzt)

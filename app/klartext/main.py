@@ -1119,7 +1119,8 @@ async def _owned_job(user_id: int, public_id: str):
         raise HttpProblem(404, "error.job_missing") from None
     row = await db.fetchrow(
         "SELECT id, public_id, original_name, status, error_code, page_count, size_bytes, "
-        "       image_count, link_count, quality_note, quality_findings, "
+        "       image_count, link_count, table_count, merged_table_count, "
+        "       quality_note, quality_findings, "
         "       created_at, duration_ms, expires_at "
         "FROM jobs WHERE public_id = $1 AND user_id = $2 AND status <> 'deleted'",
         job_uuid,
@@ -1170,6 +1171,8 @@ async def job_detail(request: Request, public_id: str):
                 "pages": job["page_count"],
                 "images": job["image_count"],
                 "links": job["link_count"],
+                "tables": job["table_count"],
+                "merged_tables": job["merged_table_count"],
                 "note": job["quality_note"],
                 "funde": json.loads(job["quality_findings"]) if job["quality_findings"] else [],
                 "size": job["size_bytes"],

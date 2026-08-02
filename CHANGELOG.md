@@ -3,7 +3,42 @@
 Was wann veröffentlicht wurde. Die Versionsnummer ist zugleich der Tag des
 Docker-Images (`klartext-app:<Version>`), das auf dem Server läuft.
 
-**Aktuell live: 1.1.2** (seit 31.07.2026)
+**Aktuell live: 1.2.0** (seit 02.08.2026)
+
+---
+
+## 1.2.0 — 02.08.2026
+
+Layouttreue. Zwei Rückmeldungen auf Product Hunt: die Ausgabe flacht das Original
+ein, und Markdown kann eine verbundene Zelle gar nicht ausdrücken — was passiert
+also damit?
+
+### Neu
+
+* **Tabellen mit verbundenen Zellen bleiben verbunden.** Bisher füllte Docling
+  jede überdeckte Rasterstelle mit demselben Text: aus „Zwischensumme" über vier
+  Spalten wurden vier gleiche Zellen. Solche Tabellen stehen jetzt als
+  HTML-Tabelle mit `rowspan`/`colspan` in der Markdown-Datei. Tabellen ohne
+  Verbünde bleiben unverändert im Markdown-Raster, die JSON-Ausgabe trug die
+  Struktur ohnehin schon. Abschaltbar mit `MERGED_TABLES=raster`.
+* **Gliederungstiefe aus der Nummer.** Das Layoutmodell kennt Überschriften,
+  aber keine Ebenen — `1`, `1.1` und `1.1.1` kamen alle als `##` heraus. Die
+  Ebene wird jetzt aus der Nummer der Vorlage hergeleitet; die Nummer selbst
+  bleibt Zeichen für Zeichen stehen.
+* **Verschachtelte Listen** werden eingerückt, wenn ein lückenloser
+  Buchstabenblock zwischen zwei nummerierten Punkten steht.
+* Zwei neue Fragen im FAQ (verbundene Zellen, Überschriften-Nummern) und ein
+  Hinweis auf der Auftragsseite, wenn Tabellen als HTML erhalten wurden.
+
+### Technisch
+
+* Neues Modul `app/klartext/layout.py`, im Worker vor bzw. nach den Textregeln.
+  Jede Regel prüft sich selbst und lässt das Dokument unverändert, sobald die
+  Belege nicht reichen (Elternprüfung bei Nummern, Kopfzeilen-Abgleich bei
+  Tabellen). Zellentext wird beim HTML-Bau maskiert.
+* Migration `006_layouttreue.sql`: `jobs.table_count`, `jobs.merged_table_count`.
+* `tests/layout_test.py` — 21 Prüfungen gegen nachgebaute Docling-Strukturen,
+  ohne Netz und Datenbank; läuft auch in `tests/e2e.py` als Prüfung 43c.
 
 ---
 

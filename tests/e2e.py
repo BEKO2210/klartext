@@ -642,6 +642,23 @@ def main() -> int:
     check("43b Nur Einheiten-Spalten werden geprueft", probe2 == "True",
           probe2 or "keine Antwort")
 
+    # 43c Layouttreue ----------------------------------------------------------
+    # Gliederungstiefe, verbundene Zellen und verschachtelte Listen, geprueft
+    # gegen nachgebaute Strukturen im Container. Der Testlauf liegt als eigene
+    # Datei vor, weil er zu lang fuer eine Kommandozeile ist.
+    layout_datei = pathlib.Path(__file__).parent / "layout_test.py"
+    layout_lauf = subprocess.run(
+        ["docker", "exec", "-i", "klartext-web", "python", "-"],
+        input=layout_datei.read_text(encoding="utf-8"),
+        capture_output=True, text=True, timeout=60,
+    )
+    fehlende = [z for z in layout_lauf.stdout.splitlines() if z.startswith("FEHLT")]
+    einzeln = sum(1 for z in layout_lauf.stdout.splitlines() if z.startswith("  ok  "))
+    check("43c Layouttreue: Gliederung, verbundene Zellen, Listen",
+          layout_lauf.returncode == 0 and not fehlende and einzeln > 0,
+          "; ".join(fehlende) or (f"{einzeln} Einzelpruefungen"
+                                  if einzeln else layout_lauf.stderr.strip()[-200:]))
+
     # 45 Bestätigungsmail erneut anfordern -------------------------------------
     status, _, _ = anon.get("/resend-confirmation")
     check("45 Formular für neue Bestätigungsmail erreichbar", status == 200, f"HTTP {status}")

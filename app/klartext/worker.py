@@ -14,7 +14,7 @@ import json
 import logging
 import signal
 
-from . import db, i18n, ocr_wahl, postprocess, quota, settings_store, storage
+from . import db, i18n, layout, ocr_wahl, postprocess, quota, settings_store, storage
 from .config import CONFIG
 from .docling_client import ConversionError, DoclingClient
 
@@ -129,6 +129,15 @@ async def _process(client: DoclingClient, job) -> None:
     bilder = postprocess.bilder_ausloesen(struktur if isinstance(struktur, dict) else {})
     markdown = postprocess.markdown_bilder_verweisen(markdown, bilder)
 
+    # 1b) Tabellen mit verbundenen Zellen als HTML-Tabelle erhalten. Markdown
+    #     kennt kein rowspan; Docling fuellt stattdessen jede ueberdeckte
+    #     Rasterstelle mit demselben Text. Vor allen Textregeln, damit die
+    #     folgenden Schritte auch die Zellen dieser Tabellen erreichen.
+    tabellen = len((struktur.get("tables") or []) if isinstance(struktur, dict) else [])
+    verbunden = 0
+    if CONFIG.merged_tables == "html":
+        markdown, verbunden = layout.verbundene_tabellen_erhalten(markdown, struktur)
+
     # 2) Verweise aus der PDF retten — Docling exportiert nur den Text.
     links = []
     if job["mime_type"] == "application/pdf":
@@ -157,6 +166,13 @@ async def _process(client: DoclingClient, job) -> None:
     #    fehlende Leerzeichen). Keine Rechtschreibkorrektur — Tippfehler der
     #    Vorlage bleiben stehen. Nur im Markdown, die JSON bleibt unangetastet.
     markdown, geglaettet = postprocess.schreibweisen_glaetten(markdown)
+
+    # 4b) Gliederung: aus "1", "1.1", "1.1.1" die Ebenen zurueckrechnen. Das
+    #     Layoutmodell erkennt Ueberschriften, aber keine Tiefe — ohne diesen
+    #     Schritt steht jede Ueberschrift auf derselben Stufe. Unterlisten, die
+    #     dabei flach geworden sind, werden anschliessend eingerueckt.
+    markdown, gliederung = layout.gliederung_wiederherstellen(markdown)
+    markdown, eingerueckt = layout.listen_verschachteln(markdown)
 
     # 5) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
     #    Nur im Markdown; die JSON bleibt vollstaendig.
@@ -202,7 +218,8 @@ async def _process(client: DoclingClient, job) -> None:
     await db.execute(
         "UPDATE jobs SET status = 'done', page_count = $2, finished_at = now(), "
         "image_count = $3, link_count = $4, quality_note = $5, "
-        "quality_findings = $6, ocr_engine = $7, "
+        "quality_findings = $6, ocr_engine = $7, table_count = $8, "
+        "merged_table_count = $9, "
         "duration_ms = (EXTRACT(EPOCH FROM (now() - started_at)) * 1000)::int "
         "WHERE id = $1",
         job_id,
@@ -212,6 +229,8 @@ async def _process(client: DoclingClient, job) -> None:
         hinweis,
         json.dumps(funde, ensure_ascii=False) if funde else None,
         engine,
+        tabellen,
+        verbunden,
     )
     # Der Verbrauch wurde beim Einstellen mit der geschätzten Seitenzahl gebucht.
     # Hier wird nur noch die Differenz zur tatsächlichen Seitenzahl nachgetragen.
@@ -222,8 +241,10 @@ async def _process(client: DoclingClient, job) -> None:
             job["user_id"],
             delta,
         )
-    log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise, %s Schreibweisen",
-             result["pages"], len(bilder), len(links), geglaettet)
+    log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise, %s Schreibweisen, "
+             "%s/%s Tabellen mit Verbund, %s Ueberschriften, %s Listenpunkte",
+             result["pages"], len(bilder), len(links), geglaettet,
+             verbunden, tabellen, gliederung, eingerueckt)
 
 
 async def _worker_loop(index: int, client: DoclingClient) -> None:
