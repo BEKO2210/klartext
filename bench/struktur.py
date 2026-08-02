@@ -25,6 +25,9 @@ _WEICH = {
     "‘": "'", "’": "'", "‚": "'",
     "–": "-", "—": "-", "‑": "-", "−": "-",
     "…": "...", "×": "x", "·": " ",
+    # Die Texterkennung liest das angekreuzte Kästchen gern als mathematisches
+    # Zeichen. Dasselbe Symbol, anderer Codepunkt — kein Lesefehler.
+    "⊠": "☒", "⊡": "☐", "□": "☐", "■": "☒",
 }
 
 

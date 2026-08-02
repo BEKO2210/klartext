@@ -79,6 +79,124 @@ pruefe("Gliederung: Codebloecke bleiben unberuehrt",
        layout.gliederung_wiederherstellen(zaun) == (zaun, 0))
 
 
+# ------------------------------------------ Gliederung ohne Nummer (Größe)
+
+def kopf(text, hoehe, links=60.0, rechts=300.0, oben=None):
+    oben = hoehe * 100 if oben is None else oben
+    return {"label": "section_header", "text": text,
+            "prov": [{"page_no": 1, "bbox": {"l": links, "r": rechts, "t": oben,
+                                             "b": oben - hoehe,
+                                             "coord_origin": "BOTTOMLEFT"}}]}
+
+
+OHNE_NUMMER = "## Rechnung 2026-0417\n\nText.\n\n## Leistungen\n\n## Zahlungsbedingungen"
+STRUKTUR_KLAR = {"texts": [kopf("Rechnung 2026-0417", 7.19), kopf("Leistungen", 6.07),
+                           kopf("Zahlungsbedingungen", 6.07)]}
+
+neu, anzahl = layout.ueberschriften_nach_groesse(OHNE_NUMMER, STRUKTUR_KLAR)
+pruefe("Größe: Titel bleibt oben, Abschnitte eine Ebene tiefer",
+       "## Rechnung 2026-0417" in neu and "### Leistungen" in neu
+       and "### Zahlungsbedingungen" in neu and anzahl == 2, neu)
+
+# Ein Scan: die Höhen schwanken mit Ober- und Unterlängen, eine Ebene ist
+# daraus nicht ableitbar. Genau dann darf nichts passieren.
+STRUKTUR_SCAN = {"texts": [kopf("Rechnung 2026-0417", 17.82), kopf("Leistungen", 16.98),
+                           kopf("Zahlungsbedingungen", 18.25)]}
+pruefe("Größe: schwankende Scanhöhen aendern nichts",
+       layout.ueberschriften_nach_groesse(OHNE_NUMMER, STRUKTUR_SCAN) == (OHNE_NUMMER, 0))
+
+# Gleiche Größe heißt gleiche Ebene.
+STRUKTUR_GLEICH = {"texts": [kopf("Rechnung 2026-0417", 6.07), kopf("Leistungen", 6.07),
+                             kopf("Zahlungsbedingungen", 6.07)]}
+pruefe("Größe: eine einzige Größe bleibt eine Ebene",
+       layout.ueberschriften_nach_groesse(OHNE_NUMMER, STRUKTUR_GLEICH) == (OHNE_NUMMER, 0))
+
+pruefe("Größe: ohne Struktur passiert nichts",
+       layout.ueberschriften_nach_groesse(OHNE_NUMMER, {}) == (OHNE_NUMMER, 0))
+
+# Steht eine Überschrift nicht in der Struktur, ist die Zuordnung unsicher.
+STRUKTUR_LUECKIG = {"texts": [kopf("Rechnung 2026-0417", 7.19), kopf("Leistungen", 6.07)]}
+pruefe("Größe: fehlende Zuordnung laesst das Dokument in Ruhe",
+       layout.ueberschriften_nach_groesse(OHNE_NUMMER, STRUKTUR_LUECKIG) == (OHNE_NUMMER, 0))
+
+
+# --------------------------------------------------------- Lesereihenfolge
+
+def block(text, links, rechts, oben, unten, marke="text"):
+    return {"label": marke, "text": text,
+            "prov": [{"page_no": 1, "bbox": {"l": links, "r": rechts, "t": oben,
+                                             "b": unten, "coord_origin": "BOTTOMLEFT"}}]}
+
+
+# Zwei Spalten, darunter ein durchgehender Schlussabsatz. Docling haengt die
+# rechte Spalte hinten an — so sieht das Markdown vorher aus.
+SPALTEN_MD = "\n".join([
+    "Einleitung über die volle Breite.", "",
+    "Links oben beginnt der Text.", "",
+    "Links unten geht er weiter.", "",
+    "Schlusswort über die volle Breite.", "",
+    "Rechts oben steht die Fortsetzung.", "",
+    "Rechts unten endet die Spalte.",
+])
+SPALTEN_STRUKTUR = {"texts": [
+    block("Einleitung über die volle Breite.", 60, 520, 750, 740),
+    block("Links oben beginnt der Text.", 60, 280, 700, 620),
+    block("Links unten geht er weiter.", 60, 280, 600, 520),
+    block("Schlusswort über die volle Breite.", 60, 520, 300, 280),
+    block("Rechts oben steht die Fortsetzung.", 310, 530, 700, 620),
+    block("Rechts unten endet die Spalte.", 310, 530, 600, 520),
+]}
+
+neu, verschoben = layout.lesereihenfolge_spalten(SPALTEN_MD, SPALTEN_STRUKTUR)
+reihenfolge = [z for z in neu.split("\n") if z.strip()]
+pruefe("Spalten: erst links, dann rechts, dann der Schlussabsatz",
+       reihenfolge == ["Einleitung über die volle Breite.",
+                       "Links oben beginnt der Text.",
+                       "Links unten geht er weiter.",
+                       "Rechts oben steht die Fortsetzung.",
+                       "Rechts unten endet die Spalte.",
+                       "Schlusswort über die volle Breite."] and verschoben > 0,
+       str(reihenfolge))
+
+# Einspaltig: nichts anfassen.
+EIN_MD = "Erster Absatz.\n\nZweiter Absatz.\n\nDritter Absatz.\n\nVierter Absatz."
+EIN_STRUKTUR = {"texts": [
+    block("Erster Absatz.", 60, 520, 700, 680),
+    block("Zweiter Absatz.", 60, 520, 660, 640),
+    block("Dritter Absatz.", 60, 520, 620, 600),
+    block("Vierter Absatz.", 60, 520, 580, 560),
+]}
+pruefe("Spalten: einspaltiger Satz bleibt unveraendert",
+       layout.lesereihenfolge_spalten(EIN_MD, EIN_STRUKTUR) == (EIN_MD, 0))
+
+# Sobald eine Tabelle im Abschnitt steht, wird nicht sortiert.
+MIT_TABELLE = SPALTEN_MD + "\n\n| A | B |\n|---|---|\n| 1 | 2 |"
+pruefe("Spalten: mit Tabelle im Abschnitt wird nicht umgestellt",
+       layout.lesereihenfolge_spalten(MIT_TABELLE, SPALTEN_STRUKTUR) == (MIT_TABELLE, 0))
+
+
+# ------------------------------------------------------ Getrennte Absaetze
+
+GETRENNT = ("Ohne ihn laufen einzelne Stränge zu warm und andere zu kalt,\n\n"
+            "und die Regelung gleicht das mit einer höheren Vorlauftemperatur aus.")
+neu, anzahl = layout.getrennte_absaetze_verbinden(GETRENNT)
+pruefe("Absätze: am Umbruch zerschnittener Absatz wird verbunden",
+       neu.count("\n\n") == 0 and "zu kalt, und die Regelung" in neu and anzahl == 1, neu)
+
+UEBER_SEITE = ("Der Satz bricht hier ab,\n\n<!-- seitenumbruch -->\n\n"
+               "und geht auf der nächsten Seite weiter.")
+_, anzahl_seite = layout.getrennte_absaetze_verbinden(UEBER_SEITE)
+pruefe("Absätze: auch über den Seitenumbruch hinweg", anzahl_seite == 1, str(anzahl_seite))
+
+VOLLSTAENDIG = "Der erste Satz ist zu Ende.\n\nDer zweite beginnt groß."
+pruefe("Absätze: vollstaendige Saetze bleiben getrennt",
+       layout.getrennte_absaetze_verbinden(VOLLSTAENDIG) == (VOLLSTAENDIG, 0))
+
+MIT_KOPF = "Der Satz bricht ab,\n\n## Überschrift\n\nund hier geht es klein weiter."
+pruefe("Absätze: über eine Überschrift hinweg wird nicht verbunden",
+       layout.getrennte_absaetze_verbinden(MIT_KOPF) == (MIT_KOPF, 0))
+
+
 # ----------------------------------------------------------------- Tabellen
 
 def zelle(zeile, spalte, text, hoch=1, breit=1, kopf=False):

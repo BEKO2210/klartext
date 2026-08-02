@@ -110,9 +110,16 @@ im Markdown, die JSON-Ausgabe wird nicht angefasst.
 
 | Verlust | Was passiert | Regel |
 |---|---|---|
-| Gliederungstiefe | Das Layoutmodell erkennt Überschriften, aber keine Ebenen: `1`, `1.1` und `1.1.1` kommen alle als `##` heraus | Ebene aus der Nummer der Vorlage herleiten (`1` → `##`, `1.1` → `###`). Der Text bleibt Zeichen für Zeichen stehen |
+| Gliederungstiefe (nummeriert) | Das Layoutmodell erkennt Überschriften, aber keine Ebenen: `1`, `1.1` und `1.1.1` kommen alle als `##` heraus | Ebene aus der Nummer der Vorlage herleiten (`1` → `##`, `1.1` → `###`). Der Text bleibt Zeichen für Zeichen stehen |
+| Gliederungstiefe (ohne Nummer) | Titel und Abschnitte landen auf derselben Ebene | Ebene aus der Zeilenhöhe (`texts[].prov[].bbox`) ableiten: Gruppen bilden, nur bei klarer Trennung anwenden. Auf Scans misst die Höhe Ober- und Unterlängen statt der Schriftgröße — dort greift die Regel nie |
 | Verbundene Zellen | Markdown kennt kein `rowspan`; Docling füllt jede überdeckte Rasterstelle mit demselben Text — aus einer Zelle über vier Spalten werden vier gleiche Zellen | Tabellen **mit** Verbund werden als HTML-Tabelle (`rowspan`/`colspan`, `thead`/`tbody`) ins Markdown geschrieben. Tabellen ohne Verbund bleiben im Markdown-Raster |
+| Lesereihenfolge bei Spaltensatz | Die rechte Spalte hängt hinter allem anderen | Spaltenbänder über die Seitenmitte bestimmen, an durchgehenden Blöcken trennen, die Zone mit Text in **beiden** Spalten spaltenweise sortieren. Nur bei reinem Fließtext im Abschnitt |
+| Zerschnittene Absätze | Spalten- oder Seitenumbruch trennt einen Satz | Wieder zusammenfügen, wenn der erste Teil ohne Satzzeichen endet und der zweite klein beginnt |
 | Verschachtelte Listen | Eine Unterliste („a., b.") landet auf der Ebene der Hauptliste | Einrücken, wenn ein lückenloser Buchstabenblock zwischen zwei Zifferpunkten steht |
+
+Die Kette selbst steht in `nachbearbeitung.py` — dieselbe Funktion nutzen der
+Worker und der Messstand in `bench/`. Nur so ist sicher, dass gemessen wird,
+was ausgeliefert wird.
 
 Jede Regel prüft sich selbst und lässt das Dokument unverändert, sobald die
 Belege nicht reichen: Überschriften nur ab drei nummerierten Treffern, bei nur

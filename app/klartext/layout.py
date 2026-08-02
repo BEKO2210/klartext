@@ -1,14 +1,21 @@
-"""Layouttreue: Gliederung und Tabellenstruktur der Vorlage erhalten.
+"""Layouttreue: Gliederung, Tabellen und Lesereihenfolge der Vorlage erhalten.
 
-Drei Dinge gehen auf dem Weg nach Markdown verloren, obwohl die Vorlage sie
+Fuenf Dinge gehen auf dem Weg nach Markdown verloren, obwohl die Vorlage sie
 klar hergibt:
 
-1. **Die Gliederungstiefe.** Das Layoutmodell erkennt Ueberschriften, aber keine
-   Ebenen — "1", "1.1" und "1.1.1" kommen alle als ``##`` heraus. Die Nummer
-   steht im Text und nennt die Ebene selbst; daraus wird sie zurueckgerechnet.
-   Die Nummer bleibt dabei unveraendert stehen, sie gehoert zur Vorlage.
+1. **Die Gliederungstiefe bei nummerierten Ueberschriften.** Das Layoutmodell
+   erkennt Ueberschriften, aber keine Ebenen — "1", "1.1" und "1.1.1" kommen
+   alle als ``##`` heraus. Die Nummer steht im Text und nennt die Ebene selbst;
+   daraus wird sie zurueckgerechnet. Die Nummer bleibt dabei unveraendert
+   stehen, sie gehoert zur Vorlage.
 
-2. **Verbundene Zellen.** Markdown kennt kein ``rowspan``. Docling fuellt jede
+2. **Die Gliederungstiefe ohne Nummern.** Titel, darunter Abschnitte: Ohne
+   Nummer bleibt alles auf einer Ebene. Dann sagt die Schriftgroesse die Ebene
+   — sie steckt als Zeilenhoehe in der Struktur. Nur wenn die Groessen sich
+   klar trennen; bei einem Scan schwanken sie mit Ober- und Unterlaengen und
+   sagen nichts, dort bleibt alles unveraendert.
+
+3. **Verbundene Zellen.** Markdown kennt kein ``rowspan``. Docling fuellt jede
    ueberdeckte Rasterstelle mit demselben Text — aus einer Zelle "Zwischensumme"
    ueber vier Spalten werden vier gleiche Zellen, aus einer zweizeiligen
    Kopfzelle zwei. Genau das macht Rechnungen und Formulare unbrauchbar.
@@ -17,7 +24,13 @@ klar hergibt:
    bleibt erhalten. Tabellen ohne verbundene Zellen bleiben unveraendert im
    gewohnten Markdown-Raster.
 
-3. **Verschachtelte Listen.** Eine Unterliste ("a., b.") landet auf derselben
+4. **Die Lesereihenfolge bei Spaltensatz.** Bei zwei Spalten haengt das
+   Layoutmodell die rechte Spalte gern hinter alles andere. Aus der Lage der
+   Bloecke auf der Seite laesst sich die Reihenfolge zurueckgewinnen — und ein
+   Absatz, den der Spalten- oder Seitenumbruch zerschnitten hat, wieder
+   zusammensetzen.
+
+5. **Verschachtelte Listen.** Eine Unterliste ("a., b.") landet auf derselben
    Ebene wie die Hauptliste. Sie wird nur dann eingerueckt, wenn die Vorlage
    selbst es zweifelsfrei zeigt: Buchstabenmarken zwischen zwei Zifferpunkten.
 
@@ -102,6 +115,139 @@ def gliederung_wiederherstellen(markdown: str) -> tuple[str, int]:
     geaendert = 0
     for i, stufe, _, tiefe in treffer:
         neu = min(6, basis + tiefe - kleinste)
+        if neu == stufe:
+            continue
+        zeilen[i] = "#" * neu + zeilen[i][stufe:]
+        geaendert += 1
+    return "\n".join(zeilen), geaendert
+
+
+# ------------------------------------- Gliederung ohne Nummern (Schriftgröße)
+
+# Innerhalb einer Ebene darf die Zeilenhöhe so weit streuen ...
+_STUFE_STREUUNG = 0.02
+# ... und zwischen zwei Ebenen muss mindestens so viel Abstand liegen.
+_STUFE_ABSTAND = 0.08
+# Mehr Ebenen als das leitet niemand mehr aus einer Schriftgröße ab.
+_STUFE_HOECHSTZAHL = 4
+# Zwei Überschriften reichen hier — anders als bei den Nummern, wo drei
+# Treffer nötig sind, damit aus Zufallszahlen keine Gliederung wird. Die
+# Absicherung ist bei dieser Regel die Trennschärfe, nicht die Menge: ein
+# Größensprung von acht Prozent ist eine Stufe der Vorlage, kein Rauschen.
+_MINDEST_FUER_GROESSE = 2
+
+
+def _kopfhoehen(struktur: dict | None) -> dict[str, float]:
+    """Zeilenhöhe je Überschrift aus der Docling-Struktur.
+
+    Die Höhe der Bounding-Box ist das einzige Maß für die Schriftgröße, das die
+    Struktur hergibt. Bei einer Textebene ist sie exakt; bei einem Scan misst
+    sie die Ausdehnung der erkannten Buchstaben und schwankt mit Ober- und
+    Unterlängen — dort trägt sie keine Aussage. Genau dafür sind die
+    Trennschärfe-Prüfungen unten da.
+    """
+    hoehen: dict[str, float] = {}
+    if not isinstance(struktur, dict):
+        return hoehen
+    for eintrag in (struktur.get("texts") or []):
+        if not isinstance(eintrag, dict) or eintrag.get("label") not in ("section_header", "title"):
+            continue
+        text = re.sub(r"\s+", " ", (eintrag.get("text") or "")).strip().lower()
+        if not text:
+            continue
+        for stelle in (eintrag.get("prov") or []):
+            kasten = (stelle or {}).get("bbox") or {}
+            oben, unten = kasten.get("t"), kasten.get("b")
+            if isinstance(oben, (int, float)) and isinstance(unten, (int, float)):
+                hoehe = abs(oben - unten)
+                if hoehe > 0:
+                    hoehen[text] = max(hoehen.get(text, 0.0), hoehe)
+                break
+    return hoehen
+
+
+def _gruppieren(hoehen: list[float]) -> list[list[float]] | None:
+    """Teilt die Höhen in Ebenen — oder gibt nichts zurück, wenn es nicht trägt.
+
+    Getrennt wird an jeder Lücke, die größer ist als der erlaubte Abstand.
+    Danach muss jede Gruppe in sich eng sein: eine Gruppe, die selbst weit
+    streut, ist keine Ebene, sondern Zufall.
+    """
+    sortiert = sorted(hoehen, reverse=True)
+    gruppen: list[list[float]] = [[sortiert[0]]]
+    for hoehe in sortiert[1:]:
+        vorherige = gruppen[-1][-1]
+        if (vorherige - hoehe) / vorherige > _STUFE_ABSTAND:
+            gruppen.append([hoehe])
+        else:
+            gruppen[-1].append(hoehe)
+
+    if len(gruppen) < 2 or len(gruppen) > _STUFE_HOECHSTZAHL:
+        return None
+    for gruppe in gruppen:
+        if (gruppe[0] - gruppe[-1]) / gruppe[0] > _STUFE_STREUUNG:
+            return None
+    return gruppen
+
+
+def ueberschriften_nach_groesse(markdown: str, struktur: dict | None) -> tuple[str, int]:
+    """Leitet die Gliederungsebene aus der Schriftgröße ab.
+
+    Für Dokumente ohne Gliederungsnummern — Titel, darunter Abschnitte. Ohne
+    diesen Schritt steht dort jede Überschrift auf derselben Stufe, weil das
+    Layoutmodell zwar Überschriften erkennt, aber keine Ebenen vergibt.
+
+    Es wird nur eingegriffen, wenn die Größen sich klar in Ebenen trennen: jede
+    Ebene in sich eng, zwischen den Ebenen ein deutlicher Sprung. Bei einem Scan
+    ist das nie der Fall — dort bleibt alles, wie es ist, statt zu raten.
+    """
+    hoehen = _kopfhoehen(struktur)
+    if not hoehen:
+        return markdown, 0
+
+    zeilen = markdown.split("\n")
+    im_zaun = False
+    treffer: list[tuple[int, int, float]] = []   # Zeile, Stufe, Höhe
+    stufen: set[int] = set()
+    ohne_hoehe = 0
+
+    for i, zeile in enumerate(zeilen):
+        if zeile.lstrip().startswith(_ZAUN):
+            im_zaun = not im_zaun
+            continue
+        if im_zaun:
+            continue
+        kopf = _UEBERSCHRIFT.match(zeile)
+        if not kopf:
+            continue
+        stufen.add(len(kopf.group(1)))
+        text = re.sub(r"\s+", " ", kopf.group(2)).strip().lower()
+        hoehe = hoehen.get(text)
+        if hoehe is None:
+            ohne_hoehe += 1
+            continue
+        treffer.append((i, len(kopf.group(1)), hoehe))
+
+    if len(treffer) < _MINDEST_FUER_GROESSE or len(stufen) != 1:
+        return markdown, 0
+    # Wenn ein nennenswerter Teil der Überschriften in der Struktur nicht
+    # wiederzufinden ist, stimmt die Zuordnung nicht — dann lieber nichts tun.
+    if ohne_hoehe * 4 > len(treffer):
+        return markdown, 0
+
+    gruppen = _gruppieren([h for *_, h in treffer])
+    if gruppen is None:
+        return markdown, 0
+
+    ebene_von_hoehe: dict[float, int] = {}
+    for nummer, gruppe in enumerate(gruppen):
+        for hoehe in gruppe:
+            ebene_von_hoehe[hoehe] = nummer
+
+    basis = stufen.pop()
+    geaendert = 0
+    for i, stufe, hoehe in treffer:
+        neu = min(6, basis + ebene_von_hoehe[hoehe])
         if neu == stufe:
             continue
         zeilen[i] = "#" * neu + zeilen[i][stufe:]
@@ -287,6 +433,269 @@ def verbundene_tabellen_erhalten(markdown: str, struktur: dict | None) -> tuple[
     for anfang, ende, html in reversed(ersetzungen):
         zeilen[anfang:ende] = html.split("\n")
     return "\n".join(zeilen), len(ersetzungen)
+
+
+# ------------------------------------------------- Lesereihenfolge in Spalten
+
+_SEITENMARKE = "<!-- seitenumbruch -->"
+# So viele Blöcke muss jede Spalte tragen, damit von Spaltensatz die Rede ist.
+_MINDEST_JE_SPALTE = 2
+
+
+def _textbloecke(struktur: dict | None) -> dict[str, dict]:
+    """Fließtext und Überschriften mit ihrer Lage auf der Seite."""
+    bloecke: dict[str, dict] = {}
+    if not isinstance(struktur, dict):
+        return bloecke
+    for eintrag in (struktur.get("texts") or []):
+        if not isinstance(eintrag, dict):
+            continue
+        if eintrag.get("label") not in ("text", "section_header", "title"):
+            continue
+        text = re.sub(r"\s+", " ", (eintrag.get("text") or "")).strip().lower()
+        if not text or text in bloecke:
+            continue
+        stelle = (eintrag.get("prov") or [{}])[0] or {}
+        kasten = stelle.get("bbox") or {}
+        try:
+            links, rechts = float(kasten["l"]), float(kasten["r"])
+            oben, unten = float(kasten["t"]), float(kasten["b"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        # Docling liefert je nach Quelle den Ursprung oben oder unten links.
+        # Wir rechnen einheitlich "größer heißt weiter oben".
+        if str(kasten.get("coord_origin", "")).upper() == "TOPLEFT":
+            oben, unten = -oben, -unten
+        bloecke[text] = {"l": links, "r": rechts, "t": max(oben, unten),
+                         "b": min(oben, unten)}
+    return bloecke
+
+
+def _spaltenfolge(bloecke: list[dict]) -> list[int] | None:
+    """Sortiert die Blöcke einer Seite spaltenweise.
+
+    Vorgehen wie beim Lesen: Ein Block, der über die Seitenmitte reicht, gilt
+    als durchgehend und schließt die offenen Spalten ab. Alles andere sammelt
+    sich in seiner Spalte, bis eine Spalte endet — dann wird von links nach
+    rechts ausgegeben.
+
+    Gibt nichts zurück, wenn die Seite gar nicht zweispaltig gesetzt ist.
+    """
+    if len(bloecke) < 4:
+        return None
+    mitte = (min(b["l"] for b in bloecke) + max(b["r"] for b in bloecke)) / 2
+
+    def band(block: dict) -> str:
+        if block["l"] < mitte < block["r"]:
+            return "durch"
+        return "links" if block["r"] <= mitte else "rechts"
+
+    if sum(1 for b in bloecke if band(b) == "links") < _MINDEST_JE_SPALTE:
+        return None
+    if sum(1 for b in bloecke if band(b) == "rechts") < _MINDEST_JE_SPALTE:
+        return None
+
+    # Von oben nach unten; bei gleicher Höhe zuerst die linke Spalte.
+    folge = sorted(range(len(bloecke)), key=lambda i: (-bloecke[i]["t"], bloecke[i]["l"]))
+
+    def zone_ordnen(teil: list[int]) -> list[int]:
+        """Ordnet einen Abschnitt zwischen zwei durchgehenden Blöcken.
+
+        Die eigentliche Spaltenzone ist der Bereich, in dem **beide** Spalten
+        Text tragen. Was darüber oder darunter steht, gehört nicht dazu — etwa
+        eine Zwischenüberschrift unterhalb beider Spalten, die sonst mitten in
+        den Spaltentext geriete.
+        """
+        links = [i for i in teil if band(bloecke[i]) == "links"]
+        rechts = [i for i in teil if band(bloecke[i]) == "rechts"]
+        if not links or not rechts:
+            return teil
+
+        oben = min(max(bloecke[i]["t"] for i in links),
+                   max(bloecke[i]["t"] for i in rechts))
+        unten = max(min(bloecke[i]["b"] for i in links),
+                    min(bloecke[i]["b"] for i in rechts))
+        if unten >= oben:
+            # Die Spalten überlappen sich gar nicht — dann steht die eine unter
+            # der anderen, und das ist kein Spaltensatz.
+            return teil
+
+        darueber = [i for i in teil if bloecke[i]["b"] >= oben]
+        darunter = [i for i in teil if bloecke[i]["t"] <= unten]
+        kern = [i for i in teil if i not in darueber and i not in darunter]
+        return (darueber
+                + [i for i in kern if band(bloecke[i]) == "links"]
+                + [i for i in kern if band(bloecke[i]) == "rechts"]
+                + darunter)
+
+    ergebnis: list[int] = []
+    abschnitt: list[int] = []
+    for i in folge:
+        if band(bloecke[i]) == "durch":
+            ergebnis.extend(zone_ordnen(abschnitt))
+            abschnitt = []
+            ergebnis.append(i)
+            continue
+        abschnitt.append(i)
+    ergebnis.extend(zone_ordnen(abschnitt))
+    return ergebnis
+
+
+def _bloecke_zerlegen(zeilen: list[str]) -> list[dict]:
+    """Zerlegt Markdown in Blöcke: Überschrift, Absatz, Tabelle, Liste, Sonstiges."""
+    bloecke: list[dict] = []
+    i = 0
+    im_zaun = False
+    while i < len(zeilen):
+        zeile = zeilen[i]
+        if zeile.lstrip().startswith(_ZAUN):
+            im_zaun = not im_zaun
+            bloecke.append({"art": "sonst", "zeilen": [zeile]})
+            i += 1
+            continue
+        if im_zaun:
+            bloecke.append({"art": "sonst", "zeilen": [zeile]})
+            i += 1
+            continue
+        if not zeile.strip():
+            bloecke.append({"art": "leer", "zeilen": [zeile]})
+            i += 1
+            continue
+        if zeile.strip().startswith("<!--"):
+            # Seitenmarke und andere Kommentare sind keine Absätze; sie dürfen
+            # zwei zusammengehörende Textteile nicht trennen.
+            bloecke.append({"art": "sonst", "zeilen": [zeile]})
+            i += 1
+            continue
+        if zeile.lstrip().startswith("<table"):
+            block = []
+            while i < len(zeilen):
+                block.append(zeilen[i])
+                if "</table>" in zeilen[i]:
+                    i += 1
+                    break
+                i += 1
+            bloecke.append({"art": "tabelle", "zeilen": block})
+            continue
+        if zeile.startswith("|"):
+            block = []
+            while i < len(zeilen) and zeilen[i].startswith("|"):
+                block.append(zeilen[i])
+                i += 1
+            bloecke.append({"art": "tabelle", "zeilen": block})
+            continue
+        kopf = _UEBERSCHRIFT.match(zeile)
+        if kopf:
+            bloecke.append({"art": "ueberschrift", "zeilen": [zeile],
+                            "text": re.sub(r"\s+", " ", kopf.group(2)).strip().lower()})
+            i += 1
+            continue
+        if _ZIFFERNPUNKT.match(zeile) or zeile.lstrip().startswith(("- ", "* ", "+ ")):
+            block = []
+            while i < len(zeilen) and zeilen[i].strip():
+                block.append(zeilen[i])
+                i += 1
+            bloecke.append({"art": "liste", "zeilen": block})
+            continue
+        block = []
+        while i < len(zeilen) and zeilen[i].strip() and not zeilen[i].startswith("|"):
+            block.append(zeilen[i])
+            i += 1
+        text = re.sub(r"\s+", " ", " ".join(block)).strip().lower()
+        bloecke.append({"art": "absatz", "zeilen": block, "text": text})
+    return bloecke
+
+
+def lesereihenfolge_spalten(markdown: str, struktur: dict | None) -> tuple[str, int]:
+    """Bringt zweispaltig gesetzte Seiten in die Reihenfolge, in der man liest.
+
+    Bei zwei Spalten hängt das Layoutmodell die rechte Spalte gern hinter alles
+    andere, statt sie an der richtigen Stelle einzufügen. Aus der Lage der
+    Blöcke auf der Seite lässt sich die Reihenfolge zurückgewinnen.
+
+    Angefasst wird nur, was sich zweifelsfrei zuordnen lässt: Seiten mit
+    Tabellen, Listen oder Bildern bleiben unberührt — dort ist der mögliche
+    Schaden größer als der Gewinn.
+    """
+    lage = _textbloecke(struktur)
+    if not lage:
+        return markdown, 0
+
+    abschnitte = markdown.split(_SEITENMARKE)
+    verschoben = 0
+    neue_abschnitte: list[str] = []
+
+    for abschnitt in abschnitte:
+        bloecke = _bloecke_zerlegen(abschnitt.split("\n"))
+        inhalt = [b for b in bloecke if b["art"] not in ("leer", "sonst")]
+        # Nur reiner Fließtext: sobald Tabellen oder Listen im Spiel sind,
+        # müsste ihre Lage mitgerechnet werden — dafür ist die Zuordnung zu
+        # unsicher.
+        if not inhalt or any(b["art"] not in ("absatz", "ueberschrift") for b in inhalt):
+            neue_abschnitte.append(abschnitt)
+            continue
+        stellen = [lage.get(b["text"]) for b in inhalt]
+        if any(s is None for s in stellen):
+            neue_abschnitte.append(abschnitt)
+            continue
+
+        folge = _spaltenfolge([s for s in stellen if s])
+        if folge is None or folge == list(range(len(inhalt))):
+            neue_abschnitte.append(abschnitt)
+            continue
+
+        sortiert = [inhalt[i] for i in folge]
+        verschoben += sum(1 for alt, neu in zip(inhalt, sortiert) if alt is not neu)
+
+        # Der Abschnitt wird aus den sortierten Blöcken neu gesetzt; die
+        # Leerzeilen dazwischen stellt Markdown ohnehin selbst her.
+        text = "\n\n".join("\n".join(b["zeilen"]) for b in sortiert)
+        neue_abschnitte.append(f"\n{text}\n")
+
+    if not verschoben:
+        return markdown, 0
+    return _SEITENMARKE.join(neue_abschnitte), verschoben
+
+
+# Ein Absatz, der am Spalten- oder Seitenumbruch zerschnitten wurde: der erste
+# Teil endet ohne Satzzeichen, der zweite beginnt klein. Im Deutschen wie im
+# Englischen faengt kein Satz mit einem Kleinbuchstaben an — deshalb traegt
+# dieses Merkmal.
+_ENDET_OFFEN = re.compile(r"[\w,;–-]$")
+_BEGINNT_KLEIN = re.compile(r"^[a-zäöüß]")
+
+
+def getrennte_absaetze_verbinden(markdown: str) -> tuple[str, int]:
+    """Fügt Absätze wieder zusammen, die ein Umbruch zerschnitten hat."""
+    zeilen = markdown.split("\n")
+    bloecke = _bloecke_zerlegen(zeilen)
+    ergebnis: list[dict] = []
+    verbunden = 0
+
+    for block in bloecke:
+        if (block["art"] == "absatz" and ergebnis):
+            # Zwischen den beiden dürfen nur Leerzeilen oder eine Seitenmarke
+            # stehen — sonst gehören sie nicht zusammen.
+            zwischen = []
+            j = len(ergebnis) - 1
+            while j >= 0 and ergebnis[j]["art"] in ("leer", "sonst"):
+                zwischen.append(ergebnis[j])
+                j -= 1
+            harmlos = all(b["art"] == "leer"
+                          or b["zeilen"] == [_SEITENMARKE] for b in zwischen)
+            if (j >= 0 and ergebnis[j]["art"] == "absatz" and harmlos
+                    and _ENDET_OFFEN.search(ergebnis[j]["zeilen"][-1].rstrip())
+                    and _BEGINNT_KLEIN.match(block["zeilen"][0].lstrip())):
+                ergebnis[j]["zeilen"][-1] = (ergebnis[j]["zeilen"][-1].rstrip() + " "
+                                             + block["zeilen"][0].lstrip())
+                ergebnis[j]["zeilen"].extend(block["zeilen"][1:])
+                verbunden += 1
+                continue
+        ergebnis.append(block)
+
+    if not verbunden:
+        return markdown, 0
+    return "\n".join(zeile for block in ergebnis for zeile in block["zeilen"]), verbunden
 
 
 # -------------------------------------------------------------------- Listen

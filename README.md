@@ -13,7 +13,7 @@ Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
 [![Status](https://img.shields.io/badge/Status-im%20Betrieb-15803D)](https://klartext.it-handwerk-stuttgart.de)
-[![Live](https://img.shields.io/badge/Live-v1.2.0-1E3A5F)](CHANGELOG.md)
+[![Live](https://img.shields.io/badge/Live-v1.3.0-1E3A5F)](CHANGELOG.md)
 [![Sprachen](https://img.shields.io/badge/Sprachen-English%20%C2%B7%20Deutsch-15803D)](CHANGELOG.md)
 
 [Live ansehen](https://klartext.it-handwerk-stuttgart.de) ·
@@ -58,10 +58,13 @@ HTML, MD**.
 
 Ausgabe je Dokument: `originalname.md` und `originalname.json`.
 
-Markdown kann bestimmte Layoutmerkmale technisch nicht abbilden — mehrspaltige
-Seiten, beliebig verbundene Tabellenzellen, exakte Positionen. Die JSON-Ausgabe ist
-deshalb die strukturtreuere Variante. Ein pixelgenaues Abbild des Originals ist
-Markdown nicht und kann es auch nicht sein; das wird in der Oberfläche auch so gesagt.
+Markdown kann bestimmte Layoutmerkmale nicht direkt abbilden. Klartext arbeitet
+dagegen an: verbundene Tabellenzellen bleiben als HTML-Tabelle erhalten,
+zweispaltige Seiten werden in Lesereihenfolge gebracht, Überschriftenebenen aus
+Nummer oder Schriftgröße wiederhergestellt. Exakte Positionen bildet Markdown
+nicht ab — die JSON-Ausgabe bleibt die strukturtreuere Variante. Ein
+pixelgenaues Abbild des Originals ist Markdown nicht und kann es auch nicht
+sein; das wird in der Oberfläche auch so gesagt.
 
 ## Texterkennung
 
@@ -215,10 +218,24 @@ enthält die Zellstruktur in beiden Fällen vollständig. Abschaltbar mit
 **Die Gliederung** erkennt das Layoutmodell nur als „hier steht eine
 Überschrift", nicht als Ebene — `1`, `1.1` und `1.1.1` kämen alle als `##`
 heraus. Die Ebene wird aus der Nummer der Vorlage hergeleitet, die Nummer selbst
-bleibt Zeichen für Zeichen stehen. Unterlisten, die dabei flach geworden sind,
-werden eingerückt, wenn ein lückenloser Buchstabenblock zwischen zwei
-Zifferpunkten steht. Beides prüft sich selbst und lässt das Dokument in Ruhe,
-sobald die Belege nicht reichen.
+bleibt Zeichen für Zeichen stehen. Hat ein Dokument keine Nummern — Titel,
+darunter Abschnitte —, sagt die Schriftgröße die Ebene; sie steckt als
+Zeilenhöhe in der Struktur. Auf Scans schwankt dieses Maß mit Ober- und
+Unterlängen und trägt nichts: dort bleibt die Gliederung unangetastet, statt
+geraten zu werden. Unterlisten, die flach geworden sind, werden eingerückt,
+wenn ein lückenloser Buchstabenblock zwischen zwei Zifferpunkten steht.
+
+**Die Lesereihenfolge** stimmt bei zweispaltigem Satz nicht: die rechte Spalte
+hängt hinter allem anderen. Aus der Lage der Blöcke auf der Seite wird sie
+zurückgewonnen — sortiert wird der Bereich, in dem beide Spalten Text tragen,
+Zwischenüberschriften darunter bleiben dahinter. Absätze, die ein Spalten- oder
+Seitenumbruch zerschnitten hat, werden wieder zusammengefügt: erkennbar daran,
+dass der erste Teil ohne Satzzeichen endet und der zweite klein beginnt. Seiten
+mit Tabellen, Listen oder Bildern werden nicht umgestellt — dort wäre der
+mögliche Schaden größer als der Gewinn.
+
+Gemessen im Messstand (siehe unten): Überschriftenebenen 0,395 → 1,000,
+Lesereihenfolge 0,976 → 1,000, beides bei digitalen Vorlagen.
 
 **Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
 in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie
@@ -229,11 +246,15 @@ weiterhin jede Fundstelle.
 ## Grenzen, die bleiben
 
 Eine PDF beschreibt, wie etwas aussieht, nicht wie es aufgebaut ist. Kapitel,
-Tabellen und Lesereihenfolge müssen erschlossen werden. Auf mehrspaltigen oder
-grafiklastigen Seiten stimmt die Reihenfolge deshalb nicht immer, und
-Tabellenzellen können falsch zugeordnet werden. Das ist eine Grenze des
-Layout-Modells, keine Einstellungssache. Eine verlustfreie 1:1-Umwandlung
-beliebiger PDFs leistet kein Werkzeug.
+Tabellen und Lesereihenfolge müssen erschlossen werden. Zweispaltiger Fließtext
+wird inzwischen in Lesereihenfolge gebracht; auf grafiklastigen oder unruhig
+gesetzten Seiten kann die Reihenfolge weiterhin abweichen, und Tabellenzellen
+können falsch zugeordnet werden — bei mehrstufigen Tabellenköpfen setzt das
+Tabellenmodell Kopfzellen gelegentlich um eine Spalte versetzt. Das ist eine
+Grenze des Layout-Modells, keine Einstellungssache. Auf Scans gehen Kreuzchen
+in Formularen verloren (die Texterkennung liest sie nicht zuverlässig), und
+Überschriftenebenen ohne Nummern bleiben dort flach, statt geraten zu werden.
+Eine verlustfreie 1:1-Umwandlung beliebiger PDFs leistet kein Werkzeug.
 
 ## Verlustarm heißt hier
 
