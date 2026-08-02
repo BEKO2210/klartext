@@ -19,3 +19,6 @@ brand/explorations/
 __pycache__/
 *.pyc
 *.log
+
+# Messstand: die gebauten Prüfdateien entstehen aus den Quellen neu
+bench/dokumente/

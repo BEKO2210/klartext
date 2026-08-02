@@ -1,0 +1,172 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Prüfbericht zur wiederkehrenden Prüfung"
+  },
+  {
+   "stufe": 2,
+   "text": "1 Auftrag"
+  },
+  {
+   "stufe": 2,
+   "text": "2 Vorgefundener Zustand"
+  },
+  {
+   "stufe": 2,
+   "text": "3 Festgestellte Mängel"
+  },
+  {
+   "stufe": 2,
+   "text": "4 Messwerte"
+  },
+  {
+   "stufe": 2,
+   "text": "5 Bewertung"
+  },
+  {
+   "stufe": 2,
+   "text": "6 Angaben zur Prüfstelle"
+  },
+  {
+   "stufe": 2,
+   "text": "7 Anhang: Prüfumfang"
+  },
+  {
+   "stufe": 2,
+   "text": "8 Hinweise für den Betreiber"
+  },
+  {
+   "stufe": 2,
+   "text": "9 Schlussbemerkung"
+  }
+ ],
+ "absaetze": [
+  "Geprüfte Anlage: Aufzugsanlage im Objekt Königstraße 51, 70173 Stuttgart. Prüfdatum 09.06.2026.",
+  "Die Prüfstelle wurde mit der wiederkehrenden Prüfung nach Betriebssicherheitsverordnung beauftragt. Grundlage sind die Prüfgrundsätze in der Fassung vom Januar 2025.",
+  "Der Umfang der Prüfung wurde vor Beginn mit dem Betreiber abgestimmt und schriftlich festgehalten. Abweichungen vom Regelumfang bestanden nicht.",
+  "Die Anlage befand sich in einem gepflegten Zustand. Das Fahrkorbdach war frei von Ablagerungen, die Notbeleuchtung funktionsfähig, die Notrufeinrichtung im Test erreichbar.",
+  "Die Wartungsnachweise lagen vollständig vor. Der letzte Regelbesuch datiert vom 12.05.2026 und wurde durch die Firma Aufzugsdienst Bühler ausgeführt.",
+  "Bei der Prüfung wurden zwei geringfügige Mängel festgestellt, die den sicheren Betrieb nicht unmittelbar beeinträchtigen.",
+  "Sicherheitstechnisch bedeutsame Mängel wurden nicht festgestellt. Eine Nachprüfung ist nicht erforderlich.",
+  "Die Fahrgeschwindigkeit betrug im Aufwärtsbetrieb 1,02 m/s und im Abwärtsbetrieb 1,00 m/s. Der Bündigkeitsfehler lag an allen Haltestellen unter 6 mm.",
+  "Der Isolationswiderstand der Steuerleitungen wurde mit 24 MOhm gemessen. Der Auslösestrom der Fehlerstromschutzeinrichtung lag bei 22 mA.",
+  "Die Anlage entspricht mit Ausnahme der genannten geringfügigen Mängel den Anforderungen. Der Weiterbetrieb ist zulässig.",
+  "Die nächste wiederkehrende Prüfung ist bis spätestens 09.06.2028 zu veranlassen. Die Zwischenprüfung ist bis 09.12.2027 fällig.",
+  "Prüfstelle Süd GmbH, Akkreditierung D-ZP-24710-01-00, Sachverständiger Dipl.-Ing. Rainer Kolb.",
+  "Der Bericht umfasst fünf Seiten und ist ohne Unterschrift gültig, sofern er elektronisch übermittelt wurde.",
+  "Geprüft wurden Trag- und Zugmittel, Fangvorrichtung, Geschwindigkeitsbegrenzer, Puffer, Türverriegelungen, Steuerung, Notruf und Notbefreiung.",
+  "Die Prüfung der elektrischen Anlage beschränkte sich auf die für den Aufzug erforderlichen Teile bis zur Hauptverteilung.",
+  "Der Betreiber hat die Prüfbescheinigung im Triebwerksraum auszuhängen. Die Notrufeinrichtung ist monatlich auf Funktion zu prüfen.",
+  "Änderungen an der Anlage sind der Prüfstelle vor Inbetriebnahme anzuzeigen.",
+  "Der vorliegende Bericht bezieht sich ausschließlich auf den am Prüftag vorgefundenen Zustand.",
+  "Für Schäden, die nach dem Prüftag durch Verschleiß oder unsachgemäße Bedienung entstehen, wird keine Haftung übernommen."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 3,
+   "spalten": 4,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Nr."
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Feststellung"
+    },
+    {
+     "z": 0,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Einstufung"
+    },
+    {
+     "z": 0,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Frist"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Türlaufschiene im Erdgeschoss verschmutzt"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "geringfügig"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3 Monate"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Beschriftung der Hauptschalter unvollständig"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "geringfügig"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3 Monate"
+    }
+   ]
+  }
+ ],
+ "volltext": "Prüfbericht zur wiederkehrenden Prüfung Geprüfte Anlage: Aufzugsanlage im Objekt Königstraße 51, 70173 Stuttgart. Prüfdatum 09.06.2026. 1 Auftrag Die Prüfstelle wurde mit der wiederkehrenden Prüfung nach Betriebssicherheitsverordnung beauftragt. Grundlage sind die Prüfgrundsätze in der Fassung vom Januar 2025. Der Umfang der Prüfung wurde vor Beginn mit dem Betreiber abgestimmt und schriftlich festgehalten. Abweichungen vom Regelumfang bestanden nicht. 2 Vorgefundener Zustand Die Anlage befand sich in einem gepflegten Zustand. Das Fahrkorbdach war frei von Ablagerungen, die Notbeleuchtung funktionsfähig, die Notrufeinrichtung im Test erreichbar. Die Wartungsnachweise lagen vollständig vor. Der letzte Regelbesuch datiert vom 12.05.2026 und wurde durch die Firma Aufzugsdienst Bühler ausgeführt. 3 Festgestellte Mängel Bei der Prüfung wurden zwei geringfügige Mängel festgestellt, die den sicheren Betrieb nicht unmittelbar beeinträchtigen. Nr. Feststellung Einstufung Frist 1 Türlaufschiene im Erdgeschoss verschmutzt geringfügig 3 Monate 2 Beschriftung der Hauptschalter unvollständig geringfügig 3 Monate Sicherheitstechnisch bedeutsame Mängel wurden nicht festgestellt. Eine Nachprüfung ist nicht erforderlich. 4 Messwerte Die Fahrgeschwindigkeit betrug im Aufwärtsbetrieb 1,02 m/s und im Abwärtsbetrieb 1,00 m/s. Der Bündigkeitsfehler lag an allen Haltestellen unter 6 mm. Der Isolationswiderstand der Steuerleitungen wurde mit 24 MOhm gemessen. Der Auslösestrom der Fehlerstromschutzeinrichtung lag bei 22 mA. 5 Bewertung Die Anlage entspricht mit Ausnahme der genannten geringfügigen Mängel den Anforderungen. Der Weiterbetrieb ist zulässig. Die nächste wiederkehrende Prüfung ist bis spätestens 09.06.2028 zu veranlassen. Die Zwischenprüfung ist bis 09.12.2027 fällig. 6 Angaben zur Prüfstelle Prüfstelle Süd GmbH, Akkreditierung D-ZP-24710-01-00, Sachverständiger Dipl.-Ing. Rainer Kolb. Der Bericht umfasst fünf Seiten und ist ohne Unterschrift gültig, sofern er elektronisch übermittelt wurde. 7 Anhang: Prüfumfang Geprüft wurden Trag- und Zugmittel, Fangvorrichtung, Geschwindigkeitsbegrenzer, Puffer, Türverriegelungen, Steuerung, Notruf und Notbefreiung. Die Prüfung der elektrischen Anlage beschränkte sich auf die für den Aufzug erforderlichen Teile bis zur Hauptverteilung. 8 Hinweise für den Betreiber Der Betreiber hat die Prüfbescheinigung im Triebwerksraum auszuhängen. Die Notrufeinrichtung ist monatlich auf Funktion zu prüfen. Änderungen an der Anlage sind der Prüfstelle vor Inbetriebnahme anzuzeigen. 9 Schlussbemerkung Der vorliegende Bericht bezieht sich ausschließlich auf den am Prüftag vorgefundenen Zustand. Für Schäden, die nach dem Prüftag durch Verschleiß oder unsachgemäße Bedienung entstehen, wird keine Haftung übernommen.",
+ "name": "08-seitenelemente"
+}

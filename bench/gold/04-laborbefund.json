@@ -1,0 +1,396 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Laborbefund vom 21.06.2026"
+  },
+  {
+   "stufe": 2,
+   "text": "Klinische Chemie"
+  },
+  {
+   "stufe": 2,
+   "text": "Beurteilung"
+  },
+  {
+   "stufe": 2,
+   "text": "Hinweise zur Präanalytik"
+  }
+ ],
+ "absaetze": [
+  "Patient: Herr Ulrich Brand, geboren am 04.11.1968 Einsender: Praxis Dr. Wolters Auftrag: L-2026-88431",
+  "Gamma-GT und CRP leicht über dem Referenzbereich. Übrige Werte im Normbereich. Kontrolle in vier Wochen empfohlen.",
+  "Blutentnahme am 21.06.2026 um 08:15 Uhr, nüchtern. Probeneingang im Labor um 10:40 Uhr. Lagerung bei 4 °C."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 12,
+   "spalten": 4,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Parameter"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 2,
+     "kopf": true,
+     "text": "Ergebnis"
+    },
+    {
+     "z": 0,
+     "s": 3,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Referenzbereich"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Wert"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Einheit"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Hämoglobin"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "13,8"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "g/dl"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "13,5 - 17,5"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Leukozyten"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "9,4"
+    },
+    {
+     "z": 3,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Tsd/µl"
+    },
+    {
+     "z": 3,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,0 - 10,0"
+    },
+    {
+     "z": 4,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Thrombozyten"
+    },
+    {
+     "z": 4,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "221"
+    },
+    {
+     "z": 4,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Tsd/µl"
+    },
+    {
+     "z": 4,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "150 - 400"
+    },
+    {
+     "z": 5,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kreatinin"
+    },
+    {
+     "z": 5,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,12"
+    },
+    {
+     "z": 5,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "mg/dl"
+    },
+    {
+     "z": 5,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "0,70 - 1,20"
+    },
+    {
+     "z": 6,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "eGFR"
+    },
+    {
+     "z": 6,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "72"
+    },
+    {
+     "z": 6,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "ml/min"
+    },
+    {
+     "z": 6,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "> 60"
+    },
+    {
+     "z": 7,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "GPT (ALAT)"
+    },
+    {
+     "z": 7,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "44"
+    },
+    {
+     "z": 7,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "U/l"
+    },
+    {
+     "z": 7,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "< 50"
+    },
+    {
+     "z": 8,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Gamma-GT"
+    },
+    {
+     "z": 8,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "68"
+    },
+    {
+     "z": 8,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "U/l"
+    },
+    {
+     "z": 8,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "< 60"
+    },
+    {
+     "z": 9,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "CRP"
+    },
+    {
+     "z": 9,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "8,3"
+    },
+    {
+     "z": 9,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "mg/l"
+    },
+    {
+     "z": 9,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "< 5,0"
+    },
+    {
+     "z": 10,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TSH basal"
+    },
+    {
+     "z": 10,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,41"
+    },
+    {
+     "z": 10,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "mU/l"
+    },
+    {
+     "z": 10,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "0,40 - 4,00"
+    },
+    {
+     "z": 11,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "HbA1c"
+    },
+    {
+     "z": 11,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5,9"
+    },
+    {
+     "z": 11,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "%"
+    },
+    {
+     "z": 11,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "< 5,7"
+    }
+   ]
+  }
+ ],
+ "volltext": "Laborbefund vom 21.06.2026 Patient: Herr Ulrich Brand, geboren am 04.11.1968 Einsender: Praxis Dr. Wolters Auftrag: L-2026-88431 Klinische Chemie Parameter Ergebnis Referenzbereich Wert Einheit Hämoglobin 13,8 g/dl 13,5 - 17,5 Leukozyten 9,4 Tsd/µl 4,0 - 10,0 Thrombozyten 221 Tsd/µl 150 - 400 Kreatinin 1,12 mg/dl 0,70 - 1,20 eGFR 72 ml/min > 60 GPT (ALAT) 44 U/l < 50 Gamma-GT 68 U/l < 60 CRP 8,3 mg/l < 5,0 TSH basal 2,41 mU/l 0,40 - 4,00 HbA1c 5,9 % < 5,7 Beurteilung Gamma-GT und CRP leicht über dem Referenzbereich. Übrige Werte im Normbereich. Kontrolle in vier Wochen empfohlen. Hinweise zur Präanalytik Blutentnahme am 21.06.2026 um 08:15 Uhr, nüchtern. Probeneingang im Labor um 10:40 Uhr. Lagerung bei 4 °C.",
+ "name": "04-laborbefund"
+}

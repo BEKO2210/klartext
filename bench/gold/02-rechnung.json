@@ -1,0 +1,426 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Rechnung 2026-0417"
+  },
+  {
+   "stufe": 2,
+   "text": "Leistungen"
+  },
+  {
+   "stufe": 2,
+   "text": "Zahlungsbedingungen"
+  },
+  {
+   "stufe": 2,
+   "text": "Bankverbindung"
+  }
+ ],
+ "absaetze": [
+  "Elektro Kreisstrom GmbH, Hauptstraße 12, 70173 Stuttgart",
+  "Rechnungsdatum: 14.07.2026 Leistungszeitraum: 01.07.2026 bis 11.07.2026 Kundennummer: 40823",
+  "Zahlbar ohne Abzug bis zum 28.07.2026. Bei Zahlung innerhalb von zehn Tagen gewähren wir 2 % Skonto."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 11,
+   "spalten": 5,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Pos."
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 3,
+     "kopf": true,
+     "text": "Leistung"
+    },
+    {
+     "z": 0,
+     "s": 4,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Gesamt"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Bezeichnung"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Menge"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Einzelpreis"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Wartung Heizungsanlage"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,00 h"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "85,00 €"
+    },
+    {
+     "z": 2,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "170,00 €"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Umwälzpumpe Grundfos UPS 25-60"
+    },
+    {
+     "z": 3,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,00 Stk"
+    },
+    {
+     "z": 3,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "243,90 €"
+    },
+    {
+     "z": 3,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "243,90 €"
+    },
+    {
+     "z": 4,
+     "s": 0,
+     "zs": 3,
+     "ss": 1,
+     "kopf": false,
+     "text": "3"
+    },
+    {
+     "z": 4,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Anfahrt Stadtgebiet"
+    },
+    {
+     "z": 4,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,00"
+    },
+    {
+     "z": 4,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "45,00 €"
+    },
+    {
+     "z": 4,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "45,00 €"
+    },
+    {
+     "z": 5,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Zuschlag Samstagsarbeit"
+    },
+    {
+     "z": 5,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,00"
+    },
+    {
+     "z": 5,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "30,00 €"
+    },
+    {
+     "z": 5,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "30,00 €"
+    },
+    {
+     "z": 6,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kleinmaterial pauschal"
+    },
+    {
+     "z": 6,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,00"
+    },
+    {
+     "z": 6,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "18,50 €"
+    },
+    {
+     "z": 6,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "18,50 €"
+    },
+    {
+     "z": 7,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4"
+    },
+    {
+     "z": 7,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Entsorgung Altteile"
+    },
+    {
+     "z": 7,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,00"
+    },
+    {
+     "z": 7,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "12,60 €"
+    },
+    {
+     "z": 7,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "12,60 €"
+    },
+    {
+     "z": 8,
+     "s": 0,
+     "zs": 1,
+     "ss": 4,
+     "kopf": false,
+     "text": "Zwischensumme netto"
+    },
+    {
+     "z": 8,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "520,00 €"
+    },
+    {
+     "z": 9,
+     "s": 0,
+     "zs": 1,
+     "ss": 4,
+     "kopf": false,
+     "text": "Umsatzsteuer 19 %"
+    },
+    {
+     "z": 9,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "98,80 €"
+    },
+    {
+     "z": 10,
+     "s": 0,
+     "zs": 1,
+     "ss": 4,
+     "kopf": false,
+     "text": "Rechnungsbetrag brutto"
+    },
+    {
+     "z": 10,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "618,80 €"
+    }
+   ]
+  },
+  {
+   "zeilen": 4,
+   "spalten": 2,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Kontoinhaber"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Elektro Kreisstrom GmbH"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "IBAN"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "DE02 6005 0101 0002 0345 67"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "BIC"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "SOLADEST600"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Verwendungszweck"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Rechnung 2026-0417"
+    }
+   ]
+  }
+ ],
+ "volltext": "Rechnung 2026-0417 Elektro Kreisstrom GmbH, Hauptstraße 12, 70173 Stuttgart Rechnungsdatum: 14.07.2026 Leistungszeitraum: 01.07.2026 bis 11.07.2026 Kundennummer: 40823 Leistungen Pos. Leistung Gesamt Bezeichnung Menge Einzelpreis 1 Wartung Heizungsanlage 2,00 h 85,00 € 170,00 € 2 Umwälzpumpe Grundfos UPS 25-60 1,00 Stk 243,90 € 243,90 € 3 Anfahrt Stadtgebiet 1,00 45,00 € 45,00 € Zuschlag Samstagsarbeit 1,00 30,00 € 30,00 € Kleinmaterial pauschal 1,00 18,50 € 18,50 € 4 Entsorgung Altteile 1,00 12,60 € 12,60 € Zwischensumme netto 520,00 € Umsatzsteuer 19 % 98,80 € Rechnungsbetrag brutto 618,80 € Zahlungsbedingungen Zahlbar ohne Abzug bis zum 28.07.2026. Bei Zahlung innerhalb von zehn Tagen gewähren wir 2 % Skonto. Bankverbindung Kontoinhaber Elektro Kreisstrom GmbH IBAN DE02 6005 0101 0002 0345 67 BIC SOLADEST600 Verwendungszweck Rechnung 2026-0417",
+ "name": "02-rechnung"
+}

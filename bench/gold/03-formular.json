@@ -1,0 +1,256 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Aufnahmebogen Reparaturauftrag"
+  },
+  {
+   "stufe": 2,
+   "text": "1 Angaben zum Auftraggeber"
+  },
+  {
+   "stufe": 2,
+   "text": "2 Gerät"
+  },
+  {
+   "stufe": 2,
+   "text": "3 Vereinbarungen"
+  },
+  {
+   "stufe": 2,
+   "text": "4 Fehlerbeschreibung"
+  },
+  {
+   "stufe": 2,
+   "text": "5 Unterschriften"
+  }
+ ],
+ "absaetze": [
+  "Bitte vollständig ausfüllen. Angekreuzte Felder gelten als vereinbart.",
+  "Gerät zieht kein Wasser, Pumpe läuft hörbar an, bricht nach etwa zwanzig Sekunden ab. Fehlermeldung F 20 im Display. Tritt seit dem 02.07.2026 bei jedem Programm auf."
+ ],
+ "listen": [
+  {
+   "tiefe": 0,
+   "text": "☒ Kostenvoranschlag gewünscht (bis 90,00 €)"
+  },
+  {
+   "tiefe": 0,
+   "text": "☐ Reparatur ohne Rückfrage bis 250,00 €"
+  },
+  {
+   "tiefe": 0,
+   "text": "☒ Altgerät soll mitgenommen werden"
+  },
+  {
+   "tiefe": 0,
+   "text": "☐ Abholung durch Kunden"
+  },
+  {
+   "tiefe": 0,
+   "text": "☒ Ersatzgerät für die Dauer der Reparatur"
+  },
+  {
+   "tiefe": 0,
+   "text": "☐ Versand an den Hersteller"
+  }
+ ],
+ "tabellen": [
+  {
+   "zeilen": 4,
+   "spalten": 2,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Name, Vorname"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Sandner, Beate"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anschrift"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Lerchenweg 8, 71229 Leonberg"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Telefon"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "07152 445120"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Kundennummer"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "K-2026-1183"
+    }
+   ]
+  },
+  {
+   "zeilen": 2,
+   "spalten": 4,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Hersteller"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Miele"
+    },
+    {
+     "z": 0,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Typ"
+    },
+    {
+     "z": 0,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "WCI 660 WPS"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Seriennummer"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "AB 4471 2299"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Baujahr"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2021"
+    }
+   ]
+  },
+  {
+   "zeilen": 2,
+   "spalten": 3,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Datum"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Auftraggeber"
+    },
+    {
+     "z": 0,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Annehmende Person"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "18.07.2026"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "B. Sandner"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "M. Özdemir"
+    }
+   ]
+  }
+ ],
+ "volltext": "Aufnahmebogen Reparaturauftrag Bitte vollständig ausfüllen. Angekreuzte Felder gelten als vereinbart. 1 Angaben zum Auftraggeber Name, Vorname Sandner, Beate Anschrift Lerchenweg 8, 71229 Leonberg Telefon 07152 445120 Kundennummer K-2026-1183 2 Gerät Hersteller Miele Typ WCI 660 WPS Seriennummer AB 4471 2299 Baujahr 2021 3 Vereinbarungen ☒ Kostenvoranschlag gewünscht (bis 90,00 €) ☐ Reparatur ohne Rückfrage bis 250,00 € ☒ Altgerät soll mitgenommen werden ☐ Abholung durch Kunden ☒ Ersatzgerät für die Dauer der Reparatur ☐ Versand an den Hersteller 4 Fehlerbeschreibung Gerät zieht kein Wasser, Pumpe läuft hörbar an, bricht nach etwa zwanzig Sekunden ab. Fehlermeldung F 20 im Display. Tritt seit dem 02.07.2026 bei jedem Programm auf. 5 Unterschriften Datum Auftraggeber Annehmende Person 18.07.2026 B. Sandner M. Özdemir",
+ "name": "03-formular"
+}

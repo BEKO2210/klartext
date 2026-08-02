@@ -1,0 +1,38 @@
+/* Gemeinsame Gestaltung der Quelldokumente. Bewusst schlicht und gut lesbar:
+   gemessen werden soll die Umwandlung, nicht die Leidensfähigkeit der
+   Texterkennung. Schriftgröße 11 pt entspricht einem gewöhnlichen Geschäftsbrief. */
+@page { size: A4; margin: 22mm 20mm; }
+
+body {
+  font-family: "DejaVu Sans", Helvetica, Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #000;
+}
+
+h1 { font-size: 16pt; margin: 18pt 0 8pt; }
+h2 { font-size: 13.5pt; margin: 14pt 0 6pt; }
+h3 { font-size: 12pt; margin: 12pt 0 5pt; }
+h4 { font-size: 11pt; margin: 10pt 0 4pt; font-style: italic; }
+
+p { margin: 0 0 7pt; }
+ol, ul { margin: 0 0 8pt; padding-left: 20pt; }
+li { margin-bottom: 3pt; }
+
+table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt; }
+th, td { border: 0.6pt solid #333; padding: 3.5pt 5pt; font-size: 10pt; text-align: left; }
+th { background: #ececec; font-weight: bold; }
+td.zahl, th.zahl { text-align: right; }
+
+.kopfzeile, .fusszeile {
+  position: fixed;
+  left: 0; right: 0;
+  font-size: 8.5pt;
+  color: #444;
+}
+.kopfzeile { top: -14mm; border-bottom: 0.4pt solid #999; padding-bottom: 2pt; }
+.fusszeile { bottom: -14mm; border-top: 0.4pt solid #999; padding-top: 2pt; }
+
+.fussnoten { margin-top: 14pt; border-top: 0.5pt solid #666; padding-top: 5pt; font-size: 9pt; }
+.zweispaltig { column-count: 2; column-gap: 10mm; }
+.umbruch { break-before: page; }

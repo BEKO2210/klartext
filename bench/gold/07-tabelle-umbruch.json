@@ -1,0 +1,1015 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Ersatzteilliste Baureihe TX"
+  }
+ ],
+ "absaetze": [
+  "Stand 01.07.2026. Alle Preise netto ab Lager Stuttgart.",
+  "Lieferzeit für Artikel ohne Bestand beträgt in der Regel zehn Werktage."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 31,
+   "spalten": 4,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Artikelnummer"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Bezeichnung"
+    },
+    {
+     "z": 0,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Bestand"
+    },
+    {
+     "z": 0,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Preis"
+    },
+    {
+     "z": 1,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1001"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Dichtring 18 x 3 mm"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "420"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "0,45 €"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1002"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Dichtring 22 x 3 mm"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "385"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "0,52 €"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1010"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kugellager 6203 2RS"
+    },
+    {
+     "z": 3,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "96"
+    },
+    {
+     "z": 3,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,80 €"
+    },
+    {
+     "z": 4,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1011"
+    },
+    {
+     "z": 4,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kugellager 6204 2RS"
+    },
+    {
+     "z": 4,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "88"
+    },
+    {
+     "z": 4,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5,60 €"
+    },
+    {
+     "z": 5,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1020"
+    },
+    {
+     "z": 5,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Keilriemen SPZ 1180"
+    },
+    {
+     "z": 5,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "34"
+    },
+    {
+     "z": 5,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "12,90 €"
+    },
+    {
+     "z": 6,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1021"
+    },
+    {
+     "z": 6,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Keilriemen SPZ 1320"
+    },
+    {
+     "z": 6,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "29"
+    },
+    {
+     "z": 6,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14,20 €"
+    },
+    {
+     "z": 7,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1030"
+    },
+    {
+     "z": 7,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Filtermatte G4 592 x 592"
+    },
+    {
+     "z": 7,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "140"
+    },
+    {
+     "z": 7,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "6,75 €"
+    },
+    {
+     "z": 8,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1031"
+    },
+    {
+     "z": 8,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Filtermatte F7 592 x 592"
+    },
+    {
+     "z": 8,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "112"
+    },
+    {
+     "z": 8,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "18,40 €"
+    },
+    {
+     "z": 9,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1040"
+    },
+    {
+     "z": 9,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Temperaturfühler PT1000"
+    },
+    {
+     "z": 9,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "61"
+    },
+    {
+     "z": 9,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "32,50 €"
+    },
+    {
+     "z": 10,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1041"
+    },
+    {
+     "z": 10,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Drucksensor 0 bis 10 bar"
+    },
+    {
+     "z": 10,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "18"
+    },
+    {
+     "z": 10,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "88,00 €"
+    },
+    {
+     "z": 11,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1050"
+    },
+    {
+     "z": 11,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Ventilator 230 V 180 W"
+    },
+    {
+     "z": 11,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "7"
+    },
+    {
+     "z": 11,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "214,00 €"
+    },
+    {
+     "z": 12,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1051"
+    },
+    {
+     "z": 12,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Ventilator 400 V 550 W"
+    },
+    {
+     "z": 12,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4"
+    },
+    {
+     "z": 12,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "468,00 €"
+    },
+    {
+     "z": 13,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1060"
+    },
+    {
+     "z": 13,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Steuerplatine Rev. C"
+    },
+    {
+     "z": 13,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "11"
+    },
+    {
+     "z": 13,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "312,00 €"
+    },
+    {
+     "z": 14,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1061"
+    },
+    {
+     "z": 14,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Bedieneinheit LCD"
+    },
+    {
+     "z": 14,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "9"
+    },
+    {
+     "z": 14,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "176,50 €"
+    },
+    {
+     "z": 15,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1070"
+    },
+    {
+     "z": 15,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Magnetventil 3/4 Zoll"
+    },
+    {
+     "z": 15,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "23"
+    },
+    {
+     "z": 15,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "64,90 €"
+    },
+    {
+     "z": 16,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1071"
+    },
+    {
+     "z": 16,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Magnetventil 1 Zoll"
+    },
+    {
+     "z": 16,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "16"
+    },
+    {
+     "z": 16,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "79,30 €"
+    },
+    {
+     "z": 17,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1080"
+    },
+    {
+     "z": 17,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Umwälzpumpe Klasse A"
+    },
+    {
+     "z": 17,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "6"
+    },
+    {
+     "z": 17,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "243,90 €"
+    },
+    {
+     "z": 18,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1081"
+    },
+    {
+     "z": 18,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Pumpenkopf Ersatz"
+    },
+    {
+     "z": 18,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5"
+    },
+    {
+     "z": 18,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "168,00 €"
+    },
+    {
+     "z": 19,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1090"
+    },
+    {
+     "z": 19,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Ausdehnungsgefäß 12 l"
+    },
+    {
+     "z": 19,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14"
+    },
+    {
+     "z": 19,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "54,00 €"
+    },
+    {
+     "z": 20,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1091"
+    },
+    {
+     "z": 20,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Ausdehnungsgefäß 25 l"
+    },
+    {
+     "z": 20,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "10"
+    },
+    {
+     "z": 20,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "72,00 €"
+    },
+    {
+     "z": 21,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1100"
+    },
+    {
+     "z": 21,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Sicherheitsventil 3 bar"
+    },
+    {
+     "z": 21,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "48"
+    },
+    {
+     "z": 21,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "21,60 €"
+    },
+    {
+     "z": 22,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1101"
+    },
+    {
+     "z": 22,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Manometer 63 mm"
+    },
+    {
+     "z": 22,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "52"
+    },
+    {
+     "z": 22,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "16,80 €"
+    },
+    {
+     "z": 23,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1110"
+    },
+    {
+     "z": 23,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Wärmetauscher 20 Platten"
+    },
+    {
+     "z": 23,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3"
+    },
+    {
+     "z": 23,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "389,00 €"
+    },
+    {
+     "z": 24,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1111"
+    },
+    {
+     "z": 24,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Wärmetauscher 30 Platten"
+    },
+    {
+     "z": 24,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2"
+    },
+    {
+     "z": 24,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "512,00 €"
+    },
+    {
+     "z": 25,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1120"
+    },
+    {
+     "z": 25,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Isolierschale DN 25"
+    },
+    {
+     "z": 25,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "76"
+    },
+    {
+     "z": 25,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,90 €"
+    },
+    {
+     "z": 26,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1121"
+    },
+    {
+     "z": 26,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Isolierschale DN 32"
+    },
+    {
+     "z": 26,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "64"
+    },
+    {
+     "z": 26,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,60 €"
+    },
+    {
+     "z": 27,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1130"
+    },
+    {
+     "z": 27,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Schmutzfänger DN 25"
+    },
+    {
+     "z": 27,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "31"
+    },
+    {
+     "z": 27,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "27,40 €"
+    },
+    {
+     "z": 28,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1131"
+    },
+    {
+     "z": 28,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Rückschlagklappe DN 25"
+    },
+    {
+     "z": 28,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "27"
+    },
+    {
+     "z": 28,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "19,90 €"
+    },
+    {
+     "z": 29,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1140"
+    },
+    {
+     "z": 29,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Anschlussset flexibel"
+    },
+    {
+     "z": 29,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "45"
+    },
+    {
+     "z": 29,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "33,20 €"
+    },
+    {
+     "z": 30,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "TX-1141"
+    },
+    {
+     "z": 30,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Wandhalter verzinkt"
+    },
+    {
+     "z": 30,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "58"
+    },
+    {
+     "z": 30,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "11,70 €"
+    }
+   ]
+  }
+ ],
+ "volltext": "Ersatzteilliste Baureihe TX Stand 01.07.2026. Alle Preise netto ab Lager Stuttgart. Artikelnummer Bezeichnung Bestand Preis TX-1001 Dichtring 18 x 3 mm 420 0,45 € TX-1002 Dichtring 22 x 3 mm 385 0,52 € TX-1010 Kugellager 6203 2RS 96 4,80 € TX-1011 Kugellager 6204 2RS 88 5,60 € TX-1020 Keilriemen SPZ 1180 34 12,90 € TX-1021 Keilriemen SPZ 1320 29 14,20 € TX-1030 Filtermatte G4 592 x 592 140 6,75 € TX-1031 Filtermatte F7 592 x 592 112 18,40 € TX-1040 Temperaturfühler PT1000 61 32,50 € TX-1041 Drucksensor 0 bis 10 bar 18 88,00 € TX-1050 Ventilator 230 V 180 W 7 214,00 € TX-1051 Ventilator 400 V 550 W 4 468,00 € TX-1060 Steuerplatine Rev. C 11 312,00 € TX-1061 Bedieneinheit LCD 9 176,50 € TX-1070 Magnetventil 3/4 Zoll 23 64,90 € TX-1071 Magnetventil 1 Zoll 16 79,30 € TX-1080 Umwälzpumpe Klasse A 6 243,90 € TX-1081 Pumpenkopf Ersatz 5 168,00 € TX-1090 Ausdehnungsgefäß 12 l 14 54,00 € TX-1091 Ausdehnungsgefäß 25 l 10 72,00 € TX-1100 Sicherheitsventil 3 bar 48 21,60 € TX-1101 Manometer 63 mm 52 16,80 € TX-1110 Wärmetauscher 20 Platten 3 389,00 € TX-1111 Wärmetauscher 30 Platten 2 512,00 € TX-1120 Isolierschale DN 25 76 3,90 € TX-1121 Isolierschale DN 32 64 4,60 € TX-1130 Schmutzfänger DN 25 31 27,40 € TX-1131 Rückschlagklappe DN 25 27 19,90 € TX-1140 Anschlussset flexibel 45 33,20 € TX-1141 Wandhalter verzinkt 58 11,70 € Lieferzeit für Artikel ohne Bestand beträgt in der Regel zehn Werktage.",
+ "name": "07-tabelle-umbruch"
+}

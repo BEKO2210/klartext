@@ -1,0 +1,507 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Auswertung Betriebsstunden 2025"
+  },
+  {
+   "stufe": 2,
+   "text": "Anmerkungen"
+  }
+ ],
+ "absaetze": [
+  "Vier Anlagen, zwei Halbjahre, jeweils Laufzeit und Störungen. Zeilenbeschriftung links, mehrstufiger Kopf oben.",
+  "Der Anteil bezieht sich auf die planmäßige Betriebszeit von 4.380 Stunden je Halbjahr. Störungsdauern unter 30 Minuten sind nicht erfasst."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 8,
+   "spalten": 9,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 3,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anlage"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 1,
+     "ss": 4,
+     "kopf": true,
+     "text": "Halbjahr 1"
+    },
+    {
+     "z": 0,
+     "s": 5,
+     "zs": 1,
+     "ss": 4,
+     "kopf": true,
+     "text": "Halbjahr 2"
+    },
+    {
+     "z": 1,
+     "s": 1,
+     "zs": 1,
+     "ss": 2,
+     "kopf": true,
+     "text": "Laufzeit"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 2,
+     "kopf": true,
+     "text": "Störungen"
+    },
+    {
+     "z": 1,
+     "s": 5,
+     "zs": 1,
+     "ss": 2,
+     "kopf": true,
+     "text": "Laufzeit"
+    },
+    {
+     "z": 1,
+     "s": 7,
+     "zs": 1,
+     "ss": 2,
+     "kopf": true,
+     "text": "Störungen"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Stunden"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anteil"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anzahl"
+    },
+    {
+     "z": 2,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Dauer"
+    },
+    {
+     "z": 2,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Stunden"
+    },
+    {
+     "z": 2,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anteil"
+    },
+    {
+     "z": 2,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Anzahl"
+    },
+    {
+     "z": 2,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Dauer"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Halle Nord"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3.910"
+    },
+    {
+     "z": 3,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "89 %"
+    },
+    {
+     "z": 3,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "6"
+    },
+    {
+     "z": 3,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14 h"
+    },
+    {
+     "z": 3,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4.010"
+    },
+    {
+     "z": 3,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "91 %"
+    },
+    {
+     "z": 3,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4"
+    },
+    {
+     "z": 3,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "9 h"
+    },
+    {
+     "z": 4,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Halle Süd"
+    },
+    {
+     "z": 4,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3.640"
+    },
+    {
+     "z": 4,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "83 %"
+    },
+    {
+     "z": 4,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "11"
+    },
+    {
+     "z": 4,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "31 h"
+    },
+    {
+     "z": 4,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3.720"
+    },
+    {
+     "z": 4,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "85 %"
+    },
+    {
+     "z": 4,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "8"
+    },
+    {
+     "z": 4,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "22 h"
+    },
+    {
+     "z": 5,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Werkstatt"
+    },
+    {
+     "z": 5,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2.180"
+    },
+    {
+     "z": 5,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "50 %"
+    },
+    {
+     "z": 5,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3"
+    },
+    {
+     "z": 5,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5 h"
+    },
+    {
+     "z": 5,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2.240"
+    },
+    {
+     "z": 5,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "51 %"
+    },
+    {
+     "z": 5,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2"
+    },
+    {
+     "z": 5,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3 h"
+    },
+    {
+     "z": 6,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Lager"
+    },
+    {
+     "z": 6,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4.320"
+    },
+    {
+     "z": 6,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "99 %"
+    },
+    {
+     "z": 6,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1"
+    },
+    {
+     "z": 6,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2 h"
+    },
+    {
+     "z": 6,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4.300"
+    },
+    {
+     "z": 6,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "98 %"
+    },
+    {
+     "z": 6,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2"
+    },
+    {
+     "z": 6,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4 h"
+    },
+    {
+     "z": 7,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "Summe"
+    },
+    {
+     "z": 7,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14.050"
+    },
+    {
+     "z": 7,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "-"
+    },
+    {
+     "z": 7,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "21"
+    },
+    {
+     "z": 7,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "52 h"
+    },
+    {
+     "z": 7,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14.270"
+    },
+    {
+     "z": 7,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "-"
+    },
+    {
+     "z": 7,
+     "s": 7,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "16"
+    },
+    {
+     "z": 7,
+     "s": 8,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "38 h"
+    }
+   ]
+  }
+ ],
+ "volltext": "Auswertung Betriebsstunden 2025 Vier Anlagen, zwei Halbjahre, jeweils Laufzeit und Störungen. Zeilenbeschriftung links, mehrstufiger Kopf oben. Anlage Halbjahr 1 Halbjahr 2 Laufzeit Störungen Laufzeit Störungen Stunden Anteil Anzahl Dauer Stunden Anteil Anzahl Dauer Halle Nord 3.910 89 % 6 14 h 4.010 91 % 4 9 h Halle Süd 3.640 83 % 11 31 h 3.720 85 % 8 22 h Werkstatt 2.180 50 % 3 5 h 2.240 51 % 2 3 h Lager 4.320 99 % 1 2 h 4.300 98 % 2 4 h Summe 14.050 - 21 52 h 14.270 - 16 38 h Anmerkungen Der Anteil bezieht sich auf die planmäßige Betriebszeit von 4.380 Stunden je Halbjahr. Störungsdauern unter 30 Minuten sind nicht erfasst.",
+ "name": "12-mehrstufiger-kopf"
+}

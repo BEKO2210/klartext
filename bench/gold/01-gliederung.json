@@ -1,0 +1,95 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "1 Allgemeine Geschäftsbedingungen"
+  },
+  {
+   "stufe": 2,
+   "text": "1.1 Geltungsbereich"
+  },
+  {
+   "stufe": 3,
+   "text": "1.1.1 Abweichende Vereinbarungen"
+  },
+  {
+   "stufe": 3,
+   "text": "1.1.2 Schriftform"
+  },
+  {
+   "stufe": 2,
+   "text": "1.2 Angebot und Vertragsschluss"
+  },
+  {
+   "stufe": 3,
+   "text": "1.2.1 Bindefrist"
+  },
+  {
+   "stufe": 2,
+   "text": "1.3 Ablauf einer Beauftragung"
+  },
+  {
+   "stufe": 1,
+   "text": "2 Haftung"
+  },
+  {
+   "stufe": 2,
+   "text": "2.1 Umfang der Haftung"
+  },
+  {
+   "stufe": 3,
+   "text": "2.1.1 Einfache Fahrlässigkeit"
+  },
+  {
+   "stufe": 2,
+   "text": "2.2 Verjährung"
+  },
+  {
+   "stufe": 1,
+   "text": "3 Schlussbestimmungen"
+  }
+ ],
+ "absaetze": [
+  "Diese Bedingungen regeln die Zusammenarbeit zwischen dem Auftragnehmer und dem Auftraggeber. Sie gelten für alle Angebote, Lieferungen und Leistungen.",
+  "Die Bedingungen gelten für alle Lieferungen und Leistungen des Auftragnehmers gegenüber Unternehmern im Sinne des Handelsgesetzbuchs.",
+  "Abweichende Bedingungen des Auftraggebers werden nicht Vertragsbestandteil, auch wenn ihnen nicht ausdrücklich widersprochen wird.",
+  "Nebenabreden bedürfen zu ihrer Wirksamkeit der Schriftform. Das gilt auch für die Aufhebung dieser Klausel.",
+  "Angebote sind freibleibend. Ein Vertrag kommt erst mit der schriftlichen Auftragsbestätigung zustande.",
+  "Der Auftraggeber ist an seine Bestellung vier Wochen gebunden.",
+  "Eine Beauftragung läuft in den folgenden Schritten ab:",
+  "Der Auftragnehmer haftet nach den gesetzlichen Bestimmungen, soweit nachfolgend nichts anderes bestimmt ist.",
+  "Bei Vorsatz und grober Fahrlässigkeit haftet der Auftragnehmer unbeschränkt.",
+  "Bei einfacher Fahrlässigkeit haftet der Auftragnehmer nur bei Verletzung einer wesentlichen Vertragspflicht.",
+  "Ansprüche des Auftraggebers verjähren in zwölf Monaten ab Abnahme der Leistung.",
+  "Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand ist der Sitz des Auftragnehmers."
+ ],
+ "listen": [
+  {
+   "tiefe": 1,
+   "text": "Angabe des gewünschten Termins"
+  },
+  {
+   "tiefe": 1,
+   "text": "Angabe der Anschrift des Einsatzortes"
+  },
+  {
+   "tiefe": 0,
+   "text": "Anfrage mit Beschreibung der gewünschten Leistung"
+  },
+  {
+   "tiefe": 0,
+   "text": "Angebot des Auftragnehmers innerhalb von fünf Werktagen"
+  },
+  {
+   "tiefe": 0,
+   "text": "Schriftliche Auftragsbestätigung"
+  },
+  {
+   "tiefe": 0,
+   "text": "Ausführung der Leistung"
+  }
+ ],
+ "tabellen": [],
+ "volltext": "1 Allgemeine Geschäftsbedingungen Diese Bedingungen regeln die Zusammenarbeit zwischen dem Auftragnehmer und dem Auftraggeber. Sie gelten für alle Angebote, Lieferungen und Leistungen. 1.1 Geltungsbereich Die Bedingungen gelten für alle Lieferungen und Leistungen des Auftragnehmers gegenüber Unternehmern im Sinne des Handelsgesetzbuchs. 1.1.1 Abweichende Vereinbarungen Abweichende Bedingungen des Auftraggebers werden nicht Vertragsbestandteil, auch wenn ihnen nicht ausdrücklich widersprochen wird. 1.1.2 Schriftform Nebenabreden bedürfen zu ihrer Wirksamkeit der Schriftform. Das gilt auch für die Aufhebung dieser Klausel. 1.2 Angebot und Vertragsschluss Angebote sind freibleibend. Ein Vertrag kommt erst mit der schriftlichen Auftragsbestätigung zustande. 1.2.1 Bindefrist Der Auftraggeber ist an seine Bestellung vier Wochen gebunden. 1.3 Ablauf einer Beauftragung Eine Beauftragung läuft in den folgenden Schritten ab: Angabe des gewünschten Termins Angabe der Anschrift des Einsatzortes Anfrage mit Beschreibung der gewünschten Leistung Angebot des Auftragnehmers innerhalb von fünf Werktagen Schriftliche Auftragsbestätigung Ausführung der Leistung 2 Haftung Der Auftragnehmer haftet nach den gesetzlichen Bestimmungen, soweit nachfolgend nichts anderes bestimmt ist. 2.1 Umfang der Haftung Bei Vorsatz und grober Fahrlässigkeit haftet der Auftragnehmer unbeschränkt. 2.1.1 Einfache Fahrlässigkeit Bei einfacher Fahrlässigkeit haftet der Auftragnehmer nur bei Verletzung einer wesentlichen Vertragspflicht. 2.2 Verjährung Ansprüche des Auftraggebers verjähren in zwölf Monaten ab Abnahme der Leistung. 3 Schlussbestimmungen Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand ist der Sitz des Auftragnehmers.",
+ "name": "01-gliederung"
+}

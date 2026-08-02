@@ -1,0 +1,699 @@
+{
+ "ueberschriften": [
+  {
+   "stufe": 1,
+   "text": "Preisliste Staffelpreise 2026"
+  },
+  {
+   "stufe": 2,
+   "text": "Hinweise"
+  }
+ ],
+ "absaetze": [
+  "Gültig ab 01.08.2026. Alle Preise in Euro, netto, je Stück.",
+  "Staffelpreise gelten je Artikel und Bestellung, eine Zusammenfassung mehrerer Artikel ist nicht möglich. Skonto von 2 % bei Zahlung innerhalb von zehn Tagen."
+ ],
+ "listen": [],
+ "tabellen": [
+  {
+   "zeilen": 14,
+   "spalten": 7,
+   "zellen": [
+    {
+     "z": 0,
+     "s": 0,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Artikel"
+    },
+    {
+     "z": 0,
+     "s": 1,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Einheit"
+    },
+    {
+     "z": 0,
+     "s": 2,
+     "zs": 1,
+     "ss": 4,
+     "kopf": true,
+     "text": "Abnahmemenge"
+    },
+    {
+     "z": 0,
+     "s": 6,
+     "zs": 2,
+     "ss": 1,
+     "kopf": true,
+     "text": "Lieferzeit"
+    },
+    {
+     "z": 1,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "1 - 49"
+    },
+    {
+     "z": 1,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "50 - 199"
+    },
+    {
+     "z": 1,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "200 - 999"
+    },
+    {
+     "z": 1,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": true,
+     "text": "ab 1.000"
+    },
+    {
+     "z": 2,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kabelkanal 40 x 60"
+    },
+    {
+     "z": 2,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "m"
+    },
+    {
+     "z": 2,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,80"
+    },
+    {
+     "z": 2,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,35"
+    },
+    {
+     "z": 2,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,95"
+    },
+    {
+     "z": 2,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,60"
+    },
+    {
+     "z": 2,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2 Tage"
+    },
+    {
+     "z": 3,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Kabelkanal 60 x 110"
+    },
+    {
+     "z": 3,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "m"
+    },
+    {
+     "z": 3,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "9,20"
+    },
+    {
+     "z": 3,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "8,45"
+    },
+    {
+     "z": 3,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "7,80"
+    },
+    {
+     "z": 3,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "7,10"
+    },
+    {
+     "z": 3,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2 Tage"
+    },
+    {
+     "z": 4,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Leitung NYM-J 3 x 1,5"
+    },
+    {
+     "z": 4,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "m"
+    },
+    {
+     "z": 4,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,45"
+    },
+    {
+     "z": 4,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,28"
+    },
+    {
+     "z": 4,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "1,12"
+    },
+    {
+     "z": 4,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "0,98"
+    },
+    {
+     "z": 4,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Lager"
+    },
+    {
+     "z": 5,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Leitung NYM-J 5 x 2,5"
+    },
+    {
+     "z": 5,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "m"
+    },
+    {
+     "z": 5,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,90"
+    },
+    {
+     "z": 5,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,52"
+    },
+    {
+     "z": 5,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,15"
+    },
+    {
+     "z": 5,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,86"
+    },
+    {
+     "z": 5,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Lager"
+    },
+    {
+     "z": 6,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Schalter Serie flach"
+    },
+    {
+     "z": 6,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 6,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "12,40"
+    },
+    {
+     "z": 6,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "11,20"
+    },
+    {
+     "z": 6,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "10,15"
+    },
+    {
+     "z": 6,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "9,30"
+    },
+    {
+     "z": 6,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5 Tage"
+    },
+    {
+     "z": 7,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Steckdose 2-fach"
+    },
+    {
+     "z": 7,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 7,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "14,80"
+    },
+    {
+     "z": 7,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "13,40"
+    },
+    {
+     "z": 7,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "12,10"
+    },
+    {
+     "z": 7,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "11,05"
+    },
+    {
+     "z": 7,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5 Tage"
+    },
+    {
+     "z": 8,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "LED-Panel 40 W"
+    },
+    {
+     "z": 8,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 8,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "48,90"
+    },
+    {
+     "z": 8,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "44,20"
+    },
+    {
+     "z": 8,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "39,80"
+    },
+    {
+     "z": 8,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "36,15"
+    },
+    {
+     "z": 8,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "10 Tage"
+    },
+    {
+     "z": 9,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Bewegungsmelder 180°"
+    },
+    {
+     "z": 9,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 9,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "32,60"
+    },
+    {
+     "z": 9,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "29,40"
+    },
+    {
+     "z": 9,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "26,55"
+    },
+    {
+     "z": 9,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "24,10"
+    },
+    {
+     "z": 9,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "10 Tage"
+    },
+    {
+     "z": 10,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Verteilerdose IP 65"
+    },
+    {
+     "z": 10,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 10,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "3,25"
+    },
+    {
+     "z": 10,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,95"
+    },
+    {
+     "z": 10,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,68"
+    },
+    {
+     "z": 10,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "2,44"
+    },
+    {
+     "z": 10,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Lager"
+    },
+    {
+     "z": 11,
+     "s": 0,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Leitungsschutzschalter B16"
+    },
+    {
+     "z": 11,
+     "s": 1,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Stk"
+    },
+    {
+     "z": 11,
+     "s": 2,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "6,70"
+    },
+    {
+     "z": 11,
+     "s": 3,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "6,05"
+    },
+    {
+     "z": 11,
+     "s": 4,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "5,45"
+    },
+    {
+     "z": 11,
+     "s": 5,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "4,95"
+    },
+    {
+     "z": 11,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "Lager"
+    },
+    {
+     "z": 12,
+     "s": 0,
+     "zs": 1,
+     "ss": 2,
+     "kopf": false,
+     "text": "Mindestbestellwert"
+    },
+    {
+     "z": 12,
+     "s": 2,
+     "zs": 1,
+     "ss": 4,
+     "kopf": false,
+     "text": "150,00"
+    },
+    {
+     "z": 12,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "-"
+    },
+    {
+     "z": 13,
+     "s": 0,
+     "zs": 1,
+     "ss": 2,
+     "kopf": false,
+     "text": "Versandkostenfrei ab"
+    },
+    {
+     "z": 13,
+     "s": 2,
+     "zs": 1,
+     "ss": 4,
+     "kopf": false,
+     "text": "500,00"
+    },
+    {
+     "z": 13,
+     "s": 6,
+     "zs": 1,
+     "ss": 1,
+     "kopf": false,
+     "text": "-"
+    }
+   ]
+  }
+ ],
+ "volltext": "Preisliste Staffelpreise 2026 Gültig ab 01.08.2026. Alle Preise in Euro, netto, je Stück. Artikel Einheit Abnahmemenge Lieferzeit 1 - 49 50 - 199 200 - 999 ab 1.000 Kabelkanal 40 x 60 m 4,80 4,35 3,95 3,60 2 Tage Kabelkanal 60 x 110 m 9,20 8,45 7,80 7,10 2 Tage Leitung NYM-J 3 x 1,5 m 1,45 1,28 1,12 0,98 Lager Leitung NYM-J 5 x 2,5 m 3,90 3,52 3,15 2,86 Lager Schalter Serie flach Stk 12,40 11,20 10,15 9,30 5 Tage Steckdose 2-fach Stk 14,80 13,40 12,10 11,05 5 Tage LED-Panel 40 W Stk 48,90 44,20 39,80 36,15 10 Tage Bewegungsmelder 180° Stk 32,60 29,40 26,55 24,10 10 Tage Verteilerdose IP 65 Stk 3,25 2,95 2,68 2,44 Lager Leitungsschutzschalter B16 Stk 6,70 6,05 5,45 4,95 Lager Mindestbestellwert 150,00 - Versandkostenfrei ab 500,00 - Hinweise Staffelpreise gelten je Artikel und Bestellung, eine Zusammenfassung mehrerer Artikel ist nicht möglich. Skonto von 2 % bei Zahlung innerhalb von zehn Tagen.",
+ "name": "09-preisliste"
+}

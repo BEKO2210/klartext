@@ -295,6 +295,23 @@ python3 tests/layout_test.py           # Layouttreue, ohne Netz und Datenbank
 Der Test legt eigene Konten an, konvertiert die Dateien aus `tests/fixtures`, prüft
 Benutzerisolation, Limits, Sicherheits-Header und räumt am Ende auf.
 
+## Messstand
+
+Tests sagen, ob etwas funktioniert. Sie sagen nicht, wie **gut** die Umwandlung
+ist. Dafür gibt es `bench/` — zwölf selbst geschriebene Prüfdokumente, jeweils
+als digitale PDF und als Bild-PDF ohne Textebene, mit einer Wahrheit, die aus der
+Quelle berechnet und nicht von Hand gepflegt wird.
+
+```bash
+python3 bench/bauen.py                    # Dokumente + Wahrheit erzeugen
+python3 bench/messen.py --variante beide  # durch den laufenden Dienst messen
+```
+
+Gemessen werden Text, Überschriftenebenen, Listen mit Tiefe, Tabellenzellen samt
+Verbünden und die Lesereihenfolge. Jeder Lauf schreibt
+[bench/BERICHT.md](bench/BERICHT.md) und hängt eine Zeile an `bench/verlauf.jsonl`.
+Details und Grenzen: [bench/README.md](bench/README.md).
+
 ## Sicherheit
 
 Argon2id für Passwörter, Sitzungstoken nur als Hash gespeichert, HttpOnly- und
