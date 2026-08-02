@@ -16,9 +16,25 @@ Stand beim Anlegen: 02.08.2026, Commit `b269fa1`, live ist 1.2.0.
 Tabellen sitzen. Die Lücken liegen bei den Überschriften, bei mehrspaltigem
 Text und im Scanweg bei den Listen.
 
+## Ergebnis (offline gemessen, Zweig `layouttreue/ueberschriften-und-spalten`)
+
+| Variante | Text | Überschr. | Listen | Tab-Struktur | Tab-Inhalt | Reihenfolge |
+|---|---|---|---|---|---|---|
+| digital vorher | 0,981 | 0,395 | 1,000 | 0,987 | 0,964 | 0,976 |
+| **digital nachher** | **0,991** | **1,000** | 1,000 | 0,987 | 0,964 | **1,000** |
+| scan vorher | 0,943 | 0,382 | 0,781 | 0,993 | 0,897 | 0,900 |
+| **scan nachher** | **0,953** | **0,423** | 0,781 | 0,993 | 0,897 | **1,000** |
+
+* **A erledigt** für die digitale Fassung (0,395 → 1,000). Für Scans **nicht
+  erreichbar** — siehe unten, die Messlatte war dort falsch angesetzt.
+* **B erledigt**: zweispaltiges Dokument von Reihenfolge 0,833 auf 1,000
+  (digital) und 0,600 auf 1,000 (Scan), Text dort 0,877 → 1,000.
+* **C und D** liegen nicht in der Nachbearbeitung — Begründung unten.
+* Keine Kennzahl ist gefallen.
+
 ## Arbeitspakete
 
-### A — Überschriftenebenen ohne Nummer  ▸ größter Hebel
+### A — Überschriftenebenen ohne Nummer  ▸ erledigt (digital)
 
 **Problem.** Die Layouttreue von 1.2.0 leitet die Ebene aus der Nummer der
 Vorlage ab. Ein Dokument ohne Gliederungsnummern — Titel, darunter Abschnitte —
@@ -42,6 +58,16 @@ hergibt (fett/kursiv) — falls belastbar, als zweites Merkmal.
 **Messlatte.** Überschriften digital ≥ 0,90 · scan ≥ 0,85, ohne Verlust bei
 den übrigen Kennzahlen (Toleranz 0,005).
 
+**Ergebnis.** Digital 1,000 — erreicht. **Scan 0,423 — nicht erreicht, und die
+Messlatte war dort falsch angesetzt.** Die Zeilenhöhe misst bei einem Scan die
+Ausdehnung der erkannten Buchstaben, nicht die Schriftgröße: im Beleg ist die
+Überschrift „Zahlungsbedingungen" (h2, mit Unterlängen) *höher* als der Titel
+darüber. Aus diesem Signal ist auf Scans keine Ebene abzuleiten, und die Regel
+verweigert dort korrekt die Arbeit. Nummerierte Gliederungen greifen weiterhin
+auch auf Scans (Prüfdokument 01: 0,833). Ein besseres Signal müsste aus der
+Erkennung selbst kommen (Schriftgrad statt Bounding-Box) — eigenes Paket,
+eigene Messung.
+
 ### B — Lesereihenfolge bei mehrspaltigem Satz
 
 **Problem.** Zweispaltiger Fachtext: Reihenfolge 0,833 digital und 0,600 im
@@ -60,19 +86,47 @@ zweispaltig ≥ 0,95 digital.
 brauchbares Dokument unbrauchbar. Deshalb nach A und nur mit deutlicher
 Trennung.
 
-### C — Mehrstufige Tabellenköpfe
+**Ergebnis.** Erreicht: Reihenfolge 1,000 in beiden Varianten, Text beim
+zweispaltigen Dokument 0,877 → 1,000 (digital) und 0,854 → 0,979 (Scan).
+Umgesetzt als Spaltenzone: der Bereich, in dem **beide** Spalten Text tragen,
+wird spaltenweise sortiert; was darunter steht (etwa eine Zwischenüberschrift),
+bleibt dahinter. Zusätzlich werden Absätze wieder zusammengefügt, die ein
+Spalten- oder Seitenumbruch zerschnitten hat — Erkennungsmerkmal: der erste
+Teil endet ohne Satzzeichen, der zweite beginnt klein.
 
-Tab-Inhalt 0,817 digital und 0,733 im Scan beim dreizeiligen Kopf. Struktur
-stimmt weitgehend (0,933), der Text einzelner Kopfzellen nicht. Erst nach A
-und B ansehen — kleiner Hebel, aber sauber messbar.
+Abgesichert: Seiten mit Tabellen, Listen oder Bildern werden nicht umgestellt,
+ebenso wenig Seiten ohne echten Spaltensatz. Sobald sich ein Block nicht
+eindeutig zuordnen lässt, bleibt der Abschnitt unberührt.
 
-### D — Listen im Scanweg
+### C — Mehrstufige Tabellenköpfe  ▸ liegt nicht bei uns
 
-Listen fallen von 1,000 (digital) auf 0,781 (Scan). Zwei Ausreißer: das
-Formular mit Kreuzchen und der Prüfbericht. Ursache noch nicht untersucht.
-Zuerst nachsehen, was der Scanweg tatsächlich liefert, dann entscheiden — es
-kann gut sein, dass hier die Wahrheit im Korpus zu streng ist und nicht der
-Dienst falsch liegt.
+Tab-Inhalt 0,817 digital und 0,733 im Scan beim dreizeiligen Kopf. Untersucht:
+Das Tabellenmodell (TableFormer) setzt die Kopfzellen um eine Spalte versetzt —
+die Zelle „Anlage" landet in Zeile 1 statt 0, die beiden „Halbjahr"-Verbünde
+rutschen eine Spalte nach links, die letzte Spalte der Kopfzeile bleibt leer.
+Der **Inhalt ist vollständig**, nur die Rasterzuordnung stimmt nicht.
+
+Das im Nachhinein zu reparieren hieße, die Zuordnung des Modells zu erraten.
+Genau das ist ausgeschlossen. Wenn hier etwas passiert, dann über die Engine
+(anderes `table_mode`, neuere Docling-Fassung) — und das ist ein eigenes Paket
+mit eigener Messung, weil es alle Werte verschiebt.
+
+### D — Listen im Scanweg  ▸ Grenze der Texterkennung
+
+Untersucht, was der Scanweg tatsächlich liefert:
+
+* Das leere Kästchen `☐` wird gar nicht gelesen, das angekreuzte `☒` als `⊠`.
+  Welche Kästchen angekreuzt sind, geht damit verloren. Ein Kreuz zu **raten**
+  ist ausgeschlossen — ein falsch angekreuztes Formularfeld ist schlimmer als
+  eine sichtbare Lücke.
+* Wörter verschmelzen („mitgenommenwerden", „Treppenhausliegt"). Das trifft
+  Listen wie Fließtext und ist eine Eigenschaft der Texterkennung.
+* Eine Überschrift wurde als Listenpunkt gelesen und mit der Fußzeile
+  verklebt — ein Einzelfall des Layoutmodells.
+
+Im Messstand wurde nur die Bewertung fair gemacht (`⊠` gilt als `☒`, gleiches
+Zeichen, anderer Codepunkt). Am Dienst wurde nichts geändert. Der ehrliche
+Umgang damit gehört in den FAQ-Text, nicht in eine Regel.
 
 ## Vorgehen
 

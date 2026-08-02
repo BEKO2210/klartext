@@ -7,6 +7,64 @@ Docker-Images (`klartext-app:<Version>`), das auf dem Server läuft.
 
 ---
 
+## 1.3.0 — vorbereitet, noch nicht live
+
+Zwei Lücken, die der neue Messstand beziffert hat: Überschriften ohne
+Gliederungsnummer landeten alle auf derselben Ebene, und bei zweispaltigem Satz
+stand die rechte Spalte hinter allem anderen.
+
+### Neu
+
+* **Gliederungstiefe auch ohne Nummern.** Titel, darunter Abschnitte — bisher
+  alles `##`. Die Ebene kommt jetzt aus der Schriftgröße, die als Zeilenhöhe in
+  der Struktur steht. Nur bei klarer Trennung: jede Ebene in sich eng, zwischen
+  den Ebenen ein deutlicher Sprung. Auf Scans misst dieses Maß Ober- und
+  Unterlängen statt der Schriftgröße — dort bleibt die Gliederung unangetastet,
+  statt geraten zu werden.
+* **Lesereihenfolge bei Spaltensatz.** Die Spalten werden über die Seitenmitte
+  bestimmt, an durchgehenden Blöcken getrennt und in der Zone, in der beide
+  Spalten Text tragen, spaltenweise sortiert. Eine Zwischenüberschrift unter
+  den Spalten bleibt dahinter. Seiten mit Tabellen, Listen oder Bildern werden
+  nicht umgestellt.
+* **Zerschnittene Absätze** werden wieder zusammengefügt, wenn der erste Teil
+  ohne Satzzeichen endet und der zweite klein beginnt — auch über den
+  Seitenumbruch hinweg.
+
+### Gemessen (bench/, zwölf Prüfdokumente)
+
+| Variante | Text | Überschr. | Listen | Tab-Struktur | Tab-Inhalt | Reihenfolge |
+|---|---|---|---|---|---|---|
+| digital vorher | 0,981 | 0,395 | 1,000 | 0,987 | 0,964 | 0,976 |
+| **digital jetzt** | **0,991** | **1,000** | 1,000 | 0,987 | 0,964 | **1,000** |
+| scan vorher | 0,943 | 0,382 | 0,781 | 0,993 | 0,897 | 0,900 |
+| **scan jetzt** | **0,953** | **0,423** | 0,781 | 0,993 | 0,897 | **1,000** |
+
+Keine Kennzahl ist gefallen.
+
+### Technisch
+
+* Die Nachbearbeitung liegt jetzt vollständig in `nachbearbeitung.py`. Worker
+  und Messstand rufen dieselbe Funktion auf — vorher hätte der Messstand nur
+  eine Nachbildung messen können.
+* `bench/offline.py` rechnet gesicherte Docling-Rohergebnisse in Sekunden
+  durch, in einem Wegwerfcontainer aus dem gebauten Abbild und ohne jedes
+  Datenverzeichnis. Damit ist eine Änderung an einer Regel sofort messbar,
+  ohne Aufträge und ohne den laufenden Dienst anzufassen.
+* `tests/layout_test.py` deckt die neuen Regeln mit zwölf weiteren Prüfungen ab
+  (33 insgesamt), darunter die Fälle, in denen bewusst **nichts** passieren darf.
+
+### Nicht angefasst
+
+* **Mehrstufige Tabellenköpfe** (Tab-Inhalt 0,817): Das Tabellenmodell setzt die
+  Kopfzellen um eine Spalte versetzt. Der Inhalt ist vollständig, nur die
+  Rasterzuordnung stimmt nicht — das im Nachhinein zu reparieren hieße raten.
+* **Kreuzchen auf Scans:** Die Texterkennung liest `☐` gar nicht und `☒` als
+  `⊠`. Welche Kästchen angekreuzt sind, geht verloren. Ein Kreuz zu raten ist
+  ausgeschlossen: ein falsch angekreuztes Formularfeld ist schlimmer als eine
+  sichtbare Lücke.
+
+---
+
 ## 1.2.0 — 02.08.2026
 
 Layouttreue. Zwei Rückmeldungen auf Product Hunt: die Ausgabe flacht das Original

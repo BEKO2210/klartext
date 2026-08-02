@@ -13,7 +13,7 @@ Selbst gehostet, ohne KI-Anbieter, dauerhaft kostenlos.
 [![OCR](https://img.shields.io/badge/OCR-RapidOCR%20lokal-15803D)](THIRD_PARTY_LICENSES.md)
 [![Datenschutz](https://img.shields.io/badge/Verarbeitung-nur%20eigener%20Server-1E3A5F)](SECURITY.md)
 [![Status](https://img.shields.io/badge/Status-im%20Betrieb-15803D)](https://klartext.it-handwerk-stuttgart.de)
-[![Live](https://img.shields.io/badge/Live-v1.2.0-1E3A5F)](CHANGELOG.md)
+[![Live](https://img.shields.io/badge/Live-v1.3.0-1E3A5F)](CHANGELOG.md)
 [![Sprachen](https://img.shields.io/badge/Sprachen-English%20%C2%B7%20Deutsch-15803D)](CHANGELOG.md)
 
 [Live ansehen](https://klartext.it-handwerk-stuttgart.de) ·
@@ -215,10 +215,24 @@ enthält die Zellstruktur in beiden Fällen vollständig. Abschaltbar mit
 **Die Gliederung** erkennt das Layoutmodell nur als „hier steht eine
 Überschrift", nicht als Ebene — `1`, `1.1` und `1.1.1` kämen alle als `##`
 heraus. Die Ebene wird aus der Nummer der Vorlage hergeleitet, die Nummer selbst
-bleibt Zeichen für Zeichen stehen. Unterlisten, die dabei flach geworden sind,
-werden eingerückt, wenn ein lückenloser Buchstabenblock zwischen zwei
-Zifferpunkten steht. Beides prüft sich selbst und lässt das Dokument in Ruhe,
-sobald die Belege nicht reichen.
+bleibt Zeichen für Zeichen stehen. Hat ein Dokument keine Nummern — Titel,
+darunter Abschnitte —, sagt die Schriftgröße die Ebene; sie steckt als
+Zeilenhöhe in der Struktur. Auf Scans schwankt dieses Maß mit Ober- und
+Unterlängen und trägt nichts: dort bleibt die Gliederung unangetastet, statt
+geraten zu werden. Unterlisten, die flach geworden sind, werden eingerückt,
+wenn ein lückenloser Buchstabenblock zwischen zwei Zifferpunkten steht.
+
+**Die Lesereihenfolge** stimmt bei zweispaltigem Satz nicht: die rechte Spalte
+hängt hinter allem anderen. Aus der Lage der Blöcke auf der Seite wird sie
+zurückgewonnen — sortiert wird der Bereich, in dem beide Spalten Text tragen,
+Zwischenüberschriften darunter bleiben dahinter. Absätze, die ein Spalten- oder
+Seitenumbruch zerschnitten hat, werden wieder zusammengefügt: erkennbar daran,
+dass der erste Teil ohne Satzzeichen endet und der zweite klein beginnt. Seiten
+mit Tabellen, Listen oder Bildern werden nicht umgestellt — dort wäre der
+mögliche Schaden größer als der Gewinn.
+
+Gemessen im Messstand (siehe unten): Überschriftenebenen 0,395 → 1,000,
+Lesereihenfolge 0,976 → 1,000, beides bei digitalen Vorlagen.
 
 **Wiederkehrende Kopf- und Fußzeilen** (Wasserzeichen) hängt Docling an Absätze und
 in Tabellenzellen. Erkannt werden sie über die Textebene der PDF — dort stehen sie

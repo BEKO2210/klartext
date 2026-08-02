@@ -22,3 +22,4 @@ __pycache__/
 
 # Messstand: die gebauten Prüfdateien entstehen aus den Quellen neu
 bench/dokumente/
+bench/rohdaten/

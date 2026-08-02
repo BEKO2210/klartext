@@ -14,7 +14,7 @@ import json
 import logging
 import signal
 
-from . import db, i18n, layout, ocr_wahl, postprocess, quota, settings_store, storage
+from . import db, i18n, nachbearbeitung, ocr_wahl, quota, settings_store, storage
 from .config import CONFIG
 from .docling_client import ConversionError, DoclingClient
 
@@ -125,61 +125,14 @@ async def _process(client: DoclingClient, job) -> None:
     sprache = job["lang"] if job["lang"] in i18n.LANGS else i18n.DEFAULT_LANG
 
     # --- Nachbearbeitung -------------------------------------------------
-    # 1) Bilder aus der Struktur loesen und als eigene Dateien ablegen.
-    bilder = postprocess.bilder_ausloesen(struktur if isinstance(struktur, dict) else {})
-    markdown = postprocess.markdown_bilder_verweisen(markdown, bilder)
-
-    # 1b) Tabellen mit verbundenen Zellen als HTML-Tabelle erhalten. Markdown
-    #     kennt kein rowspan; Docling fuellt stattdessen jede ueberdeckte
-    #     Rasterstelle mit demselben Text. Vor allen Textregeln, damit die
-    #     folgenden Schritte auch die Zellen dieser Tabellen erreichen.
-    tabellen = len((struktur.get("tables") or []) if isinstance(struktur, dict) else [])
-    verbunden = 0
-    if CONFIG.merged_tables == "html":
-        markdown, verbunden = layout.verbundene_tabellen_erhalten(markdown, struktur)
-
-    # 2) Verweise aus der PDF retten — Docling exportiert nur den Text.
-    links = []
-    if job["mime_type"] == "application/pdf":
-        links = postprocess.links_lesen(data)
-        markdown = postprocess.markdown_links_anhaengen(markdown, links, sprache)
-
-    # 3) Vorlage zu grob? Dann kann die Texterkennung Zeichen verwechseln.
-    hinweis = postprocess.aufloesung_pruefen(
-        data, job["mime_type"], struktur if isinstance(struktur, dict) else None, sprache
-    )
-
-    # Einheiten gegen eine Liste bekannter Einheiten pruefen. Auffaellige Zellen
-    # werden nur gemeldet — der Text bleibt unveraendert. Eine automatische
-    # Korrektur waere geraten, und eine still auf "mg/dl" gesetzte Zelle, wo
-    # "g/dl" stand, ist um den Faktor 1000 falsch und faellt niemandem auf.
-    funde = postprocess.einheiten_pruefen(struktur if isinstance(struktur, dict) else {})
-    if funde:
-        anzahl = len(funde)
-        satz = i18n.translate(sprache,
-                              "note.units.one" if anzahl == 1 else "note.units.many",
-                              count=anzahl)
-        meldung = i18n.translate(sprache, "note.units.tail", lead=satz)
-        hinweis = f"{hinweis} {meldung}" if hinweis else meldung
-
-    # 4) Rein mechanische Schreibweisen geradeziehen (Trennzeichen in Zahlen,
-    #    fehlende Leerzeichen). Keine Rechtschreibkorrektur — Tippfehler der
-    #    Vorlage bleiben stehen. Nur im Markdown, die JSON bleibt unangetastet.
-    markdown, geglaettet = postprocess.schreibweisen_glaetten(markdown)
-
-    # 4b) Gliederung: aus "1", "1.1", "1.1.1" die Ebenen zurueckrechnen. Das
-    #     Layoutmodell erkennt Ueberschriften, aber keine Tiefe — ohne diesen
-    #     Schritt steht jede Ueberschrift auf derselben Stufe. Unterlisten, die
-    #     dabei flach geworden sind, werden anschliessend eingerueckt.
-    markdown, gliederung = layout.gliederung_wiederherstellen(markdown)
-    markdown, eingerueckt = layout.listen_verschachteln(markdown)
-
-    # 5) Wiederkehrende Kopf-/Fusszeilen einmal sammeln statt je Seite wiederholen.
-    #    Nur im Markdown; die JSON bleibt vollstaendig.
-    elemente = []
-    if job["mime_type"] == "application/pdf":
-        elemente = postprocess.wiederkehrende_texte(data, markdown)
-        markdown = postprocess.seitenelemente_zusammenfassen(markdown, elemente, sprache)
+    # Die Schritte selbst stehen in nachbearbeitung.py — derselbe Code, den der
+    # Messstand in bench/ auf gespeicherte Rohergebnisse anwendet.
+    fertig = nachbearbeitung.anwenden(markdown, struktur, data, job["mime_type"], sprache)
+    markdown = fertig.markdown
+    bilder = fertig.bilder
+    links = fertig.links
+    hinweis = fertig.hinweis
+    funde = fertig.funde
 
     md_key = storage.new_key()
     json_key = storage.new_key()
@@ -229,8 +182,8 @@ async def _process(client: DoclingClient, job) -> None:
         hinweis,
         json.dumps(funde, ensure_ascii=False) if funde else None,
         engine,
-        tabellen,
-        verbunden,
+        fertig.tabellen,
+        fertig.verbundene_tabellen,
     )
     # Der Verbrauch wurde beim Einstellen mit der geschätzten Seitenzahl gebucht.
     # Hier wird nur noch die Differenz zur tatsächlichen Seitenzahl nachgetragen.
@@ -242,9 +195,11 @@ async def _process(client: DoclingClient, job) -> None:
             delta,
         )
     log.info("Job fertig: %s Seiten, %s Bilder, %s Verweise, %s Schreibweisen, "
-             "%s/%s Tabellen mit Verbund, %s Ueberschriften, %s Listenpunkte",
-             result["pages"], len(bilder), len(links), geglaettet,
-             verbunden, tabellen, gliederung, eingerueckt)
+             "%s/%s Tabellen mit Verbund, %s Ueberschriften, %s Listenpunkte, "
+             "%s umgestellt, %s Absaetze verbunden",
+             result["pages"], len(bilder), len(links), fertig.geglaettet,
+             fertig.verbundene_tabellen, fertig.tabellen, fertig.gliederung,
+             fertig.eingerueckt, fertig.umgestellt, fertig.verbundene_absaetze)
 
 
 async def _worker_loop(index: int, client: DoclingClient) -> None:
